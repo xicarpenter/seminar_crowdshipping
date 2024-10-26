@@ -1,0 +1,54 @@
+% Copyright 2007 by Till Tantau
+%
+% This file may be distributed and/or modified
+%
+% 1. under the LaTeX Project Public License and/or
+% 2. under the GNU Public License.
+%
+% See the file doc/licenses/LICENSE for more details.
+
+\ProvidesPackageRCS $Header: /cvsroot/latex-beamer/latex-beamer/themes/color/Theme/beamercolorthemeLUH.sty,v 1.3 2007/01/28 20:48:24 tantau Exp $
+
+
+\mode<presentation>
+
+\setbeamercolor*{palette primary}{use=structure,fg=white,bg=structure.fg}
+\setbeamercolor*{palette primary2}{use=structure,fg=structure.fg,bg=}
+\setbeamercolor*{palette secondary}{use=structure,fg=white,bg=structure.fg!55!white}
+\setbeamercolor*{palette tertiary}{use=structure,fg=white,bg=structure.fg!30!white}
+\setbeamercolor*{palette quaternary}{fg=black,bg=white}
+
+\setbeamercolor*{sidebar}{use=structure,bg=structure.fg}
+
+\setbeamercolor*{palette sidebar primary}{use=structure,fg=structure.fg!10}
+\setbeamercolor*{palette sidebar secondary}{fg=white}
+\setbeamercolor*{palette sidebar tertiary}{use=structure,fg=structure.fg!50}
+\setbeamercolor*{palette sidebar quaternary}{fg=white}
+
+\setbeamercolor*{titlelike}{parent=palette primary}
+\setbeamercolor*{titlelike2}{parent=palette primary2}
+
+\setbeamercolor*{title}{parent=titlelike2}
+
+\setbeamercolor*{frametitle}{parent=titlelike2}
+\setbeamercolor*{framesubtitle}{parent=frametitle2}
+
+\setbeamercolor*{separation line}{}
+\setbeamercolor*{fine separation line}{}
+
+\setbeamercolor*{block title}{use=structure,fg=white,bg=structure.fg!75!black}
+\setbeamercolor*{block title alerted}{use=alerted text,fg=white,bg=alerted text.fg!75!black}
+\setbeamercolor*{block title example}{use=example text,fg=white,bg=luhgruen!75!black}
+
+\setbeamercolor*{block body}{parent=normal text,use=block title,bg=block title.bg!10!bg}
+\setbeamercolor*{block body alerted}{parent=normal text,use=block title alerted,bg=block title alerted.bg!10!bg}
+\setbeamercolor*{block body example}{parent=normal text,use=block title example,bg=block title example.bg!10!bg}
+
+\setbeamerfont*{frametitle}{parent=structure,size=\Large}
+\setbeamerfont*{framesubtitle}{parent=frametitle,size=\large}
+
+\setbeamerfont*{caption}{size=\footnotesize}
+\setbeamerfont*{caption name}{parent={structure,caption}}
+
+\mode
+<all>

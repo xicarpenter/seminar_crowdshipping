@@ -1,0 +1,21 @@
+\begin{tikzpicture}
+    \begin{axis}[
+        ybar,
+        enlarge x limits=1,
+        width=8cm, 
+        height=\axisdefaultheight,
+        bar width=15pt,
+        ymin=0,
+        symbolic x coords={Struktur A, Struktur B},        xtick=data,
+        legend style={at={(0.05,0.95)}, anchor=north west},
+        ylabel={Durchschn. Rechenzeit [s]},
+    ]
+        % Daten für die Säulen
+        \addplot[draw=none, fill=luhblau] coordinates {(Struktur A, 3.2) (Struktur B, 7.1)};
+        \addplot[draw=none, fill=luhmittelblau] coordinates {(Struktur A, 10.8) (Struktur B, 35)};
+        \addplot[draw=none, fill=luhhellgrau] coordinates {(Struktur A, 14) (Struktur B, 40)};
+        
+        % Legende
+        \legend{Modell 1, Modell 2, Modell 3}
+    \end{axis}
+\end{tikzpicture}

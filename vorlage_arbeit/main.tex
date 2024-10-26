@@ -1,0 +1,74 @@
+%Festlegung der Dokumentenklasse, zahlreiche Vereinbarungen über Layout, Gliederungsstrukturen,
+%bsp. article -> section, subsection..., book -> chapter, section...
+\documentclass[
+    a4paper,
+    12pt,
+]{article}
+
+% Einfügen aller geladenen Pakete in der Präambel
+\input{preamble}
+
+
+% ________________________________________________
+%    Anfang des Dokumentes 
+% ________________________________________________
+\begin{document}
+
+% ________________________________________________
+% Titelblatt: enstprechendes Titelblatt auswählen und Angaben ergänzen
+% ________________________________________________
+\input{Vorlagen_Titelblatt/Titelblatt_Seminar_Hausarbeit} % für Seminar- und Hausarbeiten
+\input{Vorlagen_Titelblatt/Titelblatt_Abschlussarbeit} % Für Bachelor- und Masterarbeiten
+
+% ________________________________________________
+% Übersicht der Todos
+% ________________________________________________
+% Todo Verzeichnis
+\listoftodos % Erstellt eine Liste mit ToDos => auskommentieren vor Abgabe
+\newpage
+
+
+% ________________________________________________
+% Übersicht der TodosVerzeichnisse
+% ________________________________________________
+% Römische Seitennummerierung für die Verzeichnisse
+\pagenumbering{roman}  
+
+% Erstellung der Verzeichnisse. Diese müssen angepasst werden unter Kapitel/00_Verzeichnisse!
+\input{Kapitel/00_Verzeichnisse}
+
+
+% ________________________________________________
+% Textteil
+% ________________________________________________
+% arabische Seitenzahlen beginnend mit 1 für den Textteil
+\pagenumbering{arabic}  
+
+% Einfügen der einzelnen Kapitel, nach Bedarf weitere Dateien erstellen. 
+% Die Unterteilung in einzelnen Kapitel macht die Arbeit mit Latex übersichtlicher. 
+\input{Kapitel/01_Vorlage}
+
+\input{Kapitel/02_Kapitel}
+
+% ________________________________________________
+% Literaturverzeichnis
+% ________________________________________________
+%  Literaturverzeichnis
+\newpage
+\printbibliography[heading=bibintoc]  %an der Stelle zu verwenden, an der das Literaturverzeichnis gesetzt werden soll;
+
+
+% ________________________________________________
+% Anhang
+% ________________________________________________
+\include{Kapitel/98_Anhang}
+
+% ________________________________________________
+% Ehrenwörtliche Erklärung
+% ________________________________________________
+\include{Kapitel/99_Ehrenwoertliche_Erklaerung}
+
+% ________________________________________________
+% Ende des Dokuments
+% ________________________________________________
+\end{document}

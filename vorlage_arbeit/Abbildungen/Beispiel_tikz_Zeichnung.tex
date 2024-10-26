@@ -1,0 +1,84 @@
+% Set global arrow style
+\tikzset{>=Stealth}
+
+% Zeichnung des Windrads, sodass dieses mehrmals verwendet werden kann
+\tikzset{%
+	wind turbine/.pic={
+		\tikzset{path/.style={fill, draw=white, ultra thick, line join=round}}
+		\path [path] 
+		(-.25,0) arc (180:360:.25 and .0625) -- (.0625,3) -- (-.0625,3) -- cycle;
+		\foreach \i in {90, 210, 330}{
+			\ifcase#1
+			\or
+			\path [path, shift=(90:3), rotate=\i] 
+			(.5,-.1875) arc (270:90:.5 and .1875) arc (90:-90:1.5 and .1875);
+			\or
+			\path [path, shift=(90:3), rotate=\i] 
+			(0,0.125) -- (2,0.125) -- (2,0) -- (0.5,-0.375) -- cycle;
+			\or
+			\path [path, shift=(90:3), rotate=\i]
+			(0,-0.125) arc (180:0:1 and 0.125) -- ++(0,0.125) arc (0:180:1 and 0.25) -- cycle;
+			\fi
+		}
+		\path [path] (0,3) circle [radius=.25];
+}}
+
+
+\resizebox{0.9\linewidth}{!}{%
+	\begin{tikzpicture}[
+		task/.style={circle, draw=black, thick, minimum size=12mm, inner sep=0pt, font=\Large},
+		teams/.style={rectangle, fill=black!6, draw=black, anchor=west, thick, minimum height=1cm, minimum width=5cm, inner sep=0pt, font=\Large, text width =4.8cm},
+		dach/.style={isosceles triangle, draw, inner sep=0pt,
+			anchor=south, shape border rotate=90, isosceles triangle stretches, minimum width=5cm, minimum height=1cm},
+		body/.style={trapezium, draw, minimum width=0.4cm, minimum height=0.4cm, trapezium stretches},
+		head_1/.style={circle, draw, minimum size=0.2cm, fill=luhgruen},
+		head_2/.style={circle, draw, minimum size=0.2cm, fill=luhblau}
+		]
+		
+		% House Team 1
+		\node[teams, label={[anchor=west, inner sep=0pt, xshift=0.1cm]west:Team-Typ $m1$}] (team_1) at (2, 2) {};
+		\node[dach] (dach_team_1) [above = 0cm of team_1] {};
+		\node[body] (body_per_1) [below right = 0.5cm and 1.4cm of dach_team_1] {};
+		\node[head_1] (head_per_1) [below right = 0.25cm and 1.41cm of dach_team_1] {};
+		\node[body] (body_per_2) [below right = 0.5cm and 0.6cm of dach_team_1] {};
+		\node[head_1] (head_per_2) [below right = 0.25cm and 0.61cm of dach_team_1] {};
+		\node[body] (body_per_3) [below right = 0.5cm and -0.2cm of dach_team_1] {};
+		\node[head_1] (head_per_3) [below right = 0.25cm and -0.19cm of dach_team_1] {};
+		
+		% House Team 2
+		\node[teams, label={[anchor=west, inner sep=0pt, xshift=0.1cm]west:Team-Typ $m2$}] (team_2) [right = 8cm of team_1] {};
+		\node[dach] (dach_team_2) [above = 0cm of team_2] {};
+		\node[body] (body_per_4) [below right = 0.5cm and 1.4cm of dach_team_2] {};
+		\node[head_2] (head_per_4) [below right = 0.25cm and 1.41cm of dach_team_2] {};
+		\node[body] (body_per_5) [below right = 0.5cm and 0.6cm of dach_team_2] {};
+		\node[head_2] (head_per_5) [below right = 0.25cm and 0.61cm of dach_team_2] {};
+		\node[body] (body_per_6) [below right = 0.5cm and -0.2cm of dach_team_2] {};
+		\node[head_2] (head_per_6) [below right = 0.25cm and -0.19cm of dach_team_2] {};
+		
+		% Task with turbine
+		\node[task] (task_1) [above right = 4cm and -1cm of team_1] {$i1$};
+		\path (5.3, 6.4) pic[scale=0.3] {wind turbine=1};
+		\node[task] (task_2) [above right = 2.5cm and -3.5cm of team_1] {$i2$};
+		\path (3.1,4.1) pic[scale=0.3] {wind turbine=1};
+		\node[task] (task_3) [above right = 4cm and 8.5cm of team_1] {$i3$};
+		\path (17.2,6.4) pic[scale=0.3] {wind turbine=1};
+		\node[task] (task_4) [above right = 0.5cm and 3.5cm of team_1] {$i4$};
+		\path (12,2.3) pic[scale=0.3] {wind turbine=1};
+		\node[task] (task_5) [above right = -1cm and 2.5cm of team_1] {$i5$};
+		\path (11.2,1.3) pic[scale=0.3] {wind turbine=1};
+		
+		% Arrows Team 1
+		\draw [luhgruen, ultra thick, ->] (dach_team_1.north) -- node [pos=0.15,above,color=black] {$z1$} (task_3.west);
+		\draw [luhgruen, ultra thick, ->] (task_3.south) -- (dach_team_1);
+		
+		\draw [luhgruen, ultra thick, ->] (dach_team_1) -- node [pos=0.6, below,color=black] {$z2$} (task_4);
+		\draw [luhgruen, ultra thick, ->] (task_4) -- (task_5);
+		\draw [luhgruen, ultra thick, ->] (task_5) -- (dach_team_1);
+		
+		% Arrows Team 2
+		\draw [luhblau, ultra thick, ->] (dach_team_2.north) -- node [pos=0.25,above,color=black] {$z1$} (task_1);
+		\draw [luhblau, ultra thick, ->] (task_1) -- (task_2);
+		\draw [luhblau, ultra thick, ->] (task_2) -- (dach_team_2);
+		
+	\end{tikzpicture}
+}

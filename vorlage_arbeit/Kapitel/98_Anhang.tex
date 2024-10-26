@@ -1,0 +1,71 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    ggf. Anhang
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{appendix}
+% ________________________________________________
+% Allgemeines zum Anhang
+% ________________________________________________
+\section{Überschrift für den Inhalt des Anhangs}
+Wählen Sie eine aussagekräftige Überschrift für den Anhang, die den entsprechenden Inhalt beschreibt. Der Anhang kann z.B. umfangreiche Abbildungen oder Tabellen beinhalten. Der Anhang ist jedoch nicht dafür gedacht, Inhalte der Arbeit auszulagern, um bei Seminararbeiten so den Rahmen von 15 Seiten einzuhalten. Die Arbeit muss auch ohne den Anhang verständlich sein, d. h. alle wesentlichen Aussagen sind in den 15 Seiten der Seminararbeit darzustellen. Auch bei Abschlussarbeiten sollten nur weiterführende Informationen in den Anhang ausgelagert werden, um unnötiges Blättern beim Lesen der Arbeit zu vermeiden.
+
+% ________________________________________________
+% Python Code Beispiel
+% ________________________________________________
+\newpage
+\section{Python-Code Beispiele} \label{sec:Python_Bsp}
+Es kann sinnvoll sein, den Anhang in einzelne Kapitel zu unterteilen. Wurde im Rahmen einer Arbeit eine Implementierung erstellt, so ist der Quellcode in den Anhang der Arbeit mit aufzunehmen. Dies geht am besten mit dem Listings-Paket. Im Textteil der Arbeit sollte dann auf den Code verwiesen werden, wie z.B. \glqq Der zugehörige Quellcode ist in \autoref{sec:Python_Bsp} in \autoref{lst:Python_code} dargestellt\grqq.
+
+\begin{lstlisting}[language=Python, caption={Hier kann eine Überschrift eingefügt werden, die den Code beschreibt}, label={lst:Python_code}] 
+#import gurobipy as gp
+from gurobipy import *
+
+def Ablaufplanung_model(J, R, S, T, SJ, a, b, c, d, ls):
+    model = Model()
+    
+    TF = model.addVars(J, S, vtype=GRB.CONTINUOUS, lb=0.0, name='TF')
+    
+    X = model.addVars(J, S, T, vtype=GRB.BINARY, name='X')
+
+    #quicksum ist eine Funktion des package "gurobipy"
+    obj = c * quicksum(TF[j,ls[j]] for j in J)
+
+    model.setObjective(obj, GRB.MINIMIZE)
+    
+
+    model.addConstrs((quicksum (X[j,s,t] for t in T) == 1 for j in J for s in SJ[j]), 'Einmal')
+    
+    for j in J:
+        for indes, s in enumerate(SJ[j]):
+            if indes >= 1:
+                model.addConstr((TF[j,s] >= TF[j,S[indes-1]] + d[j,s]), 'Schritte')
+    
+    model.addConstrs((quicksum((t index+1) * X[j,s,t] for tindex, t in enumerate(T)) == TF[j,s] for j in J for s in SJ[j]), 'Zeitpunkte')
+    
+    model.addConstrs((quicksum(a[j,s,r] * X[j,s,tau] for j in J for s in SJ[j] for indetau, tau in enumerate(T) if indet <= indetau <= indet + d[j,s] - 1) <= b[r,t] for r in R for indet, t in enumerate(T)), 'Ressourcen')
+   
+    return model
+\end{lstlisting}
+
+\newpage
+Es kann schnell unübersichtlich werden, wenn der Code direkt in der .tex-Datei des Anhangs aufgeschrieben wird. Es können daher auch direkt Python-Dateien eingebunden werden, wie in \autoref{lst:Python_code_2} dargestellt.
+
+\lstinputlisting[language=Python, caption={Auch hier ist eine Überschirft möglich}, label={lst:Python_code_2}]{Code/Beispiel_Python_Code.py}
+
+% ________________________________________________
+% GAMS Code Beispiel
+% ________________________________________________
+\newpage
+\section{Code-Beispiele für weitere Programmiersprachen}
+In einem weiteren Kapitel könnte nun z.B. auch noch der Code einer anderen Programmiersprache aufgeführt werden, wie z.B. ein GAMS-Quellecode:
+
+\lstinputlisting[language=GAMS, caption={Dies ist ein Beispiel mit GAMS}]{Code/Beispiel_GAMS_Code.gms}
+
+% ________________________________________________
+% C++ Code Beispiel
+% ________________________________________________
+Und natürlich geht das auch mit C++:
+\lstinputlisting[language=C++, caption={Dies ein Beispiel für C++}]{Code/Beispiel_Cpp.cpp}
+
+\end{appendix}

@@ -1,0 +1,201 @@
+% ________________________________________________
+% Layout
+% ________________________________________________
+\usepackage[notindex,nottoc]{tocbibind} % Inhaltsverzeichnisse erstellen
+\usepackage{setspace} % für Zeilenabstand
+\onehalfspacing % anderthalbzeiliger Abstand
+\usepackage[
+	left=2.5cm,
+	right=2.5cm,
+	top=2.5cm,
+	bottom=2.5cm
+]{geometry} %Ränder
+\usepackage{amsthm}
+\usepackage[
+    skip=12pt, % Zeilenabstand nach Absatz
+    indent=0pt % kein Einrücken zu Absatzbeginn
+]{parskip}  
+\setlength{\itemsep}{-6pt}
+
+% ________________________________________________
+% Schriften
+% ________________________________________________ 
+\usepackage{charter} 
+\usepackage[scaled]{helvet} % Serifenlose Schrift wird in Helvetica geschrieben
+\usepackage{courier} % mit \texttt für Code im Fließtext
+
+% ________________________________________________
+% Sprache
+% ________________________________________________    
+\usepackage[ngerman]{babel}     % Neue deutsche Rechtschreibung, Umlaute können geschrieben werden
+\usepackage[utf8]{inputenc}     % direkte Angabe von Umlauten
+\usepackage[T1]{fontenc}        % Silbentrennung bei Sonderzeichen
+
+% ________________________________________________
+% Format der Abbilung-/Tabellen Über-/Unterschriften
+% ________________________________________________
+\usepackage[
+    labelsep=colon, % Doppelpunkt nach Tabelle/Abbildung
+    justification=centering, % Mittig
+    labelfont=bf, % Tabelle/Abbildung fett
+]{caption} 
+
+% Erstelle einen eingen Befehl für übernommene Tabellen/Abbildungen
+\newcommand*{\captionsource}[2]{%
+  \caption[{#1}]{%
+    #1%
+    \\
+    \textbf{Quelle:} #2%
+  }}
+
+% ________________________________________________
+% Mathe
+% ________________________________________________  
+\usepackage{amsmath} % Mathematik
+\usepackage{marvosym} % enthält Symbole (wie €): https://ctan.mc1.root.project-creative.net/fonts/marvosym/doc/fonts/marvosym/marvodoc.pdf
+\usepackage{amsfonts} % fonts for use in mathematics
+\usepackage[np, autolanguage]{numprint} % Darstellung von Zahlen mit Einheiten
+
+% Befehle für Referenzierung (Unterscheidung von Restriktion und Gleichung)
+\newcommand{\myrestref}[1]{\hyperref[#1]{Restriktion (\ref*{#1})}}
+\newcommand{\myeqref}[1]{\hyperref[#1]{Gleichung (\ref*{#1})}}
+
+% ________________________________________________
+% Farben
+% ________________________________________________  
+\usepackage[dvipsnames]{xcolor} % The option dvipsnames loads 68 colors, see https://ctan.org/pkg/xcolor?lang=de -> pdf, S.38
+% Definition von eignenen Farben (diese Farben sind beispielsweise Farben der Universität)
+\definecolor{luhblau}{RGB}{0,80,155}
+\definecolor{luhmittelblau}{RGB}{153,185,216}
+\definecolor{luhhellblau}{RGB}{204,220,235}
+\definecolor{luhgruen}{RGB}{200,211,23}
+\definecolor{luhdunkelgrau}{RGB}{153,153,153}
+\definecolor{luhhellgrau}{RGB}{204,204,204}
+
+
+% ________________________________________________
+% Abbildungen
+% ________________________________________________
+\usepackage{graphics} % Einbindung von Abbildungen
+\usepackage{graphicx} % Zusäztzliche Optionen beim Einbinden von Grafiken
+\usepackage{pgfpages} % Einbindung von (mehrseitigen) PDFs
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage[percent]{overpic} % Bild über Bild
+
+% ________________________________________________
+% Abbildungen zeichnen mit Tikz
+% ________________________________________________
+\usepackage{pgfplots}
+
+\pgfplotsset{compat=1.18} 
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, shapes}
+
+% ________________________________________________
+% Tabellen
+% ________________________________________________
+\usepackage{xltabular} % Tabellen mit Umbrüchen
+\usepackage{booktabs} % Linien in Tabellen
+\usepackage{multirow} % fasst mehrere Zeilen einer Tabelle zusammen 
+\renewcommand{\arraystretch}{1.2} % Zeilenabstand in Tabellen
+
+% ________________________________________________
+% Listings (Darstellung von Code in der Arbeit) 
+% ________________________________________________
+\usepackage{listings}
+\usepackage{listingsutf8}
+
+% Einstellungen für die Darstellung des Codes
+\lstset{frame=tb,
+	basicstyle= \ttfamily \linespread{0.8} \small,
+                keywordstyle=\color{black}\bfseries,
+                stringstyle=\color{black}\ttfamily,
+                commentstyle=\color{gray}\ttfamily,
+                numbers=left,
+                numberstyle=\color[rgb]{0,0.5,0.5}\fontfamily{pcr}\fontseries{m}\selectfont \scriptsize,
+	            numberblanklines=false,
+	            breaklines=true,
+	            belowskip=\bigskipamount{},
+	            escapeinside={<@}{@>}
+}
+
+% Python und C++ können als weit verbreitete Sprachen einfach geladen werden. 
+% Die Keywords und Kommentare sind damit automatisch definiert und werden entsprechend erkannt.
+% GAMS muss zunächst definiert werden, damit die Keyword und Kommentare richtig eingefärbt werden.
+\lstdefinelanguage{GAMS}{
+	morekeywords={
+		ABORT , ACRONYM , ACRONYMS , ALIAS , ALL , AND , ASSIGN , BINARY , CARD , DISPLAY , EPS , EQ , EQUATION , EQUATIONS , GE , GT , INF , INTEGER , LE , LOOP , LT , MODEL , MODELS , NA , NE , NEGATIVE , NOT , OPTION , OPTIONS , OR , ORD , PARAMETER , PARAMETERS , POSITIVE , PROD , SCALAR , SCALARS , SET , SETS , SMAX , SMIN , SOS1 , SOS2 , SUM , SYSTEM , TABLE , VARIABLE , VARIABLES , XOR , YES , REPEAT , UNTIL , WHILE , IF , THEN , ELSE , SEMICONT , SEMIINT , FILE , FILES , PUT , PUTPAGE , PUTTL , PUTCLOSE , FREE , NO , SOLVE , FOR , ELSEIF , ABS , ARCTAN , CEIL , COS , ERROR , EXP , FLOOR , LOG , LOG10 , MAP , MAPVAL , MAX , MIN , MOD , NORMAL , POWER , ROUND , SIGN , SIN , SQR , SQRT , TRUNC , UNIFORM , LO , UP , FX , SCALE , PRIOR , PS , PW , TM , BM , CASE , DATE , IFILE , OFILE , PAGE , RDATE , RFILE , RTIME , SFILE , TITLE , /,PROD: },
+	sensitive = false,
+	morecomment=[f]*, %
+	morecomment=[s]{\$ontext}{\$offtext},
+	morestring=[b]”,
+	morestring=[b]’
+}
+
+% Umlaute im Code (z.B. in Kommentaren) 
+% Hinweis: Besser ist es, wenn der gesamte Code auf Englisch ist
+\lstset{literate=%
+	{Ö}{{\"O}}1
+	{Ä}{{\"A}}1
+	{Ü}{{\"U}}1
+	{ß}{{\ss}}1
+	{ü}{{\"u}}1
+	{ä}{{\"a}}1
+	{ö}{{\"o}}1
+	{~}{{\textasciitilde}}1
+}
+\renewcommand{\lstlistlistingname}{Quellcodeverzeichnis}
+\def\lstlistingautorefname{Quellcode} % definition des Begriffs für \autoref
+\renewcommand{\lstlistingname}{Quellcode} % Ändern der Bezeichnung auf Deutsch
+
+% ________________________________________________
+% Pseudo Code in der Arbeit 
+% ________________________________________________
+\usepackage{algorithm} % float wrapper for algorithm (like table or figure)
+\usepackage{algorithmic} % environment for writing pseudo code
+\floatname{algorithm}{Algorithmus} % Ändern der Bezeichnung auf Deutsch
+\def\algorithmautorefname{Algorithmus} % definition des Begriffs für \autoref
+\renewcommand{\listalgorithmname}{Algorithmusverzeichnis} % Umbenennung des Verzeichnisses auf Deutsch
+\captionsetup[algorithm]{labelfont=bf,labelsep=colon} % fügt einen Doppelpunkt ein (wie Tabellen und Abbildungen)
+\algsetup{linenodelimiter=\ }
+
+% ________________________________________________
+% ToDO Notes und Kommentare
+% ________________________________________________
+\setlength {\marginparwidth }{2cm} 
+\usepackage[
+	textwidth=2cm, % Größe des Kommentarfeldes
+	textsize=scriptsize	% Textgröße der Kommentare	
+]{todonotes}
+\usepackage{comment}
+
+% ________________________________________________
+% Literatur und Zitieren (Deutsche Zitierweise)
+% ________________________________________________
+\usepackage{csquotes}
+\usepackage[
+	style=authoryear,			% Zitationsstil
+	%firstinits=true,			% Anfangsbuchstaben der Vornamen abkürzen veraltet?
+	maxcitenames=2,				% et. al. ab 3 Autoren
+	maxbibnames=99,				% alle Authoren im Literaturverzeichnis aufführen
+	doi=true,					% doi anzeigen
+	isbn=false,                 % isbn nicht anzeigen
+	url=false,                  % url nciht anzeigen (außer bei online)
+	backend=biber
+]{biblatex}
+\addbibresource{Literatur.bib}	% Hier die BIB Datei einbinden
+\DefineBibliographyStrings{ngerman}{andothers={et\ al\adddot}} % aus u.a. et al. machen
+
+\DeclareLabeldate{%
+  \field{date}
+  \field{year}
+  \field{eventdate}
+  \field{origdate}
+  \literal{nodate}
+}
+
+% ________________________________________________
+% Verweise im Text
+% ________________________________________________  
+\usepackage{hyperref}

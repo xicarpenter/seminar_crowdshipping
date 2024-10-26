@@ -1,0 +1,66 @@
+% ________________________________________________
+%  Layout, Pakete etc.
+% ________________________________________________
+%Festlegung der Dokumentenklasse
+\documentclass[
+    usenames,
+    dvipsnames,
+    aspectratio=169
+]{beamer}
+
+% Einfügen aller geladenen Pakete in der Präambel sowie festlegen des Layouts
+\input{preamble}
+
+% ________________________________________________
+%  Informationen der Titelseite 
+% ________________________________________________
+\title[Kurztitel in der Fußnote]{Titel der Präsentation} % Titel und Kurztitel in der Fußnote
+\subtitle{ggf. Untertitel der Präsentation}
+\author{Vorname Nachname}
+\institute[]{
+    Leibniz Universität Hannover \\
+    Wirtschaftswissenschaftliche Fakultät \\
+    Institut für Produktionswirtschaft
+    }
+\date{11.09.2024} % Datum der Präsentation
+
+% ________________________________________________
+% Beginn des Dokuments und Erstellung der Titelfolie
+% ________________________________________________
+\begin{document}
+\begin{frame}
+    \maketitle
+\end{frame}
+
+% ________________________________________________
+% Gliederung
+% ________________________________________________
+\begin{frame}{Agenda}
+    \tableofcontents
+\end{frame}
+
+% ________________________________________________
+% Inhalt
+% ________________________________________________
+
+\input{Kapitel/01_Einleitung}
+
+\input{Kapitel/02_Kapitel}
+
+\input{Kapitel/03_weiteres_Kapitel}
+
+\input{Kapitel/99_Anhang}
+
+% ________________________________________________
+% Schlussfolie
+% ________________________________________________
+
+% ________________________________________________
+% Anhang
+% ________________________________________________
+
+
+% ________________________________________________
+% Ende
+% ________________________________________________
+\end{document}

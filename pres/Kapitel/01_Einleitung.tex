@@ -1,0 +1,103 @@
+% Ein neues Kapitel beginnt mit \section{}. Das Inhaltsverzeichnis wird automatisch aus den sections generiert.
+\section{Kapitel (z.B. Problembeschreibung)}
+
+% ________________________________________________
+% Folie mit Stichpunkten
+% ________________________________________________
+% Eine Folie beginnt mit \begin{frame} und endet mit \end{frame}
+\begin{frame}{Stichpunkte}
+    \begin{itemize}
+        \item Die Problembeschreibung kann z.B. mit Stichpunkten beschrieben werden. Dabei sollten ganze Sätze vermieden werden!
+        \begin{itemize}
+            \item Unterpunkte sind auch möglich
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+% ________________________________________________
+% Folie mit Abbildung
+% ________________________________________________
+\begin{frame}{Abbildung}
+    \begin{itemize}
+        \item Noch besser ist die Verwendung von Abbildungen bei der Problembeschreibung!
+    \end{itemize}
+    \centering
+    \includegraphics[width=0.5\textwidth]{example-image}
+\end{frame}
+
+% ________________________________________________
+% Folie mit Stichpunkten und Bild rechts
+% ________________________________________________
+% mit begin{columns}... \end{columns} lässt sich eine Folie in mehrere Teile aufteilen 
+\begin{frame}{Stichpunkte Bild Rechts}
+    \begin{columns}
+        \begin{column}{0.4\textwidth}
+        \centering
+            \begin{itemize}
+                \item Stichpunkt
+                \begin{itemize}
+                    \item Substichpunkt
+                \end{itemize}
+            \end{itemize}
+        \end{column}
+        \begin{column}{0.6\textwidth}
+        % Selbstständig erstellte Abbildungen brauchen keine Quelle. Eine Bildunterschrift muss nur angegeben werden, wenn das Thema nicht aus der Folie hervorgeht.
+            \includegraphics[width=\textwidth]{example-image}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+
+% ________________________________________________
+% Folie mit zwei Abbildungen 
+% ________________________________________________
+% Inhalte können auch nacheinander eingeblendet werden: Alle Inhalte, die nach \pause kommen, werden erst auf der nächsten 'slide' eingeblendet. Ein Frame in Latex kann somit mehrere Slides (=meherere Folien in der Pdf) erzeugen. \pause kann mehrmals in einem Frame genutzt werden. Das geht bei Abbildungen, Texten, Aufzählungen, Tabellen etc.
+\begin{frame}{Zwei Abbildungen, nacheinander eingeblendet}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+            \includegraphics[width=\textwidth]{example-image}
+            \captionsource{Hier könnte eine Bildunterschrift stehen}{Hier die Quelle als Vollbeleg (siehe Leitfaden), mit Seitenangabe}
+            % \captionsource ist ein eigner Befehl (siehe preamble), wenn eine Unterschrift und eine Quelle gesetzt werden soll.
+        \end{column}
+        \pause
+        \begin{column}{0.5\textwidth}
+            \includegraphics[width=\textwidth]{example-image}
+            \source{Hier die Variante ohne Bildunterschrift und nur mit Quelle als Vollbeleg (siehe Leitfaden), mit Seitenangabe}
+            % \source ist ein eigner Befehl (siehe preamble), wenn nur eine Quelle gesetzt werden soll.
+        \end{column}
+        
+    \end{columns}
+\end{frame}
+
+% ________________________________________________
+% Folie mit Textbox
+% ________________________________________________
+\begin{frame}{Textboxen}
+    \begin{block}{Überschrift}
+        Hier ist der Text für den Textblock, zB. eine Aufgabe oder Definition könnte hier stehen.
+    \end{block}  
+    
+    \begin{exampleblock}{Beispiel}
+       Bei einer Instanz von $c=5$ und $z=3$ würde Bauer Bernd 145,5 GE erhalten.
+    \end{exampleblock}
+    
+    \begin{exampleblock}{}
+       Für einen Textblock ohne Überschrift einfach die \{\} leer lassen.
+    \end{exampleblock}
+    
+\end{frame}
+
+
+\begin{frame}{Zitat}
+    \begin{block}{}
+        {\textit{''Hier [...] ein Beispielzitat.''}} \\
+        \hspace*\fill{-- Name et al. (Jahr)}
+       
+    \end{block}
+    
+    \begin{block}{What is Operations Research?}
+        {\textit{''Operations Research is the study of how to form mathematical models of complex engineering and management problems and how to analyze them to gain insight about possible solutions''}} \\
+        \hspace*\fill{-- Rardin (2001), S.1}
+       
+    \end{block}
+\end{frame}

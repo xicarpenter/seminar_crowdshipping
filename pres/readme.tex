@@ -1,0 +1,15 @@
+Wichtiger Hinweis:
+
+Unter Menu->Main Document muss bei dieser Vorlage das Dokument "main.tex" ausgewählt sein.
+
+Aufbau der Vorlage:
+
+- preamble.tex: Festlegung aller Einstellungen und Laden der benötigten Pakete (z.B. Schriftgröße und -art, Sprache, Definition von Farben, Bestimmte Einstellungen für die Darstellung von Algorithmen, ...)
+
+- beamercolorthemeLUH.sty, beamerouterthemeLUH.sty und beamerthemeLUH.sty: Einstellungen des Folienlayouts. Diese sollten im Regelfall nicht verändert werden.
+
+- main.tex: Hier wird zuerst preamble.tex geladen, sodass alle Pakete und Einstellungen bekannt sind. Dann beginnt das Dokument: Erstellt wird erst die Titelfolie und dann das Inhaltsverzeichnis. Anschließend folgen die eigentlichen Folien. Aus Gründen der Übersichtlichkeit wurden die einzelnen Bestandteile in eigene Dateien ausgelagert (siehe Ordner Kapitel).
+
+- Ordner Kapitel: Für die unterschiedlichen Bestandteile der Arbeit wurden einzelne .tex-Dateien erstellt. Hierdurch sind die einzelnen Dateien übersichtlicher.
+
+- Order Abbildungen: Damit die Arbeit mit Latex übersichtlich bleibt, ist es empfehlenswert, Abbildungen in einen separaten Ordner auszulagern. Minimiert ergibt sich dadurch am linken Bildrand eine sehr übersichtliche Struktur. Ein Einfügen der Ordner ist natürlich keine Pflicht: Die Dateien können grundsätzlich auch auf der gleichen Ebene wie main.tex liegen.

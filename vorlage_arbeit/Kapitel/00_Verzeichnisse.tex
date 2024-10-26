@@ -1,0 +1,44 @@
+\newpage
+
+%Inhaltsverzeichnis erstellen
+\tableofcontents
+
+\newpage  %neue Seite
+
+% Abbildungsverzeichnis erstellen (ab 3 Abbildungen, sonst auskommentieren)
+\listoffigures
+
+% Tabellenverzeichnis erstellen (ab 3 Tabellen, sonst auskommentieren)
+\listoftables
+
+% Verzeichnis für Algorithmen (Pseudocode) -> auskommentieren wenn nicht benötigt
+\addcontentsline{toc}{section}{Algorithmusverzeichnis} % Aufnahme ins Inhalsverzeichnis
+\listofalgorithms
+
+%Verzeichnis für Listings -> auskommentieren wenn nicht benötigt
+\addcontentsline{toc}{section}{Quellcodeverzeichnis} % Aufnahme ins Inhalsverzeichnis
+\lstlistoflistings
+
+%Abkürzungsverzeichnis (ab 3 Abkürzungen, sonst auskommentieren)
+\section*{Abkürzungsverzeichnis}
+\addcontentsline{toc}{section}{Abkürzungsverzeichnis}
+    \vspace*{-3mm}
+    \begin{xltabular}{\linewidth}{lX}  
+     LP	        & Lineare Programmierung (\textit{engl. Linear Programming})\\
+     MIP		& gemischt-ganzzahlige Programmierung (\textit{engl. Mixed Integer Programming})\\
+     BD		    & Benders Dekomposition\\
+     TSP        & Problem des Handlungsreisenden (\textit{engl. Traveling Salesman Problem})\\
+	\end{xltabular}
+
+%Symbolverzeichnis - in alphabetischer Reihenfolge
+\newpage
+\section*{Symbolverzeichnis}
+\addcontentsline{toc}{section}{Symbolverzeichnis}
+\vspace*{-3mm}
+\begin{xltabular}{\linewidth}{lX}  
+    $d_{ij}$ & Parameter, welcher die Entfernung von Ort $i$ zu Ort $j$ beschreibt\\    
+	$i \in \mathcal{I}$	& Kundenstandort $i$ in der Menge $\mathcal{I}$ \\
+	$Y_{im}$ & Binäre Variable mit Wert 1, wenn Ort $i$ in der Tour $m$ enthalten ist\\
+\end{xltabular}
+
+\newpage

@@ -1,0 +1,42 @@
+\section*{Anhang}
+
+\begin{frame}{Modell}
+\textit{In den Anhang können zusätzliche Folien aufgenommen werden, die bei Bedarf in der Diskussion gezeigt werden können. }
+    \footnotesize
+    \begin{align}
+	   \min \ \sum_{i \in \mathcal{I}}\sum_{j \in \mathcal{I}} \sum_{m \in \mathcal{M}} c_{ij} \cdot X_{ijm}
+    \end{align}
+    u.B.d.R.
+    \begin{flalign}
+        \sum_{i \in \mathcal{I}} w_i \cdot Y_{im} &\le b& \forall \ m \in \mathcal{M} \\
+        \sum_{j \in \mathcal{I}} X_{ijm} & = Y_{im} &  \forall \ i \in \mathcal{I}, \ m \in \mathcal{M} \\
+        \sum_{i \in \mathcal{I}} X_{ijm} & = Y_{im} & \forall \ j \in \mathcal{I}, \ m \in \mathcal{M} \\
+        \sum_{m \in \mathcal{M}} Y_{im} & = 1 &  \forall \ i = 2, \dots, I \\
+        Z_i - Z_j + I \cdot \sum_{m \in \mathcal{M}} X_{ijm} & \le I - 1 &\forall \ i, j  = 2, \dots, I, i \neq j \\
+        X_{iim} &= 0 &  \forall \ i \in \mathcal{I}, \ m \in \mathcal{M} 
+    \end{flalign}
+\end{frame}
+
+\begin{frame}{Notation}
+	\begin{tabular}{ll}
+        \toprule 
+		\multicolumn{2}{l}{\textbf{Indizes und Mengen}} \\
+		$i, j \in \mathcal{I} = \{1, \dots, I\}$ & Orte, mit Ort 1 als Depot\\
+		$m \in \mathcal{M} = \{1, \dots, M\}$ & Touren\\
+		&\\
+		\multicolumn{2}{l}{\textbf{Parameter}} \\
+		$c_{ij}$& Distanz zwischen den Orten $i$ und $j$\\
+		$w_i$ & Transporteinheit am/für Ort $i$ \\
+		$b$ & Fahrzeugkapazität\\
+		&\\
+		\multicolumn{2}{l}{\textbf{Entscheidungsvariablen}} \\
+		$X_{ijm} \in \{0,1\}$ & 1, wenn in Tour $m$ vom Ort $i$ zum Ort $j$ gefahren wird und 0 sonst \\	
+		$Y_{im} \in \{0,1\}$ & 1, falls Ort $i$ in Tour $m$ enthalten ist und 0 sonst\\
+		$Z_{i} \in \mathbb{R}$ & reelwertige Hilfsvariable zur Vermeidung von Kurzzyklen\\
+				\bottomrule   		
+			\end{tabular}
+\end{frame}
+
+\begin{frame}{Zusätzliche numerische Untersuchung}
+    \textit{Auch numerische Untersuchungen, die in der Präsentation nicht untergebracht werden konnten, können in den Anhang aufgenommen werden. In der Diskussion kann ggf. darauf zurückgegriffen werden.}
+\end{frame}

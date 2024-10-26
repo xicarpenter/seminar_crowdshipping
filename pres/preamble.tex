@@ -1,0 +1,91 @@
+% ________________________________________________
+% Template und Layout
+% ________________________________________________
+\usetheme{LUH} % Layout der LUH
+\usecolortheme[RGB={0,80,155}]{structure} % LUH Farbe
+\setbeamertemplate{navigation symbols}{}  % Navigationsleiste wird nicht angezeigt
+\logo{\includegraphics[width=0.35\textwidth,keepaspectratio]{Abbildungen/logo_LUH.png}}
+
+
+% ________________________________________________
+% Inhaltsverzeichnis
+% ________________________________________________
+% zu Beginn eines jeden Abschnittes einblenden
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Agenda}    \addtocounter{framenumber}{-1}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+% ________________________________________________
+% Sprache 
+% ________________________________________________
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel} 
+\usepackage{csquotes}
+
+% ________________________________________________
+% Farben
+% ________________________________________________
+%\usepackage[dvipsnames]{xcolor}
+\definecolor{luhblau}{RGB}{0,80,155}
+\definecolor{luhmittelblau}{RGB}{153,185,216}
+\definecolor{luhhellblau}{RGB}{204,220,235}
+\definecolor{luhgruen}{RGB}{200,211,23}
+\definecolor{luhdunkelgrau}{RGB}{153,153,153}
+\definecolor{luhhellgrau}{RGB}{204,204,204}
+
+
+% ________________________________________________
+% Tabellen
+% ________________________________________________
+\usepackage{booktabs}
+\usepackage{multirow} % fasst mehrere Zeilen einer Tabelle zusammen 
+
+% ________________________________________________
+% Format der Abbilung-/Tabellen Über-/Unterschriften
+% ________________________________________________
+\usepackage[
+    labelsep=colon, % Doppelpunkt nach Tabelle/Abbildung
+    justification=centering, % Mittig
+    labelfont=bf, % Tabelle/Abbildung fett
+]{caption} 
+
+% Erstelle einen eingen Befehl für übernommene Tabellen/Abbildungen mit Caption und Quelle
+\newcommand*{\captionsource}[2]{%
+  \centering \tiny \color{lightgray} #1
+    \\
+    \textbf{Quelle:} #2
+  }
+% Eigener Befehl, wenn nur die Quelle benötigt wird (ohne Caption)
+\newcommand*{\source}[1]{%
+  \centering \tiny \color{lightgray} \textbf{Quelle:} #1
+  }
+  
+% ________________________________________________
+% listings
+% ________________________________________________
+% prevent subitems to be smaller in fontsize than parent
+\setbeamerfont{itemize/enumerate body}{size=\normalsize}
+\setbeamerfont{itemize/enumerate subbody}{size=\normalsize}
+\setbeamerfont{itemize/enumerate subsubbody}{size=\normalsize}
+
+
+% ________________________________________________
+% Tikz
+% ________________________________________________
+\usepackage{tikz}
+\usetikzlibrary{
+    arrows.meta,
+    shapes,
+    positioning
+    }
+
+
+% ________________________________________________
+% Mathe
+% ________________________________________________
+\usepackage{stmaryrd}  % lightning
+\usepackage[np, autolanguage]{numprint} % Darstellung von Zahlen mit Einheiten

@@ -1,0 +1,25 @@
+Wichtiger Hinweis:
+
+Unter Menu->Main Document muss bei dieser Vorlage das Dokument "main.tex" ausgewählt sein.
+
+Aufbau der Vorlage:
+
+- preamble.tex: Festlegung aller Einstellungen und Laden der benötigten Pakete (z.B. Schriftgröße und -art, Sprache, Definition von Farben, Bestimmte Einstellungen für die Darstellung von Algorithmen, ...)
+
+- main.tex: Hier wird zuerst preamble.tex geladen, sodass alle Pakete und Einstellungen bekannt sind. Dann beginnt das Dokument: Erstellt werden erst Deckblatt und Verzeichnisse. Anschließend folgt der eigentliche Text und zum Abschluss das Literaturverzeichnis und der Anhang. Aus Gründen der Übersichtlichkeit wurden die einzelnen Bestandteile in eigene Dateien ausgelagert (siehe Ordner Kapitel).
+
+- Ordner Kapitel: Für die unterschiedlichen Bestandteile der Arbeit wurden einzelne Kapitel erstellt:
+
+    - Verzeichnisse.tex umfasst alle Verzeichnisse der Arbeit (wie Symbolverzeichnis, Tabellenverzeichnis, ...). 
+
+    - Vorlage.tex umfasst in diesem Fall den Textteil der Arbeit. Beim Schreiben einer Arbeit kann diese in main.tex einfach auskommentiert werden, sodass benötigte Befehle oder Vorlagen in die eigene Arbeit kopiert werden können. 
+
+    - Kapitel.tex: Dies ist eine Beispieldatei dafür, dass einzelne Kapitel in unterschiedliche Dateien ausgelagert werden können. 
+
+    - Anhang.tex: Hier ist der Anhang der Arbeit aufgeführt.
+
+- Ordner Vorlagen Titelblatt: Hier ist eine Vorlage für eine Haus-/Seminararbeit und eine Vorlage für Abschlussarbeiten angelegt. Die entsprechenden Daten müssen natürlich aktualisiert werden. 
+
+- Order Code und Abbildungen: Damit die Arbeit mit Latex übersichtlich bleibt, ist es empfehlenswert, Abbildungen und Code in einzelne Ordner auszulagern. Minimiert ergibt sich dadurch am linken Bildrand eine sehr übersichtliche Struktur. Ein Einfügen der Ordner ist natürlich keine Pflicht: Die Dateien können grundsätzlich auch auf der gleichen Ebene wie main.tex liegen.
+
+- Literatur.bib: Auflistung aller verwendeten Quellen in der Arbeit im BibTeX-Format.
