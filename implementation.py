@@ -7,6 +7,10 @@ from copy import deepcopy
 
 class Parameters:
     def __init__(self, **kwargs):
+        # setting a seed
+        self.seed = kwargs["seed"]
+        random.seed(self.seed)
+
         # set of crowdshippers
         self.I = kwargs["I"]
 
@@ -30,6 +34,8 @@ class Parameters:
         # point in time when crowdshipper i is at station s
         self.t = kwargs["t"]
 
+        self.sorted_stations = self.sort_stations()
+
         # fixed entrainment fee
         self.f = kwargs["f"]
 
@@ -39,6 +45,19 @@ class Parameters:
         # generate subsets based on sets and parameters
         self.generate_subsets()
 
+
+    def sort_stations(self):
+        """Return the stations based on the time they are visited in sorted order per crowdshipper."""
+        sorted_stations = {}
+
+        for (i, s), _ in sorted(self.t.items(), key=lambda item: item[1]):
+            if i not in sorted_stations:
+                sorted_stations[i] = []
+
+            sorted_stations[i].append(s)
+
+        return sorted_stations
+    
 
     def generate_subsets(self):
         """
@@ -55,20 +74,41 @@ class Parameters:
 
         Note that the subsets are initialized as empty lists/dictionaries and are filled in the loop below.
         """
-        self.S_i = dict.fromkeys(self.I, list())
+        # set of stations visited by crowdshipper i
+        self.S_i = {i: list() for i in self.I}
+
+        # set of stations visited by crowdshipper i before their last visit
         self.S_i_p = deepcopy(self.S_i)
 
-        self.I_s = dict.fromkeys(self.S, list())
+        # set of crowdshippers visiting station s
+        self.I_s = {s: list() for s in self.S}
+
+        # set of crowdshippers visiting station s but not starting there
         self.I_s_p = deepcopy(self.I_s)
-        self.I_j_1 = deepcopy(self.I_s)
-        self.I_j_2 = deepcopy(self.I_s)
 
-        self.I_js_m = {(i, j): list() for i in self.I for j in self.J}
-        self.I_js_p = deepcopy(self.I_js_m)
+        # set of crowdshippers that can pick up parcel j 
+        self.I_j_1 = {j: list() for j in self.J}
 
+        # set of crowdshippers that can deliver parcel j
+        self.I_j_2 = deepcopy(self.I_j_1)
+
+        # set of crowdshippers who can deliver 
+        # a non finished entrainment with parcel j from station s
+        self.I_is_m = {}
+
+        # set of crowdshippers who can pick up 
+        # a non finished entrainment with parcel j from station s
+        self.I_is_p = {}
+
+        # set of parcels that can be picked up 
+        # by crowdshipper i at station s
+        self.J_is = {}
+
+        # maximum and minimum times of visits of crowdshippers
         self.max_times = {i: 0 for i in self.I}
         self.min_times = {i: max(self.t.values()) for i in self.I}
 
+        # generate max and min times
         for (i, s), t in self.t.items():
             if t > self.max_times[i]:
                 self.max_times[i] = t
@@ -76,6 +116,7 @@ class Parameters:
             if t < self.min_times[i]:
                 self.min_times[i] = t
 
+        # generate subsets for stations and crowdshippers
         for (i, s), t in self.t.items():
             self.S_i[i].append(s)
             self.I_s[s].append(i)
@@ -85,7 +126,83 @@ class Parameters:
 
             if t > self.min_times[i]:
                 self.I_s_p[s].append(i)
+
+            for j in self.J:
+                if self.alpha[j] == s:
+                    if t >= self.r[j]:
+                        self.I_j_1[j].append(i)
+
+                if self.omega[j] == s:
+                    if t <= self.d[j]:
+                        self.I_j_2[j].append(i)
+
+        # generate subsets for non finished entrainments
+        for s in self.S:
+            for i in self.I_s[s]:
+                self.I_is_m[i, s] = [c for c in self.I_s[s] 
+                                     if self.t[c, s] <= self.t[i, s]]
+                
+                self.I_is_p[i, s] = [c for c in self.I_s[s] 
+                                     if self.t[c, s] >= self.t[i, s]]
+                
+        # generate subsets of parcels
+        for i in self.I:
+            for s in self.S_i[i]:
+                self.J_is[i, s] = [j for j in self.J 
+                                   if self.r[j] <= self.t[i, s] <= self.d[j]]
+  
+        # station visited by crowdshipper i in I_s_p immediately before/after station s
+        self.s_is_m = {(i, s) : self.get_last_station(i, s) 
+                        for s in self.S for i in self.I_s_p[s]}
+        
+        self.s_is_p = {(i, s) : self.get_next_station(i, s) 
+                       for i in self.I for s in self.S_i_p[i]}
+        
+
+    def get_last_station(self, i: int, s: str) -> str:
+        """
+        Return the station visited by crowdshipper i immediately before station s.
+
+        Parameters
+        ----------
+        i : int
+            crowdshipper identifier
+        s : str
+            station identifier
+
+        Returns
+        -------
+        str
+            station identifier
+        """
+        stations = self.sorted_stations[i]
+        last_index = stations.index(s)-1
+
+        return stations[last_index]
     
+
+    def get_next_station(self, i: int, s: str) -> str:
+        """
+        Return the station visited by crowdshipper i immediately after station s.
+
+        Parameters
+        ----------
+        i : int or str
+            Identifier for the crowdshipper.
+        s : str
+            The current station for which the next station is to be found.
+
+        Returns
+        -------
+        str
+            The next station visited by the crowdshipper.
+        """
+        stations = self.sorted_stations[i]
+        next_index = stations.index(s)+1
+
+        return stations[next_index]
+
+
     def __repr__(self):
         """
         Return a string representation of the Parameters instance.
@@ -96,7 +213,7 @@ class Parameters:
         return f"Instance of Parameters with {len(self.I)} crowdshippers, {len(self.J)} parcels and {len(self.S)} stations"
     
 
-    def save(self, filename):
+    def save(self, filename: str) -> None:
         """
         Saves the instance of Parameters to a file.
 
@@ -117,7 +234,7 @@ class Parameters:
 
 
     @staticmethod
-    def load(filename):
+    def load(filename: str):
         """
         Load a Parameters instance from a file.
 
@@ -154,7 +271,7 @@ class Parameters:
         pass
 
 
-def build_model(params):
+def build_model(params: Parameters) -> gp.Model:
     """
     Build a Gurobi model for the given Parameters instance.
 
@@ -171,8 +288,10 @@ def build_model(params):
     model = gp.Model()
 
     # VARIABLES
-    X = model.addVars(params.I, params.S, params.J, vtype=GRB.BINARY, name="X")
-    Y = model.addVars(params.I, params.S, vtype=GRB.CONTINUOUS, name="Y")
+    X = model.addVars(params.I, params.S_i_p, 
+                      params.J_is, vtype=GRB.BINARY, name="X")
+    Y = model.addVars(params.I, params.S_i_p, 
+                      vtype=GRB.CONTINUOUS, name="Y")
 
     # OBJECTIVE
     ...
@@ -207,8 +326,8 @@ if __name__ == "__main__":
                     "I": ["a", "b", "c"],
                     "J": ["A", "B"],
                     "S": ["s1","s2","s3","s4","s5","s6","s7","s8","s9","s10","s11"],
-                    "alpha": {"A": 7, "B": 2},
-                    "omega": {"A": 9, "B": 11},
+                    "alpha": {"A": "s7", "B": "s2"},
+                    "omega": {"A": "s9", "B": "s11"},
                     "r": {"A": 1, "B": 2},
                     "d": {"A": 7, "B": 9},
                     "p": {"A": 5, "B": 5},
@@ -227,16 +346,16 @@ if __name__ == "__main__":
                         ("c", "s5"): 4,
                         ("c", "s6"): 5,
                         ("c", "s9"): 6,
-                        ("c", "s11"): 7
-                    }
+                        ("c", "s8"): 7
+                    },
+                    "seed": 42
                 }
     
     params = Parameters(**min_inst)
 
-    Parameters.save(params, "minimalinstanz")
+    # Parameters.save(params, "minimalinstanz")
 
-    print(params.S_i_p)
-
+    # print(params.s_is_m)
     # model = build_model(params)
 
     # # OPTIMIZATION
