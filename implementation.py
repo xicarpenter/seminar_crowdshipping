@@ -295,6 +295,7 @@ def build_model(params: Parameters) -> gp.Model:
 
     # OBJECTIVE
     # MAX-PROFIT
+    # 1
     model.setObjective((gp.quicksum(params.p[j] * X[i, params.alpha[j], j] for j in params.J for i in params.I_j_1[j])
                             - gp.quicksum(params.f * Y[i, s] for i in params.I for s in params.S_i_p[i])), gp.MAXIMIZE)
 
@@ -317,7 +318,19 @@ def build_model(params: Parameters) -> gp.Model:
                         for i in params.I_j_2[j]) == 0 for j in params.J), "Constraint_5")
 
     # 6
-    model.addConstrs((...), "Constraint_6")
+    model.addConstrs((gp.quicksum(X[i_p, params.alpha[j], j] for j in params.J if (params.alpha[j] == s and params.t[i, s] >= params.r[j])
+                                                             for i_p in params.I_j_1[j]) 
+                        + gp.quicksum(X[i_p, params.s_is_m[i_p, s], j] 
+                                        for i_p in (set(params.I_is_m[i, s]) & set(params.I_s_p[s])) 
+                                        for j in params.J_is[i_p, params.s_is_m[i_p, s]] 
+                                        if params.omega[j] != s) 
+                        + gp.quicksum(X[i_p, params.s_is_m[i_p, s], j] 
+                                        for i_p in (set(params.I_is_m[i,s]) & set(params.I_s_p[s]))
+                                        for j in params.J_is[i_p, params.s_is_m[i_p, s]]
+                                        if (params.omega[j] == s and params.d[j] >= params.t[i, s])) 
+                        - gp.quicksum(X[i_p, s, j] for i_p in params.I_is_m[i, s] for j in params.J_is[i_p, s]) 
+                                <= params.l[s] for i in params.I for s in params.S_i[i]), 
+                                "Constraint_6")
 
     # 7
     model.addConstrs((X[i, s, j] - X[i, params.s_is_m[i, s], j] <= Y[i, s] 
