@@ -289,15 +289,43 @@ def build_model(params: Parameters) -> gp.Model:
 
     # VARIABLES
     X = model.addVars(params.I, params.S_i_p, 
-                      params.J_is, vtype=GRB.BINARY, name="X")
+                      params.J_is, vtype=GRB.BINARY, name="X") # 9
     Y = model.addVars(params.I, params.S_i_p, 
-                      vtype=GRB.CONTINUOUS, name="Y")
+                      vtype=GRB.CONTINUOUS, name="Y", lb=0) # 10
 
     # OBJECTIVE
-    ...
+    # MAX-PROFIT
+    model.setObjective((gp.quicksum(params.p[j] * X[i, params.alpha[j], j] for j in params.J for i in params.I_j_1[j])
+                            - gp.quicksum(params.f * Y[i, s] for i in params.I for s in params.S_i_p[i])), gp.MAXIMIZE)
 
     # CONSTRAINTS
-    ...
+    # 2
+    model.addConstrs((gp.quicksum(X[i, s, j] for j in params.J_is[i, s]) <= 1
+                      for i in params.I for s in params.S_i_p[i]), "Constraint_2")
+
+    # 3
+    model.addConstrs((gp.quicksum(X[i, s, j] for i in params.I if j in params.J_is[i, s]) <= 1 
+                            for j in params.J for s in params.S), "Constraint_3")
+
+    # 4
+    model.addConstrs((X[i, s, j] - gp.quicksum(X[i_p, params.s_is_p[i, s], j] for i_p in params.I_is_p[i, params.s_is_p[i, s]]) <= 0
+                        for i in params.I for s in params.S_i_p[i] for j in params.J_is[i, s] if params.s_is_p[i, s] != params.omega[j]), "Constraint_4")
+
+    # 5
+    model.addConstrs((gp.quicksum(X[i, params.alpha[j], j] for i in params.I_j_1[j]) 
+                        - gp.quicksum(X[i, params.s_is_m[i, params.omega[j]], j] 
+                        for i in params.I_j_2[j]) == 0 for j in params.J), "Constraint_5")
+
+    # 6
+    model.addConstrs((...), "Constraint_6")
+
+    # 7
+    model.addConstrs((X[i, s, j] - X[i, params.s_is_m[i, s], j] <= Y[i, s] 
+                        for s in params.S_i_p[i] for i in params.I_s_p[s] for j in params.J_is[i, s]), "Constraint_7")
+
+    # 8
+    model.addConstrs(X[i, s, j] <= Y[i, s] 
+                        for i in params.I for s in params.S_i_p[i] for j in params.J_is[i, s] if i not in params.I_s_p[s]), "Constraint_8"
 
 
 def print_res(model):
@@ -355,7 +383,7 @@ if __name__ == "__main__":
 
     # Parameters.save(params, "minimalinstanz")
 
-    # print(params.s_is_m)
+    print(params.J_is)
     # model = build_model(params)
 
     # # OPTIMIZATION
