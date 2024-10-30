@@ -3,24 +3,24 @@ import re
 import os
 
 
-def remove_only_multiple_spaces_and_trim(text):
+def remove_only_multiple_spaces_and_trim(text: str):
     # Remove multiple spaces, and trim leading and trailing single spaces
     cleaned_text = re.sub(r'\s{2,}', '', text)  # Remove multiple spaces
     return cleaned_text.strip()  # Trim leading and trailing spaces
 
 
-def check_substrings(string, substrings):
+def check_substrings(string: str, substrings: list[str]):
     for substring in substrings:
         if substring in string:
             return True
     return False
 
 
-def remove_non_stations(string_list, forbidden_substrings=[" - ", 
-                                                           "Verkehrsmittel", 
-                                                           "Samstag", 
-                                                           "=",
-                                                           "- "]):
+def remove_non_stations(string_list: list[str], forbidden_substrings: list[str] = [" - ", 
+                                                                                   "Verkehrsmittel", 
+                                                                                   "Samstag", 
+                                                                                   "=",
+                                                                                   "- "]):
     out = [remove_only_multiple_spaces_and_trim(
                 s.replace(" ab", "").replace(" an", "")) for s in string_list 
                 if not any(char.isdigit() for char in s) 
@@ -30,7 +30,7 @@ def remove_non_stations(string_list, forbidden_substrings=[" - ",
     return list(dict.fromkeys(out))
 
 
-def read_pdf(pdf_path):
+def read_pdf(pdf_path: str):
     # Only read the first page of the pdf
     reader = PdfReader(pdf_path)
     
