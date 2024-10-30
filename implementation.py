@@ -334,7 +334,7 @@ def build_model(params: Parameters) -> gp.Model:
 
     # 7
     model.addConstrs((X[i, s, j] - X[i, params.s_is_m[i, s], j] <= Y[i, s] 
-                        for s in params.S_i_p[i] for i in params.I_s_p[s] for j in params.J_is[i, s]), "Constraint_7")
+                        for i in params.I for s in params.S_i_p[i] for j in params.J_is[i, s]), "Constraint_7")
 
     # 8
     model.addConstrs(X[i, s, j] <= Y[i, s] 

@@ -9,14 +9,14 @@ def remove_only_multiple_spaces_and_trim(text: str):
     return cleaned_text.strip()  # Trim leading and trailing spaces
 
 
-def check_substrings(string: str, substrings: list[str]):
+def check_substrings(string: str, substrings):
     for substring in substrings:
         if substring in string:
             return True
     return False
 
 
-def remove_non_stations(string_list: list[str], forbidden_substrings: list[str] = [" - ", 
+def remove_non_stations(string_list, forbidden_substrings = [" - ", 
                                                                                    "Verkehrsmittel", 
                                                                                    "Samstag", 
                                                                                    "=",
@@ -43,9 +43,10 @@ def read_pdf(pdf_path: str):
 if __name__ == "__main__":
     base_path = "gvh_linien"
     lines_dict = {}
+    stations_dict = {}
     for file_path in os.listdir(base_path):
         # Get the line name from the file path
-        line = f"U{file_path.split(".")[0]}"
+        line = f"U{file_path.split('.')[0]}"
 
         # Read the pdf
         split_text = read_pdf(os.path.join(base_path, file_path))
@@ -53,10 +54,16 @@ if __name__ == "__main__":
         # Get the stations
         stations = remove_non_stations(split_text)
         lines_dict[line] = stations
+        
+        for station in stations:
+            if station not in stations_dict:
+                stations_dict[station] = []
+            stations_dict[station].append(line)
 
         # Print the stations
-        print(f"{line} mit {len(stations)} Stationen:")
-        print(stations, "\n")
+        # print(f"{line} mit {len(stations)} Stationen:")
+        # print(stations, "\n")
 
 # Print the dictionary
-# print(lines_dict)
+#cprint(stations_dict["Kröpcke"])
+print(lines_dict)
