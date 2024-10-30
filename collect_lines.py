@@ -26,8 +26,8 @@ def remove_non_stations(string_list, forbidden_substrings = [" - ",
                 if not any(char.isdigit() for char in s) 
                 and 5 <= len(s) <= 30 
                 and not check_substrings(s, forbidden_substrings)]
-    
-    return list(dict.fromkeys(out))
+    out = list(dict.fromkeys(out))
+    return extend_slashes(out)
 
 
 def read_pdf(pdf_path: str):
@@ -40,8 +40,25 @@ def read_pdf(pdf_path: str):
     return text.split("\n")
 
 
+def extend_slashes(input_list):
+    output_list = []
+    last_prefix = input_list[0]
+    
+    for item in input_list:
+        if item.startswith("/"):
+            # Replace with the last prefix if it exists
+            output_list.append(last_prefix + item)
+        else:
+            # Update the last prefix if the current item has a "/"
+            if "/" in item:
+                last_prefix = item.split("/")[0]
+            output_list.append(item)
+    
+    return output_list
+
+
 if __name__ == "__main__":
-    base_path = "gvh_linien"
+    base_path = "data/gvh_linien"
     lines_dict = {}
     stations_dict = {}
     for file_path in os.listdir(base_path):
