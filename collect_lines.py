@@ -57,30 +57,34 @@ def extend_slashes(input_list):
     return output_list
 
 
-if __name__ == "__main__":
-    base_path = "data/gvh_linien"
+def generate(base_path: str = "data/gvh_linien",):
     lines_dict = {}
     stations_dict = {}
+    
     for file_path in os.listdir(base_path):
         # Get the line name from the file path
         line = f"U{file_path.split('.')[0]}"
+        
+        lines_dict[line] = {}
 
         # Read the pdf
         split_text = read_pdf(os.path.join(base_path, file_path))
 
         # Get the stations
         stations = remove_non_stations(split_text)
-        lines_dict[line] = stations
+        lines_dict[line]["stations"] = stations
+        lines_dict[line]["target_station"] = stations[-1]
+        lines_dict[line]["start_station"] = stations[0]
         
         for station in stations:
             if station not in stations_dict:
                 stations_dict[station] = []
             stations_dict[station].append(line)
 
-        # Print the stations
-        # print(f"{line} mit {len(stations)} Stationen:")
-        # print(stations, "\n")
+    # Print the dictionary
+    return lines_dict, stations_dict
 
-# Print the dictionary
-#cprint(stations_dict["Kröpcke"])
-print(lines_dict)
+
+if __name__ == "__main__":
+    lines_dict, stations_dict = generate()
+    print(lines_dict)

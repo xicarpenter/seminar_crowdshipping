@@ -288,6 +288,7 @@ def build_model(params: Parameters) -> gp.Model:
     model = gp.Model()
 
     # VARIABLES
+    print(params.S_i_p)
     X = model.addVars(params.I, params.S_i_p, 
                       params.J_is, vtype=GRB.BINARY, name="X") # 9
     Y = model.addVars(params.I, params.S_i_p, 
@@ -397,7 +398,7 @@ if __name__ == "__main__":
     # Parameters.save(params, "minimalinstanz")
 
     print(params.J_is)
-    # model = build_model(params)
+    model = build_model(params)
 
     # # OPTIMIZATION
     # model.optimize()
