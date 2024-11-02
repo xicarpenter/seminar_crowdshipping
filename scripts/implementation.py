@@ -133,7 +133,7 @@ def print_res(model):
 
 
 if __name__ == "__main__":
-    params = Parameters.load("../data/minimalinstanz.pkl")
+    params = Parameters.load("data/minimalinstanz.pkl")
     model = build_model(params)
 
     # OPTIMIZATION
