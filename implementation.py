@@ -251,7 +251,7 @@ class Parameters:
         Parameters
             The loaded Parameters instance.
         """
-        with open(f"{filename}.pkl", "rb") as f:
+        with open(filename, "rb") as f:
             params = pickle.load(f)
 
         return params
@@ -288,58 +288,98 @@ def build_model(params: Parameters) -> gp.Model:
     model = gp.Model()
 
     # VARIABLES
-    print(params.S_i_p)
-    X = model.addVars(params.I, params.S_i_p, 
-                      params.J_is, vtype=GRB.BINARY, name="X") # 9
-    Y = model.addVars(params.I, params.S_i_p, 
-                      vtype=GRB.CONTINUOUS, name="Y", lb=0) # 10
+    indices_ISJ = []
+    indices_IS = []
+    indices_JS = []
+    for i in params.I:
+        for s in params.S_i_p[i]:
+            if (i, s) not in indices_IS:
+                indices_IS.append((i, s))
+
+            for j in params.J_is[i, s]:
+                indices_ISJ.append((i, s, j))
+
+                if (j, s) not in indices_JS:
+                    indices_JS.append((j, s))
+
+    X = model.addVars(indices_ISJ, vtype=GRB.BINARY, name="X") # 9
+    Y = model.addVars(indices_IS, vtype=GRB.CONTINUOUS, name="Y", lb=0) # 10
 
     # OBJECTIVE
     # MAX-PROFIT
     # 1
-    model.setObjective((gp.quicksum(params.p[j] * X[i, params.alpha[j], j] for j in params.J for i in params.I_j_1[j])
-                            - gp.quicksum(params.f * Y[i, s] for i in params.I for s in params.S_i_p[i])), gp.MAXIMIZE)
+    model.setObjective((gp.quicksum(params.p[j] * X[i, params.alpha[j], j] 
+                                    for j in params.J 
+                                    for i in params.I_j_1[j])
+
+                            - gp.quicksum(params.f * Y[i, s] 
+                                          for i in params.I 
+                                          for s in params.S_i_p[i])), GRB.MAXIMIZE)
 
     # CONSTRAINTS
     # 2
     model.addConstrs((gp.quicksum(X[i, s, j] for j in params.J_is[i, s]) <= 1
-                      for i in params.I for s in params.S_i_p[i]), "Constraint_2")
+                      for i in params.I 
+                      for s in params.S_i_p[i]), "Constraint_2")
 
     # 3
-    model.addConstrs((gp.quicksum(X[i, s, j] for i in params.I if j in params.J_is[i, s]) <= 1 
-                            for j in params.J for s in params.S), "Constraint_3")
+    model.addConstrs((gp.quicksum(X[i, s, j] 
+                                  for i in params.I 
+                                  if ((i, s) in params.J_is.keys() 
+                                      and j in params.J_is[i, s])) <= 1 
+
+                            for (j, s) in indices_JS), "Constraint_3")
 
     # 4
-    model.addConstrs((X[i, s, j] - gp.quicksum(X[i_p, params.s_is_p[i, s], j] for i_p in params.I_is_p[i, params.s_is_p[i, s]]) <= 0
-                        for i in params.I for s in params.S_i_p[i] for j in params.J_is[i, s] if params.s_is_p[i, s] != params.omega[j]), "Constraint_4")
+    model.addConstrs((X[i, s, j] - gp.quicksum(X[i_p, params.s_is_p[i, s], j] 
+                                    for i_p in params.I_is_p[i, params.s_is_p[i, s]] 
+                                    if (i_p, params.s_is_p[i, s], j) in X.keys()) <= 0
+
+                        for (i, s, j) in indices_ISJ 
+                        if params.s_is_p[i, s] != params.omega[j]), "Constraint_4")
 
     # 5
     model.addConstrs((gp.quicksum(X[i, params.alpha[j], j] for i in params.I_j_1[j]) 
                         - gp.quicksum(X[i, params.s_is_m[i, params.omega[j]], j] 
-                        for i in params.I_j_2[j]) == 0 for j in params.J), "Constraint_5")
+                        for i in params.I_j_2[j]) == 0 
+                        for j in params.J), "Constraint_5")
 
     # 6
-    model.addConstrs((gp.quicksum(X[i_p, params.alpha[j], j] for j in params.J if (params.alpha[j] == s and params.t[i, s] >= params.r[j])
-                                                             for i_p in params.I_j_1[j]) 
+    model.addConstrs((gp.quicksum(X[i_p, params.alpha[j], j] 
+                                  for j in params.J 
+                                  for i_p in params.I_j_1[j]
+                                  if (params.alpha[j] == s and params.t[i, s] >= params.r[j])) 
+
                         + gp.quicksum(X[i_p, params.s_is_m[i_p, s], j] 
                                         for i_p in (set(params.I_is_m[i, s]) & set(params.I_s_p[s])) 
                                         for j in params.J_is[i_p, params.s_is_m[i_p, s]] 
                                         if params.omega[j] != s) 
+
                         + gp.quicksum(X[i_p, params.s_is_m[i_p, s], j] 
                                         for i_p in (set(params.I_is_m[i,s]) & set(params.I_s_p[s]))
                                         for j in params.J_is[i_p, params.s_is_m[i_p, s]]
-                                        if (params.omega[j] == s and params.d[j] >= params.t[i, s])) 
-                        - gp.quicksum(X[i_p, s, j] for i_p in params.I_is_m[i, s] for j in params.J_is[i_p, s]) 
-                                <= params.l[s] for i in params.I for s in params.S_i[i]), 
-                                "Constraint_6")
+                                        if (params.omega[j] == s 
+                                            and params.d[j] >= params.t[i, s])) 
+
+                        - gp.quicksum(X[i_p, s, j] 
+                                      for i_p in params.I_is_m[i, s] 
+                                      for j in params.J_is[i_p, s] 
+                                      if (i_p, s, j) in X.keys()) <= params.l[s] 
+
+                                      for i in params.I for s in params.S_i[i]), "Constraint_6")
 
     # 7
     model.addConstrs((X[i, s, j] - X[i, params.s_is_m[i, s], j] <= Y[i, s] 
-                        for i in params.I for s in params.S_i_p[i] for j in params.J_is[i, s]), "Constraint_7")
+                        for (i, s, j) in indices_ISJ 
+                        if (i, s) in params.s_is_m.keys()), "Constraint_7")
 
     # 8
     model.addConstrs(X[i, s, j] <= Y[i, s] 
-                        for i in params.I for s in params.S_i_p[i] for j in params.J_is[i, s] if i not in params.I_s_p[s]), "Constraint_8"
+                        for i in params.I for s in params.S_i_p[i] 
+                        for j in params.J_is[i, s] 
+                        if i not in params.I_s_p[s]), "Constraint_8"
+    
+    return model
 
 
 def print_res(model):
@@ -364,44 +404,11 @@ def print_res(model):
 
 
 if __name__ == "__main__":
-    min_inst = {
-                    "I": ["a", "b", "c"],
-                    "J": ["A", "B"],
-                    "S": ["s1","s2","s3","s4","s5","s6","s7","s8","s9","s10","s11"],
-                    "alpha": {"A": "s7", "B": "s2"},
-                    "omega": {"A": "s9", "B": "s11"},
-                    "r": {"A": 1, "B": 2},
-                    "d": {"A": 7, "B": 9},
-                    "p": {"A": 5, "B": 5},
-                    "f": 1,
-                    "t": {
-                        ("a", "s10") : 2,
-                        ("a", "s7") : 3,
-                        ("a", "s5") : 4,
-                        ("a", "s4") : 5,
-                        ("a", "s3") : 6,
-                        ("b", "s1") : 5,
-                        ("b", "s4") : 6,
-                        ("b", "s9") : 7,
-                        ("b", "s11") : 8,
-                        ("c", "s2"): 3,
-                        ("c", "s5"): 4,
-                        ("c", "s6"): 5,
-                        ("c", "s9"): 6,
-                        ("c", "s8"): 7
-                    },
-                    "seed": 42
-                }
-    
-    params = Parameters(**min_inst)
-
-    # Parameters.save(params, "minimalinstanz")
-
-    print(params.J_is)
+    params = Parameters.load("data/minimalinstanz.pkl")
     model = build_model(params)
 
-    # # OPTIMIZATION
-    # model.optimize()
+    # OPTIMIZATION
+    model.optimize()
 
-    # # PRINT
-    # print_res(model)
+    # PRINT
+    print_res(model)
