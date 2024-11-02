@@ -384,23 +384,20 @@ def build_model(params: Parameters) -> gp.Model:
 
 def print_res(model):
     if model.status == GRB.OPTIMAL:
-        print("is optimal")
+        print("\nFound an optimal solution:\n")
 
         for variable in model.getVars():
             if variable.x > 0:
                 print(variable.Varname, variable.x)
 
     elif model.status == GRB.INFEASIBLE:
-        print("is infeasible")
-
-    elif model.status == GRB.INF_OR_UNBD:
-        print("is infeasible or unbounded")
+        print("\nThe model is infeasible. \n")
 
     elif model.status == GRB.UNBOUNDED:
-        print("is unbounded")
+        print("\nThe model is unbounded. \n")
 
     else:
-        print("unknown")
+        print("\nUnknown model status. Error code:", model.status, "\n")
 
 
 if __name__ == "__main__":
