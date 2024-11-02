@@ -412,5 +412,3 @@ if __name__ == "__main__":
 
     # PRINT
     print_res(model)
-
-    print(params.t)
