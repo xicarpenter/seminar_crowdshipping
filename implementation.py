@@ -1,6 +1,6 @@
 import gurobipy as gp
 from gurobipy import *
-from instance_generator import Parameters
+from classes import Parameters
 
 
 def build_model(params: Parameters) -> gp.Model:
