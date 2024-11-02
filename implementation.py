@@ -40,7 +40,10 @@ class Parameters:
         self.f = kwargs["f"]
 
         # locker capacity
-        self.l = {s: random.randint(1, 4) for s in self.S}
+        if "l" in kwargs:
+            self.l = kwargs["l"]
+        else:
+            self.l = {s: random.randint(1, 4) for s in self.S}
 
         # generate subsets based on sets and parameters
         self.generate_subsets()
@@ -409,3 +412,5 @@ if __name__ == "__main__":
 
     # PRINT
     print_res(model)
+
+    print(params.t)
