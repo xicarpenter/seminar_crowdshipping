@@ -1,4 +1,4 @@
-from collect_lines import generate, generate_times
+from data_retrieval import generate, generate_times
 import random
 import random
 import pickle

@@ -1,5 +1,4 @@
 import requests
-from collect_lines import generate
 from datetime import datetime, timedelta
 import pickle
 from pypdf import PdfReader
