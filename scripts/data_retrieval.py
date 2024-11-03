@@ -5,7 +5,8 @@ from pypdf import PdfReader
 import re
 import os
 import pickle
-import numpy.random as npr
+import osmnx as ox
+import json
 
 
 URL_JOURNEY = '''https://gvh.hafas.de/hamm?requestId=undefined&hciMethod=StationBoard&hciVersion=
@@ -272,7 +273,7 @@ def remove_only_multiple_spaces_and_trim(text: str):
 
 def check_substrings(string: str, substrings):
     for substring in substrings:
-        if substring in string and string != "Wallensteinstraße":
+        if substring in string and string != "Wallensteinstraße" and "Markthalle" not in string:
             return True
     return False
 
@@ -374,34 +375,38 @@ def test_line(folder: str = "data/gvh_linien", line_nr: int = 1):
     print(stations)
 
 
-def generate_times(lines_dict: dict):
-    npr.seed(43)
-    connections = {line: dict() for line in lines_dict.keys()}
+def get_geo_location(stations: list):
+        # Dictionary to store station names and their coordinates
+        station_coords = {}
 
-    for line in lines_dict.keys():
-        for idx, station in enumerate(lines_dict[line]["stations"]):
-            if idx == 0:
-                last_station = station
-                
-            else:
-                connections[line][last_station, station] = npr.choice([i for i in range(1,5)], 1,
-                                p=[0.5, 0.3, 0.15, 0.05])[0]
-                last_station = station
-            
-    return connections
+        # Query OSM for each station to get coordinates
+        for station_name in stations:
+            try:
+                location = ox.geocode(f"{station_name}, Hannover, Germany")
+                station_coords[station_name] = location
+                print(f"Found coordinates for {station_name}: {location}")
+
+            except Exception as e:
+                print(f"Could not find coordinates for {station_name}: {e}\n Trying again with different format...")
+
+                try:
+                    location = ox.geocode(f"{station_name}, Germany")
+                    station_coords[station_name] = list(location)
+                    print(f"Found coordinates for {station_name}: {location}")
+
+                except Exception as e:
+                    print(f"Could not find coordinates for {station_name}: {e}")
+                    station_coords[station_name] = [0, 0]
+
+        # Check coordinates
+        print("Station coordinates:", station_coords)
+
+        # Saving to json
+        with open("data/station_coords.json", "w") as f:
+            json.dump(station_coords, f, indent=4)
 
 
 if __name__ == "__main__":
     lines_dict, stations_dict = generate()
-    print(stations_dict)
-    save()
-
-    # lines = load_lines()[0]
-    # for i in range(1, 14):
-    #     durations = get_duration(lines, f"U{i}")
-    #     print(f"U{i}:")
-    #     print(durations, "\n")
-    
-    # print("U17:")
-    # durations = get_duration(lines, "U17")
-    # print(durations, "\n")
+    stations = stations_dict.keys()
+    get_geo_location(stations)

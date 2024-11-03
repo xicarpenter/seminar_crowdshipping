@@ -1,8 +1,11 @@
-from data_retrieval import generate, generate_times
+from data_retrieval import generate
 import random
 import random
 import pickle
 from copy import deepcopy
+import networkx as nx
+import matplotlib.pyplot as plt
+import numpy.random as npr
 
 
 class Parameters:
@@ -275,19 +278,188 @@ class Parameters:
 
 
 class InstanceGenerator:
-    def __init__(self, num_crowdshippers, num_parcels, seed=42):
+    def __init__(self, num_crowdshippers, num_parcels, entrainment_fee, seed=42):
         self.num_crowdshippers = num_crowdshippers
         self.num_parcels = num_parcels
         self.seed = seed
 
         self.lines, self.stations = generate()
-        self.times = generate_times(self.lines)
+        self.travel_times = self.gen_travel_times()
 
         self.I = [f"C{i}" for i in range(1, self.num_crowdshippers + 1)]
         self.J = [f"P{j}" for j in range(1, self.num_parcels + 1)]
         self.S = list(self.stations.keys())
+        
+        self.generate_graph()
 
         self.l = {s: random.randint(1, 4) for s in self.S}
+        self.p = {p: random.randint(1, 10) for p in self.J}
+        self.f = entrainment_fee
+
+        self.origin_dest_parcels()
+        self.release_deadline_parcels()
+
+        self.origin_dest_crowdshippers()
+        self.release_deadline_crowdshippers()
+
+        self.calculate_times()
+
+
+    def gen_travel_times(self):
+        """
+        Generate travel times between stations.
+
+        The travel times are randomly generated for each pair of directly
+        connected stations. The distribution of travel times is given by
+        `choices`.
+
+        Returns
+        -------
+        connections : dict
+            A dictionary mapping each line to a dictionary mapping each pair of
+            stations to the travel time between the two stations.
+        """
+        npr.seed(43)
+        connections = {line: dict() for line in self.lines.keys()}
+        choices = {1: 0.5, 2: 0.3, 3: 0.15, 4: 0.05}
+
+        for line in self.lines.keys():
+            for idx, station in enumerate(self.lines[line]["stations"]):
+                if idx == 0:
+                    last_station = station
+                    
+                else:
+                    connections[line][last_station, station] = npr.choice(list(choices.keys()), 1,
+                                    p=list(choices.values()))[0]
+                    last_station = station
+                
+        return connections
+
+
+    def origin_dest_crowdshippers(self):
+        """
+        Randomly assigns each crowdshipper an origin and destination station.
+
+        For each crowdshipper c in I, randomly selects a station from the set of all stations S as the origin station alpha_crowd[c],
+        and another station from the set of all stations S without the origin station as the destination station omega_crowd[c].
+        """
+        self.alpha_crowd = {c: random.choice(self.S) for c in self.I}
+        self.omega_crowd = {c: random.choice([s for s in self.S if s != self.alpha_crowd[c]]) for c in self.I}
+
+
+
+    def release_deadline_crowdshippers(self):
+        """
+        Assigns a release deadline for each crowdshipper at random.
+
+        The release deadline is a time represented as an integer in the range [0, 1440), which corresponds
+        to the number of minutes since midnight (00:00). This function should ensure that each crowdshipper
+        is assigned a release deadline, assuming a uniform distribution of times.
+        """
+        self.r_crowd = {c: random.randint(0, 1380) for c in self.I}
+        print(self.find_path("Fenskestraße", "Garbsen"))
+
+
+    def release_deadline_parcels(self):
+        # time is an integer in [0, 1440=24*60])
+        # 0 -> 00:00
+        # 1439 -> 23:59
+        # thus giving the time in minutes
+        # release and dates and deadlines
+        # expect an underlying uniform distribution of times
+        # which shouldnt be the case in reality
+        """
+        Assigns a release and deadline for each parcel at random.
+
+        The release and deadline are times represented as integers in the range [0, 1440), which corresponds
+        to the number of minutes since midnight (00:00). This function should ensure that each parcel
+        is assigned a release and deadline, assuming a uniform distribution of times.
+        """
+        self.r = {j: random.randint(0, 1380) for j in self.J}
+        self.d = {j: random.randint(self.r[j]+1, 1439) for j in self.J}
+
+
+    def calculate_times(self):
+        pass
+
+
+    def find_path(self, i, j):
+        """
+        Finds the shortest path and the time taken between two stations in the station network.
+
+        Parameters
+        ----------
+        i : str
+            The starting station.
+        j : str
+            The destination station.
+
+        Returns
+        -------
+        tuple
+            A tuple containing the shortest path as a list of stations and the time taken to travel
+            between the two stations as an integer, in minutes.
+        """
+        path = nx.dijkstra_path(self.station_graph, i, j)
+        time_taken = nx.dijkstra_path_length(self.station_graph, i, j)
+
+        return path, time_taken
+
+
+    def generate_graph(self):
+        """
+        Generates the graph of the station network.
+
+        The graph has nodes representing each station S. Two nodes are connected
+        by an edge if there is a direct connection between the two stations. The
+        weight of the edge is the travel time between the two stations.
+
+        A copy of the graph is also saved without weights, for better plotting of the graph.
+        """
+        self.station_graph = nx.Graph()
+        self.station_graph.add_nodes_from(self.S)
+
+        self.station_graph_const = self.station_graph.copy()
+
+        for line in self.lines.keys():
+            for connection, value in self.travel_times[line].items():
+                self.station_graph.add_edge(connection[0], connection[1], weight=value)
+                self.station_graph_const.add_edge(connection[0], connection[1], weight=1)
+
+
+    def plot_graph(self):
+        # Generate positions with increased distance between nodes
+        """
+        Plots the graph of the station network with nodes and edges.
+
+        This uses the Kamada-Kawai algorithm to generate node positions with increased distance between nodes.
+        The graph is then drawn with node labels and node colors.
+        # labels = nx.get_edge_attributes(self.station_graph, "weight")
+        # nx.draw_networkx_edge_labels(self.station_graph, pos, edge_labels=labels)
+        # Uncomment the above lines to add edge labels with weights.
+        """
+        pos = nx.kamada_kawai_layout(self.station_graph_const)  # Increase the scale as needed
+
+        # Draw the graph
+        nx.draw(self.station_graph_const, pos, with_labels=True, node_color="skyblue", node_size=150, font_size=7)
+        # labels = nx.get_edge_attributes(self.station_graph, "weight")
+        # nx.draw_networkx_edge_labels(self.station_graph, pos, edge_labels=labels)
+        plt.show()
+
+
+    def origin_dest_parcels(self):
+        self.alpha = {j: random.choice(self.S) for j in self.J}
+        self.omega = {j: random.choice(self.S) for j in self.J if j != self.alpha[j]}
+
+
+    def __repr__(self) -> str:
+        """
+        Returns a string representation of the instance, including the sets I, J, and S, as well as the alpha, omega, connection times, and L dictionaries.
+
+        :return: A string representation of the instance.
+        :rtype: str
+        """
+        return f'''--- Set I ---\n{self.I}\n\n--- Set J ---\n{self.J}\n\n--- Set S ---\n{self.S}\n\n--- Alpha ---\n{self.alpha}\n\n--- Omega ---\n{self.omega}\n\n--- Times ---\n{self.travel_times}\n\n--- L ---\n{self.l}'''
 
     
     def return_kwargs(self):
@@ -295,10 +467,10 @@ class InstanceGenerator:
             "I": self.I,
             "J": self.J,
             "S": self.S,
-            "alpha": self.lines,
-            "omega": self.lines,
-            "r": self.times,
-            "d": self.times,
+            "alpha": self.alpha,
+            "omega": self.omega,
+            "r": self.r,
+            "d": self.d,
             "p": self.p,
             "t": self.t,
             "f": self.f,
@@ -310,7 +482,11 @@ class InstanceGenerator:
 if __name__ == "__main__":
     num_crowdshippers = 10
     num_parcels = 10
-    generator = InstanceGenerator(num_crowdshippers, num_parcels)
-    print(generator.I)
-    print(generator.J)
-    print(generator.S)
+    entrainment_fee = 5
+    generator = InstanceGenerator(num_crowdshippers, 
+                                  num_parcels, 
+                                  entrainment_fee)
+
+    generator.plot_graph()
+
+
