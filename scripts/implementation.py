@@ -129,7 +129,7 @@ def print_res(model, params):
                 if j not in parcels.keys():
                     parcels[j] = {}
 
-                parcels[j][(s, params.s_is_p[i, s])] = i
+                parcels[j][(s, params.s_is_p[i, s])] = f"{i}@{params.t[i, s]}"
 
         for j in parcels.keys():
             print(f"--- Parcel {j} ---")
@@ -157,13 +157,13 @@ if __name__ == "__main__":
 
     params = Parameters(**generator.return_kwargs())
 
-    generator.plot_graph()
+    # generator.plot_graph()
 
-    # # MODEL
-    # model = build_model(params)
+    # MODEL
+    model = build_model(params)
 
-    # # OPTIMIZATION
-    # model.optimize()
+    # OPTIMIZATION
+    model.optimize()
 
-    # # PRINT
-    # print_res(model, params)
+    # PRINT
+    print_res(model, params)
