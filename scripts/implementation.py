@@ -129,7 +129,7 @@ def print_res(model, params):
                 if j not in parcels.keys():
                     parcels[j] = {}
 
-                parcels[j][(s, params.s_is_p[i, s])] = f"{i}@{params.t[i, s]}"
+                parcels[j][(s, params.s_is_p[i, s])] = f"{i}@{params.t[i, s]}min"
 
         for j in parcels.keys():
             print(f"--- Parcel {j} ---")
