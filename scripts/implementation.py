@@ -3,7 +3,7 @@ from gurobipy import *
 from classes import Parameters, InstanceGenerator
 
 
-def build_model(params: Parameters) -> gp.Model:
+def build_model(params: Parameters, of : str = "MAX_PROFIT") -> gp.Model:
     """
     Build a Gurobi model for the given Parameters instance.
 
@@ -39,50 +39,60 @@ def build_model(params: Parameters) -> gp.Model:
 
     # OBJECTIVE
     # MAX-PROFIT
-    # 1
-    model.setObjective((gp.quicksum(params.p[j] * X[i, params.alpha[j], j] 
-                                    for j in params.J 
-                                    for i in params.I_j_1[j] if (i,params.alpha[j],j) in X.keys())
+    # 1 -> checked
+    if of == "MAX_PROFIT":
+        model.setObjective((gp.quicksum(params.p[j] * X[i, params.alpha[j], j] 
+                                        for j in params.J 
+                                        for i in params.I_j_1[j] if (i, params.alpha[j], j) in X.keys()) # Adjusted
 
-                            - gp.quicksum(params.f * Y[i, s] 
-                                          for i in params.I 
-                                          for s in params.S_i_p[i])), GRB.MAXIMIZE)
+                                - gp.quicksum(params.f * Y[i, s] 
+                                            for i in params.I 
+                                            for s in params.S_i_p[i])), GRB.MAXIMIZE)
+        
+    elif of == "MAX_PARCELS":
+        model.setObjective(gp.quicksum(X[i, params.alpha[j], j] 
+                                        for j in params.J
+                                        for i in params.I_j_1[j] if (i, params.alpha[j], j) in X.keys()), GRB.MAXIMIZE)
+
+    else:
+        raise ValueError("Objective function not recognized.")
 
     # CONSTRAINTS
-    # 2
+    # 2 -> checked
     model.addConstrs((gp.quicksum(X[i, s, j] for j in params.J_is[i, s]) <= 1
                       for i in params.I 
                       for s in params.S_i_p[i]), "Constraint_2")
 
-    # 3
+    # 3 -> checked
     model.addConstrs((gp.quicksum(X[i, s, j] 
                                   for i in params.I 
-                                  if ((i, s) in params.J_is.keys() 
-                                      and j in params.J_is[i, s]
+                                  if ((i,s) in params.J_is.keys() and j in params.J_is[i, s]
                                       and (i, s, j) in X.keys())) <= 1 
 
-                            for (j, s) in indices_JS), "Constraint_3")
+                            for j in params.J for s in params.S), "Constraint_3")
 
-    # 4
+    # 4 -> checked
     model.addConstrs((X[i, s, j] - gp.quicksum(X[i_p, params.s_is_p[i, s], j] 
-                                    for i_p in params.I_is_p[i, params.s_is_p[i, s]] 
-                                    if (i_p, params.s_is_p[i, s], j) in X.keys()) <= 0
+                                    for i_p in params.I_is_p[i, params.s_is_p[i, s]]
+                                    if (i_p, params.s_is_p[i, s], j) in X.keys()) <= 0 # Adjusted
 
-                        for (i, s, j) in indices_ISJ 
-                        if params.s_is_p[i, s] != params.omega[j]), "Constraint_4")
+                        for (i, s, j) in indices_ISJ if params.s_is_p[i, s] != params.omega[j]), "Constraint_4")
 
-    # 5
-    model.addConstrs((gp.quicksum(X[i, params.alpha[j], j] for i in params.I_j_1[j] if (i, params.alpha[j], j) in X.keys()) 
+    # 5 -> checked
+    model.addConstrs(((gp.quicksum(X[i, params.alpha[j], j] 
+                                  for i in params.I_j_1[j] if (i, params.alpha[j], j) in X.keys()) 
                         - gp.quicksum(X[i, params.s_is_m[i, params.omega[j]], j] 
-                        for i in params.I_j_2[j] if (i, params.omega[j]) in params.s_is_m.keys() and (i, params.s_is_m[i, params.omega[j]], j) in X.keys()) == 0 
+                                      for i in params.I_j_2[j] 
+                                      if ((i, params.omega[j]) in params.s_is_m.keys() # Adjusted
+                                          and (i, params.s_is_m[i, params.omega[j]], j) in X.keys()))) == 0 # Adjusted
                         for j in params.J), "Constraint_5")
 
-    # 6
-    model.addConstrs((gp.quicksum(X[i_p, params.alpha[j], j] 
+    # 6 -> checked
+    model.addConstrs((((gp.quicksum(X[i_p, params.alpha[j], j] 
                                   for j in params.J 
                                   for i_p in params.I_j_1[j]
                                   if (params.alpha[j] == s and params.t[i, s] >= params.r[j])
-                                  and (i_p, params.alpha[j], j) in X.keys()) 
+                                  and (i_p, params.alpha[j], j) in X.keys()) # Adjusted
 
                         + gp.quicksum(X[i_p, params.s_is_m[i_p, s], j] 
                                         for i_p in (set(params.I_is_m[i, s]) & set(params.I_s_p[s])) 
@@ -97,23 +107,44 @@ def build_model(params: Parameters) -> gp.Model:
 
                         - gp.quicksum(X[i_p, s, j] 
                                       for i_p in params.I_is_m[i, s] 
-                                      for j in params.J_is[i_p, s] 
-                                      if (i_p, s, j) in X.keys()) <= params.l[s] 
+                                      for j in params.J_is[i_p, s] if ((i_p, s, j) in X.keys()))) <= params.l[s]) # Adjusted
 
                                       for i in params.I for s in params.S_i[i]), "Constraint_6")
 
-    # 7
+    # 7 -> checked
     model.addConstrs((X[i, s, j] - X[i, params.s_is_m[i, s], j] <= Y[i, s] 
                         for (i, s, j) in indices_ISJ if i in params.I_s_p[s]
-                        and (i, params.s_is_m[i, s], j) in X.keys()), "Constraint_7")
+                        and (i, params.s_is_m[i, s], j) in X.keys()), "Constraint_7") # Adjusted
 
-    # 8
+    # 8 -> checked
     model.addConstrs(X[i, s, j] <= Y[i, s] 
                         for i in params.I for s in params.S_i_p[i] 
                         for j in params.J_is[i, s] 
                         if i not in params.I_s_p[s]), "Constraint_8"
     
+    # 11
+    model.addConstrs((gp.quicksum(X[i, params.s_is_m[i, params.alpha[j]], j]
+                                 for i in params.I_s_p[params.alpha[j]] if j in params.J_is[i, params.s_is_m[i, params.alpha[j]]]) <= 0
+                                 for j in params.J), "Constraint_11")
+    
+    # 12 
+    model.addConstrs((gp.quicksum(X[i, params.omega[j], j] 
+                                  for i in params.I_s_p[params.omega[j]] 
+                                  if j in params.J_is[i, params.omega[j]] and (i, params.omega[j], j) in X.keys()) <= 0
+                        for j in params.J), "Constraint_12")
+    
     return model
+
+
+def sort_by_minutes(data):
+    # Sort by extracting the minutes after "@" and converting to an integer
+    sorted_data = dict(sorted(data.items(), key=lambda item: int(item[1].split('@')[1].replace('min', ''))))
+    return sorted_data
+
+
+def sort_parcels(parcels):
+    for j in parcels.keys():
+        parcels[j] = sort_by_minutes(parcels[j])
 
 
 def print_res(model, params):
@@ -130,6 +161,9 @@ def print_res(model, params):
                     parcels[j] = {}
 
                 parcels[j][(s, params.s_is_p[i, s])] = f"{i}@{params.t[i, s]}min"
+
+        # Sort parcels
+        sort_parcels(parcels)
 
         for j in parcels.keys():
             print(f"--- Parcel {j} ---")
@@ -154,13 +188,21 @@ if __name__ == "__main__":
     generator = InstanceGenerator(num_crowdshippers, 
                                   num_parcels, 
                                   entrainment_fee)
+    
+    # C = "C132"
+    # P = "P4"
+    # S = "Auf der Horst, Marshof"
+
+    # print(f"\nPath of {C}: \n", generator.find_path(generator.alpha_crowd[C], generator.omega_crowd[C])[0], "\n") 
+    # print(f"{C} is at {S} @{generator.t[C, S]}min\n") 
+    # print(f"Start of {P}: {generator.alpha[P]} @{generator.r[P]}min\nEnd of {P}: {generator.omega[P]} @{generator.d[P]}min", "\n")
 
     params = Parameters(**generator.return_kwargs())
 
     # generator.plot_graph()
 
     # MODEL
-    model = build_model(params)
+    model = build_model(params, of="MAX_PARCELS")
 
     # OPTIMIZATION
     model.optimize()

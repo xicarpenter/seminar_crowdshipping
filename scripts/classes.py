@@ -153,10 +153,13 @@ class Parameters:
                 
         # generate subsets of parcels
         for i in self.I:
-            for s in self.S_i[i]:
-                self.J_is[i, s] = [j for j in self.J 
-                                   if self.r[j] <= self.t[i, s] <= self.d[j]]
-  
+            for s in self.S:
+                if s in self.S_i[i]:
+                    self.J_is[i, s] = [j for j in self.J 
+                                    if self.r[j] <= self.t[i, s] <= self.d[j]]
+                else:
+                    self.J_is[i, s] = []
+    
         # station visited by crowdshipper i in I_s_p immediately before/after station s
         self.s_is_m = {(i, s) : self.get_last_station(i, s) 
                         for s in self.S for i in self.I_s_p[s]}
