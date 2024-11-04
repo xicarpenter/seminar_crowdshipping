@@ -1,6 +1,6 @@
 import gurobipy as gp
 from gurobipy import *
-from classes import Parameters
+from classes import Parameters, InstanceGenerator
 
 
 def build_model(params: Parameters) -> gp.Model:
@@ -42,7 +42,7 @@ def build_model(params: Parameters) -> gp.Model:
     # 1
     model.setObjective((gp.quicksum(params.p[j] * X[i, params.alpha[j], j] 
                                     for j in params.J 
-                                    for i in params.I_j_1[j])
+                                    for i in params.I_j_1[j] if (i,params.alpha[j],j) in X.keys())
 
                             - gp.quicksum(params.f * Y[i, s] 
                                           for i in params.I 
@@ -58,7 +58,8 @@ def build_model(params: Parameters) -> gp.Model:
     model.addConstrs((gp.quicksum(X[i, s, j] 
                                   for i in params.I 
                                   if ((i, s) in params.J_is.keys() 
-                                      and j in params.J_is[i, s])) <= 1 
+                                      and j in params.J_is[i, s]
+                                      and (i, s, j) in X.keys())) <= 1 
 
                             for (j, s) in indices_JS), "Constraint_3")
 
@@ -71,16 +72,17 @@ def build_model(params: Parameters) -> gp.Model:
                         if params.s_is_p[i, s] != params.omega[j]), "Constraint_4")
 
     # 5
-    model.addConstrs((gp.quicksum(X[i, params.alpha[j], j] for i in params.I_j_1[j]) 
+    model.addConstrs((gp.quicksum(X[i, params.alpha[j], j] for i in params.I_j_1[j] if (i, params.alpha[j], j) in X.keys()) 
                         - gp.quicksum(X[i, params.s_is_m[i, params.omega[j]], j] 
-                        for i in params.I_j_2[j]) == 0 
+                        for i in params.I_j_2[j] if (i, params.omega[j]) in params.s_is_m.keys() and (i, params.s_is_m[i, params.omega[j]], j) in X.keys()) == 0 
                         for j in params.J), "Constraint_5")
 
     # 6
     model.addConstrs((gp.quicksum(X[i_p, params.alpha[j], j] 
                                   for j in params.J 
                                   for i_p in params.I_j_1[j]
-                                  if (params.alpha[j] == s and params.t[i, s] >= params.r[j])) 
+                                  if (params.alpha[j] == s and params.t[i, s] >= params.r[j])
+                                  and (i_p, params.alpha[j], j) in X.keys()) 
 
                         + gp.quicksum(X[i_p, params.s_is_m[i_p, s], j] 
                                         for i_p in (set(params.I_is_m[i, s]) & set(params.I_s_p[s])) 
@@ -102,8 +104,8 @@ def build_model(params: Parameters) -> gp.Model:
 
     # 7
     model.addConstrs((X[i, s, j] - X[i, params.s_is_m[i, s], j] <= Y[i, s] 
-                        for (i, s, j) in indices_ISJ 
-                        if (i, s) in params.s_is_m.keys()), "Constraint_7")
+                        for (i, s, j) in indices_ISJ if i in params.I_s_p[s]
+                        and (i, params.s_is_m[i, s], j) in X.keys()), "Constraint_7")
 
     # 8
     model.addConstrs(X[i, s, j] <= Y[i, s] 
@@ -114,13 +116,25 @@ def build_model(params: Parameters) -> gp.Model:
     return model
 
 
-def print_res(model):
+def print_res(model, params):
     if model.status == GRB.OPTIMAL:
         print("\nFound an optimal solution:\n")
-
+        parcels = {}
         for variable in model.getVars():
-            if variable.x > 0:
-                print(variable.Varname, variable.x)
+            if variable.x > 0 and "X" in variable.Varname:
+                vars = variable.Varname.split("[")[1].split("]")[0].split(",")
+                i, j = vars[0], vars[-1]
+                s = ",".join(vars[1:-1])
+
+                if j not in parcels.keys():
+                    parcels[j] = {}
+
+                parcels[j][(s, params.s_is_p[i, s])] = i
+
+        for j in parcels.keys():
+            print(f"--- Parcel {j} ---")
+            print(f"Origin station: {params.alpha[j]} @{params.r[j]}min\nTarget station: {params.omega[j]} @{params.d[j]}min\n")
+            print(parcels[j], "\n")
 
     elif model.status == GRB.INFEASIBLE:
         print("\nThe model is infeasible. \n")
@@ -133,11 +147,23 @@ def print_res(model):
 
 
 if __name__ == "__main__":
-    params = Parameters.load("data/minimalinstanz.pkl")
-    model = build_model(params)
+    # params = Parameters.load("data/minimalinstanz.pkl")
+    num_crowdshippers = 150
+    num_parcels = 50
+    entrainment_fee = 5
+    generator = InstanceGenerator(num_crowdshippers, 
+                                  num_parcels, 
+                                  entrainment_fee)
 
-    # OPTIMIZATION
-    model.optimize()
+    params = Parameters(**generator.return_kwargs())
 
-    # PRINT
-    print_res(model)
+    generator.plot_graph()
+
+    # # MODEL
+    # model = build_model(params)
+
+    # # OPTIMIZATION
+    # model.optimize()
+
+    # # PRINT
+    # print_res(model, params)

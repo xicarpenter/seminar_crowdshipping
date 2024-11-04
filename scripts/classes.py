@@ -282,6 +282,11 @@ class InstanceGenerator:
         self.num_crowdshippers = num_crowdshippers
         self.num_parcels = num_parcels
         self.seed = seed
+        self.max_time = 180
+
+        # Setting random seeds
+        npr.seed(self.seed)
+        random.seed(self.seed)
 
         self.lines, self.stations = generate()
         self.travel_times = self.gen_travel_times()
@@ -296,13 +301,8 @@ class InstanceGenerator:
         self.p = {p: random.randint(1, 10) for p in self.J}
         self.f = entrainment_fee
 
-        self.origin_dest_parcels()
-        self.release_deadline_parcels()
-
-        self.origin_dest_crowdshippers()
-        self.release_deadline_crowdshippers()
-
-        self.calculate_times()
+        self.init_parcels()
+        self.init_crowdshippers()
 
 
     def gen_travel_times(self):
@@ -319,7 +319,6 @@ class InstanceGenerator:
             A dictionary mapping each line to a dictionary mapping each pair of
             stations to the travel time between the two stations.
         """
-        npr.seed(43)
         connections = {line: dict() for line in self.lines.keys()}
         choices = {1: 0.5, 2: 0.3, 3: 0.15, 4: 0.05}
 
@@ -333,41 +332,57 @@ class InstanceGenerator:
                                     p=list(choices.values()))[0]
                     last_station = station
                 
-        return connections
+        return connections    
 
 
-    def origin_dest_crowdshippers(self):
+    def init_crowdshippers(self):
         """
-        Randomly assigns each crowdshipper an origin and destination station.
+        Initialize the crowdshippers by randomly selecting a start and end
+        station for each of them. The start time, end time, and time of visit
+        for each station in the path between the start and end stations are then
+        randomly generated. Time is given in minutes from start of day (0 -> 00:00) to end of day (1439 -> 23:59); thus in [0, 1440).
 
-        For each crowdshipper c in I, randomly selects a station from the set of all stations S as the origin station alpha_crowd[c],
-        and another station from the set of all stations S without the origin station as the destination station omega_crowd[c].
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
         """
         self.alpha_crowd = {c: random.choice(self.S) for c in self.I}
         self.omega_crowd = {c: random.choice([s for s in self.S if s != self.alpha_crowd[c]]) for c in self.I}
 
+        self.r_crowd = {}
+        self.d_crowd = {}
+        self.t = {}
+
+        for i in self.I:
+            starting_station = self.alpha_crowd[i]
+            target_station = self.omega_crowd[i]
+            path, time_taken = self.find_path(starting_station, target_station)
+
+            self.r_crowd[i] = random.randint(0, self.max_time-1 - time_taken)
+            self.d_crowd[i] = self.r_crowd[i] + time_taken
+
+            for idx, station in enumerate(path):
+                if idx == 0:
+                    self.t[(i, station)] = self.r_crowd[i]
+                    last_t = self.t[(i, station)]
+                    last_station = station 
+
+                elif idx == len(path) - 1:
+                    self.t[(i, station)] = self.d_crowd[i]
+
+                else:
+                    travel_time = self.station_graph.edges()[(last_station, station)]["weight"]
+
+                    self.t[(i, station)] = last_t + travel_time
+                    last_t = self.t[(i, station)]
+                    last_station = station
 
 
-    def release_deadline_crowdshippers(self):
-        """
-        Assigns a release deadline for each crowdshipper at random.
-
-        The release deadline is a time represented as an integer in the range [0, 1440), which corresponds
-        to the number of minutes since midnight (00:00). This function should ensure that each crowdshipper
-        is assigned a release deadline, assuming a uniform distribution of times.
-        """
-        self.r_crowd = {c: random.randint(0, 1380) for c in self.I}
-        print(self.find_path("Fenskestraße", "Garbsen"))
-
-
-    def release_deadline_parcels(self):
-        # time is an integer in [0, 1440=24*60])
-        # 0 -> 00:00
-        # 1439 -> 23:59
-        # thus giving the time in minutes
-        # release and dates and deadlines
-        # expect an underlying uniform distribution of times
-        # which shouldnt be the case in reality
+    def init_parcels(self):
         """
         Assigns a release and deadline for each parcel at random.
 
@@ -375,12 +390,10 @@ class InstanceGenerator:
         to the number of minutes since midnight (00:00). This function should ensure that each parcel
         is assigned a release and deadline, assuming a uniform distribution of times.
         """
-        self.r = {j: random.randint(0, 1380) for j in self.J}
-        self.d = {j: random.randint(self.r[j]+1, 1439) for j in self.J}
-
-
-    def calculate_times(self):
-        pass
+        self.alpha = {j: random.choice(self.S) for j in self.J}
+        self.omega = {j: random.choice(self.S) for j in self.J if j != self.alpha[j]}
+        self.r = {j: random.randint(0, self.max_time-self.find_path(self.alpha[j], self.omega[j])[1]) for j in self.J}
+        self.d = {j: random.randint(self.r[j]+self.find_path(self.alpha[j], self.omega[j])[1], self.max_time-1) for j in self.J}
 
 
     def find_path(self, i, j):
@@ -428,7 +441,6 @@ class InstanceGenerator:
 
 
     def plot_graph(self):
-        # Generate positions with increased distance between nodes
         """
         Plots the graph of the station network with nodes and edges.
 
@@ -445,11 +457,6 @@ class InstanceGenerator:
         # labels = nx.get_edge_attributes(self.station_graph, "weight")
         # nx.draw_networkx_edge_labels(self.station_graph, pos, edge_labels=labels)
         plt.show()
-
-
-    def origin_dest_parcels(self):
-        self.alpha = {j: random.choice(self.S) for j in self.J}
-        self.omega = {j: random.choice(self.S) for j in self.J if j != self.alpha[j]}
 
 
     def __repr__(self) -> str:
@@ -480,13 +487,15 @@ class InstanceGenerator:
 
 
 if __name__ == "__main__":
-    num_crowdshippers = 10
+    num_crowdshippers = 50
     num_parcels = 10
     entrainment_fee = 5
     generator = InstanceGenerator(num_crowdshippers, 
                                   num_parcels, 
                                   entrainment_fee)
 
-    generator.plot_graph()
+    params = Parameters(**generator.return_kwargs())
+
+    print(params)
 
 

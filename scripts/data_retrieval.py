@@ -344,11 +344,15 @@ def generate(base_path: str = "data/gvh_linien",):
         # Get the stations
         stations = remove_non_stations(split_text)
 
-        lines_dict[line]["stations"] = stations
-        lines_dict[line]["target_station"] = stations[-1]
-        lines_dict[line]["start_station"] = stations[0]
+        # Replace german umlaute and ß
+        stations_replaced = [station.replace("ö", "oe").replace("ü", "ue").replace("ß", "ss").replace("ä", "ae") 
+                             for station in stations]
+
+        lines_dict[line]["stations"] = stations_replaced
+        lines_dict[line]["target_station"] = stations_replaced[-1]
+        lines_dict[line]["start_station"] = stations_replaced[0]
         
-        for station in stations:
+        for station in stations_replaced:
             if station not in stations_dict:
                 stations_dict[station] = []
             stations_dict[station].append(line)
@@ -408,5 +412,4 @@ def get_geo_location(stations: list):
 
 if __name__ == "__main__":
     lines_dict, stations_dict = generate()
-    stations = stations_dict.keys()
-    get_geo_location(stations)
+    print(stations_dict.keys())
