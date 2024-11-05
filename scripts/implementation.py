@@ -70,6 +70,15 @@ def build_model(params: Parameters, of : str = "MAX_PROFIT") -> gp.Model:
                                       and (i, s, j) in X.keys())) <= 1 
 
                             for j in params.J for s in params.S), "Constraint_3")
+    
+    # 3.5 Every parcel can only be moved to a single station once
+    model.addConstrs((gp.quicksum(X[i, s, j] 
+                                  for i in params.I 
+                                  for s in params.S_i[i] 
+                                  if (i, s) in params.s_is_p.keys() and params.s_is_p[i, s] == next_station
+                                  if (i, s, j) in X.keys()) <= 1
+                      for next_station in params.S 
+                      for j in params.J), "Constraint_3.5")
 
     # 4 -> checked
     model.addConstrs((X[i, s, j] - gp.quicksum(X[i_p, params.s_is_p[i, s], j] 
@@ -80,11 +89,9 @@ def build_model(params: Parameters, of : str = "MAX_PROFIT") -> gp.Model:
 
     # 5 -> checked
     model.addConstrs(((gp.quicksum(X[i, params.alpha[j], j] 
-                                  for i in params.I_j_1[j] if (i, params.alpha[j], j) in X.keys()) 
+                                  for i in params.I_j_1[j] if (i, params.alpha[j], j) in X.keys()) # Adjusted
                         - gp.quicksum(X[i, params.s_is_m[i, params.omega[j]], j] 
-                                      for i in params.I_j_2[j] 
-                                      if ((i, params.omega[j]) in params.s_is_m.keys() # Adjusted
-                                          and (i, params.s_is_m[i, params.omega[j]], j) in X.keys()))) == 0 # Adjusted
+                                      for i in params.I_j_2[j] if (i, params.s_is_m[i, params.omega[j]], j) in X.keys())) == 0 # Adjusted
                         for j in params.J), "Constraint_5")
 
     # 6 -> checked
@@ -132,6 +139,9 @@ def build_model(params: Parameters, of : str = "MAX_PROFIT") -> gp.Model:
                                   for i in params.I_s_p[params.omega[j]] 
                                   if j in params.J_is[i, params.omega[j]] and (i, params.omega[j], j) in X.keys()) <= 0
                         for j in params.J), "Constraint_12")
+    
+    # Save model to lp file
+    # model.write("model.lp")
     
     return model
 
@@ -189,13 +199,11 @@ if __name__ == "__main__":
                                   num_parcels, 
                                   entrainment_fee)
     
-    # C = "C132"
-    # P = "P4"
-    # S = "Auf der Horst, Marshof"
+    C, S, P = ('C44', 'Appelstrasse', 'P14')
 
-    # print(f"\nPath of {C}: \n", generator.find_path(generator.alpha_crowd[C], generator.omega_crowd[C])[0], "\n") 
-    # print(f"{C} is at {S} @{generator.t[C, S]}min\n") 
-    # print(f"Start of {P}: {generator.alpha[P]} @{generator.r[P]}min\nEnd of {P}: {generator.omega[P]} @{generator.d[P]}min", "\n")
+    print(f"\nPath of {C}: \n", generator.find_path(generator.alpha_crowd[C], generator.omega_crowd[C])[0], "\n") 
+    print(f"{C} is at {S} @{generator.t[C, S]}min\n") 
+    print(f"Start of {P}: {generator.alpha[P]} @{generator.r[P]}min\nEnd of {P}: {generator.omega[P]} @{generator.d[P]}min", "\n")
 
     params = Parameters(**generator.return_kwargs())
 

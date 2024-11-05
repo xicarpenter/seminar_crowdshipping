@@ -135,11 +135,11 @@ class Parameters:
 
             for j in self.J:
                 if self.alpha[j] == s:
-                    if t >= self.r[j]:
+                    if self.r[j] <= t <= self.d[j] and s != self.sorted_stations[i][-1]:
                         self.I_j_1[j].append(i)
 
                 if self.omega[j] == s:
-                    if t <= self.d[j]:
+                    if self.r[j] <= t <= self.d[j] and s != self.sorted_stations[i][0]:
                         self.I_j_2[j].append(i)
 
         # generate subsets for non finished entrainments
