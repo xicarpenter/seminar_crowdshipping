@@ -93,6 +93,13 @@ def build_model(params: Parameters, of : str = "MAX_PROFIT") -> gp.Model:
                         - gp.quicksum(X[i, params.s_is_m[i, params.omega[j]], j] 
                                       for i in params.I_j_2[j] if (i, params.s_is_m[i, params.omega[j]], j) in X.keys())) == 0 # Adjusted
                         for j in params.J), "Constraint_5")
+    
+    # 5.5 Parcel can only be transported if there is a possible origin station in the time window
+    model.addConstrs((gp.quicksum(X[i, s, j] 
+                                  for i in params.I 
+                                  for s in params.S_i[i] 
+                                  if (i, s, j) in X.keys()) <= 0 
+                                  for j in params.J_pick), "Constraint_5.5")
 
     # 6 -> checked
     model.addConstrs((((gp.quicksum(X[i_p, params.alpha[j], j] 
@@ -191,21 +198,21 @@ def print_res(model, params):
 
 
 if __name__ == "__main__":
-    # params = Parameters.load("data/minimalinstanz.pkl")
+    # params = Parameters.load("data/minmalinstanz.pkl")
     num_crowdshippers = 150
     num_parcels = 50
     entrainment_fee = 5
     generator = InstanceGenerator(num_crowdshippers, 
                                   num_parcels, 
-                                  entrainment_fee)
-    
-    C, S, P = ('C44', 'Appelstrasse', 'P14')
-
-    print(f"\nPath of {C}: \n", generator.find_path(generator.alpha_crowd[C], generator.omega_crowd[C])[0], "\n") 
-    print(f"{C} is at {S} @{generator.t[C, S]}min\n") 
-    print(f"Start of {P}: {generator.alpha[P]} @{generator.r[P]}min\nEnd of {P}: {generator.omega[P]} @{generator.d[P]}min", "\n")
-
+                                  entrainment_fee,
+                                  seed=50)
     params = Parameters(**generator.return_kwargs())
+
+    # C, S, P = ('C44', 'Appelstrasse', 'P14')
+
+    # print(f"\nPath of {C}: \n", generator.find_path(generator.alpha_crowd[C], generator.omega_crowd[C])[0], "\n") 
+    # print(f"{C} is at {S} @{generator.t[C, S]}min\n") 
+    # print(f"Start of {P}: {generator.alpha[P]} @{generator.r[P]}min\nEnd of {P}: {generator.omega[P]} @{generator.d[P]}min", "\n")
 
     # generator.plot_graph()
 

@@ -167,6 +167,18 @@ class Parameters:
         self.s_is_p = {(i, s) : self.get_next_station(i, s) 
                        for i in self.I for s in self.S_i_p[i]}
         
+        # Subset of Parcels that cannot be picked up from the origin station
+        self.J_pick = []
+
+        for i in self.I:
+            for s in self.S_i_p[i]:
+                for j in self.J_is[i, s]:
+                    if self.alpha[j] == s:
+                        if j not in self.J_pick:
+                            self.J_pick.append(j)
+
+        self.J_pick = list(set(self.J) - set(self.J_pick))
+        
 
     def get_last_station(self, i: int, s: str) -> str:
         """
