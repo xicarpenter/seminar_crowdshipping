@@ -95,11 +95,11 @@ def build_model(params: Parameters, of : str = "MAX_PROFIT") -> gp.Model:
                         for j in params.J), "Constraint_5")
     
     # 5.5 Parcel can only be transported if there is a possible origin station in the time window
-    # model.addConstrs((gp.quicksum(X[i, s, j] 
-    #                               for i in params.I 
-    #                               for s in params.S_i[i] 
-    #                               if (i, s, j) in X.keys()) <= 0 
-    #                               for j in params.J_pick), "Constraint_5.5")
+    model.addConstrs((gp.quicksum(X[i, s, j] 
+                                  for i in params.I 
+                                  for s in params.S_i[i] 
+                                  if (i, s, j) in X.keys()) <= 0 
+                                  for j in params.J_pick), "Constraint_5.5")
 
     # 6 -> checked
     model.addConstrs((((gp.quicksum(X[i_p, params.alpha[j], j] 
