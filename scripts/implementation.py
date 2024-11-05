@@ -164,20 +164,61 @@ def sort_parcels(parcels):
         parcels[j] = sort_by_minutes(parcels[j])
 
 
+def calc_max_parcels(X, params):
+    max_parcels = 0
+    for j in params.J:
+        for i in params.I_j_1[j]:
+            if (i, params.alpha[j], j) in X.keys():
+                max_parcels += X[i, params.alpha[j], j]
+
+    return max_parcels
+
+
+def calc_max_profit(X, Y, params):
+    max_profit = 0
+    for j in params.J:
+        for i in params.I_j_1[j]:
+            if (i, params.alpha[j], j) in X.keys():
+                max_profit += params.p[j] * X[i, params.alpha[j], j]
+
+    for i in params.I:
+        for s in params.S_i_p[i]:
+            max_profit -= params.f * Y[i, s]
+
+    return max_profit
+
+
 def print_res(model, params):
     if model.status == GRB.OPTIMAL:
         print("\nFound an optimal solution:\n")
         parcels = {}
+        X = {}
+        Y = {}
         for variable in model.getVars():
-            if variable.x > 0 and "X" in variable.Varname:
+            if "X" in variable.Varname:
                 vars = variable.Varname.split("[")[1].split("]")[0].split(",")
                 i, j = vars[0], vars[-1]
                 s = ",".join(vars[1:-1])
 
-                if j not in parcels.keys():
-                    parcels[j] = {}
+                X[i, s, j] = variable.x
 
-                parcels[j][(s, params.s_is_p[i, s])] = f"{i}@{params.t[i, s]}min"
+                if variable.x > 0:
+                    if j not in parcels.keys():
+                        parcels[j] = {}
+
+                    parcels[j][(s, params.s_is_p[i, s])] = f"{i}@{params.t[i, s]}min"
+
+            if "Y" in variable.Varname:
+                vars = variable.Varname.split("[")[1].split("]")[0].split(",")
+                i = vars[0]
+                s = ",".join(vars[1:])
+                Y[i, s] = variable.x
+                    
+        max_parcels = calc_max_parcels(X, params)
+        max_profit = calc_max_profit(X, Y, params)
+
+        print(f"Maximum number of parcels: {max_parcels}")
+        print(f"Maximum profit: {max_profit}\n\n")
 
         # Sort parcels
         sort_parcels(parcels)
