@@ -217,8 +217,8 @@ def print_res(model, params):
         max_parcels = calc_max_parcels(X, params)
         max_profit = calc_max_profit(X, Y, params)
 
-        print(f"Maximum number of parcels: {max_parcels}")
-        print(f"Maximum profit: {max_profit}\n\n")
+        print(f"Number of parcels: {max_parcels}")
+        print(f"Profit: {max_profit}\n\n")
 
         # Sort parcels
         sort_parcels(parcels)
@@ -245,8 +245,7 @@ if __name__ == "__main__":
     entrainment_fee = 5
     generator = InstanceGenerator(num_crowdshippers, 
                                   num_parcels, 
-                                  entrainment_fee,
-                                  seed=50)
+                                  entrainment_fee)
     params = Parameters(**generator.return_kwargs())
 
     # C, S, P = ('C44', 'Appelstrasse', 'P14')
