@@ -95,11 +95,11 @@ def build_model(params: Parameters, of : str = "MAX_PROFIT") -> gp.Model:
                         for j in params.J), "Constraint_5")
     
     # 5.5 Parcel can only be transported if there is a possible origin station in the time window
-    model.addConstrs((gp.quicksum(X[i, s, j] 
-                                  for i in params.I 
-                                  for s in params.S_i[i] 
-                                  if (i, s, j) in X.keys()) <= 0 
-                                  for j in params.J_pick), "Constraint_5.5")
+    # model.addConstrs((gp.quicksum(X[i, s, j] 
+    #                               for i in params.I 
+    #                               for s in params.S_i[i] 
+    #                               if (i, s, j) in X.keys()) <= 0 
+    #                               for j in params.J_pick), "Constraint_5.5")
 
     # 6 -> checked
     model.addConstrs((((gp.quicksum(X[i_p, params.alpha[j], j] 
@@ -155,16 +155,59 @@ def build_model(params: Parameters, of : str = "MAX_PROFIT") -> gp.Model:
 
 def sort_by_minutes(data):
     # Sort by extracting the minutes after "@" and converting to an integer
+    """
+    Sort a dictionary by the numeric minutes extracted from the values.
+
+    Parameters
+    ----------
+    data : dict
+        A dictionary where each value is a string containing a number 
+        followed by "min" after an "@" symbol.
+
+    Returns
+    -------
+    dict
+        A dictionary sorted by the integer value of minutes in ascending order.
+    """
     sorted_data = dict(sorted(data.items(), key=lambda item: int(item[1].split('@')[1].replace('min', ''))))
     return sorted_data
 
 
 def sort_parcels(parcels):
+    """
+    Sort parcels by minutes after "@" in ascending order
+
+    Parameters
+    ----------
+    parcels : dict
+        Dictionary with keys as parcel IDs and values as dictionaries
+        with start and end times as strings in the format "HH:MM@mm"
+
+    Returns
+    -------
+    dict
+        Sorted dictionary of parcels
+    """
     for j in parcels.keys():
         parcels[j] = sort_by_minutes(parcels[j])
 
 
 def calc_max_parcels(X, params):
+    """
+    Calculate the maximum number of parcels that can be moved.
+
+    Parameters
+    ----------
+    X : dict
+        Dictionary of decision variables X[i, s, j] for i in I, s in S_i and j in J_is[i, s]
+    params : Parameters
+        Instance of Parameters class
+
+    Returns
+    -------
+    int
+        Maximum number of parcels that can be moved
+    """
     max_parcels = 0
     for j in params.J:
         for i in params.I_j_1[j]:
@@ -175,6 +218,24 @@ def calc_max_parcels(X, params):
 
 
 def calc_max_profit(X, Y, params):
+    """
+    Calculate the maximum profit that can be obtained given the
+    decision variables X[i, s, j] and Y[i, s].
+
+    Parameters
+    ----------
+    X : dict
+        Dictionary of decision variables X[i, s, j] for i in I, s in S_i and j in J_is[i, s]
+    Y : dict
+        Dictionary of decision variables Y[i, s] for i in I and s in S_i_p[i]
+    params : Parameters
+        Instance of Parameters class
+
+    Returns
+    -------
+    int
+        Maximum profit that can be obtained
+    """
     max_profit = 0
     for j in params.J:
         for i in params.I_j_1[j]:
@@ -189,6 +250,25 @@ def calc_max_profit(X, Y, params):
 
 
 def print_res(model, params):
+    """
+    Print the results of the Gurobi model.
+
+    Parameters
+    ----------
+    model : Model
+        The Gurobi model
+    params : Parameters
+        Instance of Parameters class
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    If the model is optimal, it prints the number of parcels and the profit.
+    If the model is infeasible or unbounded, it prints an error message.
+    """
     if model.status == GRB.OPTIMAL:
         print("\nFound an optimal solution:\n")
         parcels = {}
