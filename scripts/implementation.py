@@ -72,12 +72,12 @@ def build_model(params: Parameters, of : str = "MAX_PROFIT") -> gp.Model:
                             for j in params.J for s in params.S), "Constraint_3")
     
     # 3.5 Every parcel can only be moved to a single station once
-    if of == "MAX_PARCELS":
+    if of in ["MAX_PARCELS", "MAX_PROFIT"]:
         model.addConstrs((gp.quicksum(X[i, s, j] 
                                     for i in params.I 
                                     for s in params.S_i[i] 
                                     if (i, s) in params.s_is_p.keys() and params.s_is_p[i, s] == next_station
-                                    if (i, s, j) in X.keys()) <= 1
+                                    and (i, s, j) in X.keys()) <= 1
                         for next_station in params.S 
                         for j in params.J), "Constraint_3.5")
 
@@ -235,12 +235,15 @@ def calc_max_profit(X, Y, params):
     max_profit = 0
     for j in params.J:
         for i in params.I_j_1[j]:
-            if (i, params.alpha[j], j) in X.keys():
+            if (i, params.alpha[j], j) in X.keys() and X[i, params.alpha[j], j] > 0:
+                print(f"Using X[{i, params.alpha[j], j}]")
                 max_profit += params.p[j] * X[i, params.alpha[j], j]
 
     for i in params.I:
         for s in params.S_i_p[i]:
-            max_profit -= params.f * Y[i, s]
+            if Y[i, s] > 0:
+                print(f"Using Y[{i, s}]")
+                max_profit -= params.f * Y[i, s]
 
     return max_profit
 
@@ -321,8 +324,7 @@ if __name__ == "__main__":
     entrainment_fee = 5
     generator = InstanceGenerator(num_crowdshippers, 
                                   num_parcels, 
-                                  entrainment_fee,
-                                  seed=57)
+                                  entrainment_fee)
     params = Parameters(**generator.return_kwargs())
 
     # C, S, P = ('C44', 'Appelstrasse', 'P14')
@@ -334,7 +336,7 @@ if __name__ == "__main__":
     # generator.plot_graph()
 
     # MODEL
-    model = build_model(params, of="MAX_PARCELS")
+    model = build_model(params, of="MAX_PROFIT")
 
     # OPTIMIZATION
     model.optimize()
