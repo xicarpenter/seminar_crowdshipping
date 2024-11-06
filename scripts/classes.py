@@ -96,7 +96,7 @@ class Parameters:
         self.I_j_1 = {j: list() for j in self.J}
 
         # set of crowdshippers that can deliver parcel j
-        self.I_j_2 = deepcopy(self.I_j_1)
+        self.I_j_2 = {j: list() for j in self.J}
 
         # set of crowdshippers who can deliver 
         # a non finished entrainment with parcel j from station s
@@ -136,11 +136,13 @@ class Parameters:
             for j in self.J:
                 if self.alpha[j] == s:
                     if self.r[j] <= t <= self.d[j] and s != self.sorted_stations[i][-1]:
-                        self.I_j_1[j].append(i)
+                        if i not in self.I_j_1[j]:
+                            self.I_j_1[j].append(i)
 
                 if self.omega[j] == s:
                     if self.r[j] <= t <= self.d[j] and s != self.sorted_stations[i][0]:
-                        self.I_j_2[j].append(i)
+                        if i not in self.I_j_2[j]:
+                            self.I_j_2[j].append(i)
 
         # generate subsets of parcels
         for i in self.I:
@@ -161,7 +163,6 @@ class Parameters:
                         if j not in self.J_pick:
                             self.J_pick.append(j)
 
-        # Set self.J to the subset of parcels that can be picked up from the origin station
         self.J = self.J_pick
 
         # Remove every parcel that cannot be picked up in time from J_is
@@ -186,17 +187,16 @@ class Parameters:
         self.s_is_p = {(i, s) : self.get_next_station(i, s) 
                        for i in self.I for s in self.S_i_p[i]}
         
-        # Subset of Parcels that cannot be picked up from the origin station
-        # self.J_pick = []
-
-        # for i in self.I:
-        #     for s in self.S_i_p[i]:
-        #         for j in self.J_is[i, s]:
-        #             if self.alpha[j] == s:
-        #                 if j not in self.J_pick:
-        #                     self.J_pick.append(j)
-
-        # self.J_pick = list(set(self.J) - set(self.J_pick))
+        # J_is_p is a subset of J which contains the parcels for a combination of crowdshipper i and station s
+        # which can be delivered to the next station thus generating valid X
+        self.J_is_p = {}
+        for i in self.I:
+            for s in self.S:
+                if s in self.S_i_p[i]:
+                    self.J_is_p[i, s] = [j for j in self.J 
+                                    if self.r[j] <= self.t[i,self.s_is_p[i, s]] <= self.d[j]]
+                else:
+                    self.J_is_p[i, s] = []
         
 
     def get_last_station(self, i: int, s: str) -> str:
@@ -404,9 +404,6 @@ class InstanceGenerator:
                     self.t[(i, station)] = self.r_crowd[i]
                     last_t = self.t[(i, station)]
                     last_station = station 
-
-                elif idx == len(path) - 1:
-                    self.t[(i, station)] = self.d_crowd[i]
 
                 else:
                     travel_time = self.station_graph.edges()[(last_station, station)]["weight"]
