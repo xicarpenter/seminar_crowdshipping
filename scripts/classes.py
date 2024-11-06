@@ -142,15 +142,6 @@ class Parameters:
                     if self.r[j] <= t <= self.d[j] and s != self.sorted_stations[i][0]:
                         self.I_j_2[j].append(i)
 
-        # generate subsets for non finished entrainments
-        for s in self.S:
-            for i in self.I_s[s]:
-                self.I_is_m[i, s] = [c for c in self.I_s[s] 
-                                     if self.t[c, s] <= self.t[i, s]]
-                
-                self.I_is_p[i, s] = [c for c in self.I_s[s] 
-                                     if self.t[c, s] >= self.t[i, s]]
-                
         # generate subsets of parcels
         for i in self.I:
             for s in self.S:
@@ -159,15 +150,8 @@ class Parameters:
                                     if self.r[j] <= self.t[i, s] <= self.d[j]]
                 else:
                     self.J_is[i, s] = []
-    
-        # station visited by crowdshipper i in I_s_p immediately before/after station s
-        self.s_is_m = {(i, s) : self.get_last_station(i, s) 
-                        for s in self.S for i in self.I_s_p[s]}
-        
-        self.s_is_p = {(i, s) : self.get_next_station(i, s) 
-                       for i in self.I for s in self.S_i_p[i]}
-        
-        # Subset of Parcels that cannot be picked up from the origin station
+
+        # Subset of Parcels that can be picked up from the origin station
         self.J_pick = []
 
         for i in self.I:
@@ -177,7 +161,42 @@ class Parameters:
                         if j not in self.J_pick:
                             self.J_pick.append(j)
 
-        self.J_pick = list(set(self.J) - set(self.J_pick))
+        # Set self.J to the subset of parcels that can be picked up from the origin station
+        self.J = self.J_pick
+
+        # Remove every parcel that cannot be picked up in time from J_is
+        for (i, s), parcels in self.J_is.items():
+            for parcel in parcels:
+                if parcel not in self.J_pick:
+                    self.J_is[i, s].remove(parcel)
+
+        # generate subsets for non finished entrainments
+        for s in self.S:
+            for i in self.I_s[s]:
+                self.I_is_m[i, s] = [c for c in self.I_s[s] 
+                                     if self.t[c, s] <= self.t[i, s]]
+                
+                self.I_is_p[i, s] = [c for c in self.I_s[s] 
+                                     if self.t[c, s] >= self.t[i, s]]
+    
+        # station visited by crowdshipper i in I_s_p immediately before/after station s
+        self.s_is_m = {(i, s) : self.get_last_station(i, s) 
+                        for s in self.S for i in self.I_s_p[s]}
+        
+        self.s_is_p = {(i, s) : self.get_next_station(i, s) 
+                       for i in self.I for s in self.S_i_p[i]}
+        
+        # Subset of Parcels that cannot be picked up from the origin station
+        # self.J_pick = []
+
+        # for i in self.I:
+        #     for s in self.S_i_p[i]:
+        #         for j in self.J_is[i, s]:
+        #             if self.alpha[j] == s:
+        #                 if j not in self.J_pick:
+        #                     self.J_pick.append(j)
+
+        # self.J_pick = list(set(self.J) - set(self.J_pick))
         
 
     def get_last_station(self, i: int, s: str) -> str:
