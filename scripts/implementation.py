@@ -358,6 +358,24 @@ def check_validity(parcel_id: str,
         last_end = end
     
     return True
+
+
+def test_seeds(num_crowdshippers, num_parcels, entrainment_fee):
+    for seed in range(10):
+        generator = InstanceGenerator(num_crowdshippers, 
+                                    num_parcels, 
+                                    entrainment_fee,
+                                    seed=seed)
+        params = Parameters(**generator.return_kwargs())
+
+         # MODEL
+        model = build_model(params, of="MAX_PARCELS")
+
+        # OPTIMIZATION
+        model.optimize()
+
+        # PRINT
+        print_res(model, params)
         
 
 if __name__ == "__main__":
@@ -369,14 +387,6 @@ if __name__ == "__main__":
                                   num_parcels, 
                                   entrainment_fee)
     params = Parameters(**generator.return_kwargs())
-
-    # C, S, P = ('C44', 'Appelstrasse', 'P14')
-
-    # print(f"\nPath of {C}: \n", generator.find_path(generator.alpha_crowd[C], generator.omega_crowd[C])[0], "\n") 
-    # print(f"{C} is at {S} @{generator.t[C, S]}min\n") 
-    # print(f"Start of {P}: {generator.alpha[P]} @{generator.r[P]}min\nEnd of {P}: {generator.omega[P]} @{generator.d[P]}min", "\n")
-
-    # generator.plot_graph()
 
     # MODEL
     model = build_model(params, of="MAX_PARCELS")
