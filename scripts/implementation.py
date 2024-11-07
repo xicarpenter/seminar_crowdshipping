@@ -144,7 +144,7 @@ def build_model(params: Parameters, of : str = "MAX_PROFIT") -> gp.Model:
                         for j in params.J), "Constraint_12")
     
     # Save model to lp file
-    model.write("model.lp")
+    # model.write("model.lp")
     
     return model
 
@@ -186,6 +186,10 @@ def sort_parcels(parcels):
     """
     for j in parcels.keys():
         parcels[j] = sort_by_minutes(parcels[j])
+
+    parcels = dict(sorted(parcels.items(), key=lambda item: int(item[0][1:])))
+
+    return parcels
 
 
 def calc_max_parcels(X, params):
@@ -248,7 +252,7 @@ def calc_max_profit(X, Y, params):
     return max_profit
 
 
-def print_res(model, params):
+def print_res(model, params, long_print: bool = True):
     """
     Print the results of the Gurobi model.
 
@@ -300,12 +304,21 @@ def print_res(model, params):
         print(f"Profit: {max_profit}\n\n")
 
         # Sort parcels
-        sort_parcels(parcels)
+        parcels = sort_parcels(parcels)
 
-        for j in parcels.keys():
-            print(f"--- Parcel {j} ---")
-            print(f"Origin station: {params.alpha[j]} @{params.r[j]}min\nTarget station: {params.omega[j]} @{params.d[j]}min\n")
-            print(parcels[j], "\n")
+        if long_print:
+            for j in parcels.keys():
+                print(f"--- Parcel {j} ---")
+                print(f"Origin station: {params.alpha[j]} @{params.r[j]}min\nTarget station: {params.omega[j]} @{params.d[j]}min\n")
+                print(parcels[j], "\n")
+
+                if check_validity(j, parcels[j], params):
+                    print("Valid!\n")
+                
+                else:
+                    print("Invalid!\n")
+
+        return parcels
 
     elif model.status == GRB.INFEASIBLE:
         print("\nThe model is infeasible. \n")
@@ -317,8 +330,38 @@ def print_res(model, params):
         print("\nUnknown model status. Error code:", model.status, "\n")
 
 
+def check_validity(parcel_id: str, 
+                   parcel_dict: dict, 
+                   params: Parameters):
+    last_end = ""
+    parcel_start = params.r[parcel_id]
+    parcel_deadline = params.d[parcel_id]
+
+    for idx, ((start, end), info) in enumerate(parcel_dict.items()):
+        _, time = info.split("@")
+        time = int(time[:-3])
+
+        if idx == 0:
+            if start != params.alpha[parcel_id]:
+                return False
+
+            last_end = end
+            continue
+        
+        elif idx == len(parcel_dict) - 1:
+            if end != params.omega[parcel_id]:
+                return False
+
+        if start != last_end or (parcel_deadline < time < parcel_start):
+            return False
+
+        last_end = end
+    
+    return True
+        
+
 if __name__ == "__main__":
-    # params = Parameters.load("data/minmalinstanz.pkl")
+    # # params = Parameters.load("data/minmalinstanz.pkl")
     num_crowdshippers = 150
     num_parcels = 50
     entrainment_fee = 5
@@ -336,7 +379,7 @@ if __name__ == "__main__":
     # generator.plot_graph()
 
     # MODEL
-    model = build_model(params, of="MAX_PROFIT")
+    model = build_model(params, of="MAX_PARCELS")
 
     # OPTIMIZATION
     model.optimize()
