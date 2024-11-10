@@ -345,7 +345,7 @@ def test_seeds(num_crowdshippers: int,
     """
     Test 10 different seeds of the given parameters and print the results.
     """
-    random.seed()
+    random.seed(42)
     random_seeds = [random.randint(0, 1e5) for _ in range(20)]
     
     for seed in random_seeds:
