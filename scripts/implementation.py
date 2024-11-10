@@ -407,14 +407,14 @@ def check_minimalinstanz(path: str = "data/minimalinstanz.pkl"):
 
 
 if __name__ == "__main__":
-    check_minimalinstanz()
+    # check_minimalinstanz()
 
-    # num_crowdshippers = 150
-    # num_parcels = 50
-    # entrainment_fee = 5
-    # of = "MAX_PROFIT"
+    num_crowdshippers = 150
+    num_parcels = 50
+    entrainment_fee = 5
+    of = "MAX_PROFIT"
 
-    # test_seeds(num_crowdshippers, 
-    #            num_parcels,
-    #            entrainment_fee,
-    #            of=of)
+    test_seeds(num_crowdshippers, 
+               num_parcels,
+               entrainment_fee,
+               of=of)

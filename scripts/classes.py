@@ -188,13 +188,14 @@ class Parameters:
                        for i in self.I for s in self.S_i_p[i]}
         
         # J_is_p is a subset of J which contains the parcels for a combination of crowdshipper i and station s
-        # which can be delivered to the next station thus generating valid X
+        # which can be delivered to the next station (being at stations at r or later and at s+1 at d or earlier) 
+        # thus generating valid X
         self.J_is_p = {}
         for i in self.I:
             for s in self.S:
                 if s in self.S_i_p[i]:
                     self.J_is_p[i, s] = [j for j in self.J 
-                                    if self.r[j] <= self.t[i,self.s_is_p[i, s]] <= self.d[j]]
+                                    if self.t[i, s] >= self.r[j] and self.t[i, self.s_is_p[i, s]] <= self.d[j]]
                 else:
                     self.J_is_p[i, s] = []
         
