@@ -515,6 +515,31 @@ class InstanceGenerator:
             "l": self.l,
             "seed": self.seed
         }
+    
+
+def update_minimalinstanz(path):
+    with open(path, "rb") as f:
+        params = pickle.load(f)
+
+    kwargs = {
+            "I": params.I,
+            "J": params.J,
+            "S": params.S,
+            "alpha": params.alpha,
+            "omega": params.omega,
+            "r": params.r,
+            "d": params.d,
+            "p": params.p,
+            "t": params.t,
+            "f": params.f,
+            "l": params.l,
+            "seed": params.seed
+        }
+
+    params = Parameters(**kwargs)
+    
+    with open("data/minimalinstanz.pkl", "wb") as f:
+        pickle.dump(params, f)
 
 
 if __name__ == "__main__":
