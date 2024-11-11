@@ -216,27 +216,27 @@ class CrowdshippingModel(gp.Model):
         return max_parcels
 
 
-    def calc_max_profit(self, long_print: bool = True):
+    def calc_max_profit(self, output_print: bool = True):
         max_profit = 0
 
-        if long_print:
+        if output_print:
             print("Using ", end="")
 
         for j in self._params.J:
             for i in self._params.I_j_1[j]:
                 if (i, self._params.alpha[j], j) in self._X.keys() and self._X[i, self._params.alpha[j], j].x > 0:
-                    if long_print:
+                    if output_print:
                         print(f"X[{i, self._params.alpha[j], j}]", end=", ")
                     max_profit += self._params.p[j] * self._X[i, self._params.alpha[j], j].x
 
         for i in self._params.I:
             for s in self._params.S_i_p[i]:
                 if self._Y[i, s].x > 0:
-                    if long_print:
+                    if output_print:
                         print(f"Y[{i, s}]", end=", ")
                     max_profit -= self._params.f * self._Y[i, s].x
 
-        if long_print:
+        if output_print:
             print("\n")
 
         return max_profit
@@ -259,7 +259,7 @@ class CrowdshippingModel(gp.Model):
                         print(f"X[{i, s, j}] is invalid!")
                         
             max_parcels = self.calc_max_parcels()
-            max_profit = self.calc_max_profit(long_print)
+            max_profit = self.calc_max_profit(output_print=False)
 
             print(f"Number of parcels: {max_parcels}")
             print(f"Profit: {max_profit}\n")
@@ -345,7 +345,7 @@ def test_seeds(num_crowdshippers: int,
     """
     Test 10 different seeds of the given parameters and print the results.
     """
-    random.seed() # Make reproducible by setting with some seed if needed
+    random.seed(42) # Make reproducible by setting with some seed if needed
     random_seeds = [random.randint(0, 1e5) for _ in range(20)]
     
     for seed in random_seeds:
