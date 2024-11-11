@@ -143,31 +143,31 @@ class Parameters:
         for (i, s), t in self.t.items():
             for j in self.J:
                 if self.alpha[j] == s:
-                    if (s != self.sorted_stations[i][-1] 
-                        and self.t[i, s] >= self.r[j] and self.t[i, self.s_is_p[i, s]] <= self.d[j]):
+                    if (self.r[j] <= t <= self.d[j] 
+                        and s != self.sorted_stations[i][-1]):
                         if i not in self.I_j_1[j]:
                             self.I_j_1[j].append(i)
 
                 if self.omega[j] == s:
-                    if (s != self.sorted_stations[i][0] 
-                        and self.t[i, self.s_is_m[i, s]] >= self.r[j] and self.t[i, s] <= self.d[j]):
+                    if (self.r[j] <= t <= self.d[j] 
+                        and s != self.sorted_stations[i][0]):
                         if i not in self.I_j_2[j]:
                             self.I_j_2[j].append(i)
+
+        # generate subsets of parcels
+        for i in self.I:
+            for s in self.S:
+                if s in self.S_i[i]:
+                    self.J_is[i, s] = [j for j in self.J 
+                                    if self.r[j] <= self.t[i, s] <= self.d[j]]
+                else:
+                    self.J_is[i, s] = []
 
         # Subset of Parcels that can be picked up from the origin station
         self.J_pick = []
 
-        # J_is is a subset of J which contains the parcels for a combination of crowdshipper i and station s
-        # which can be delivered to the next station (being at stations at r or later and at s+1 at d or earlier) 
-        # thus generating valid X
         for i in self.I:
-            for s in self.S:
-                if s in self.S_i_p[i]:
-                    self.J_is[i, s] = [j for j in self.J 
-                                    if self.t[i, s] >= self.r[j] and self.t[i, self.s_is_p[i, s]] <= self.d[j]]
-                else:
-                    self.J_is[i, s] = []
-
+            for s in self.S_i_p[i]:
                 for j in self.J_is[i, s]:
                     if self.alpha[j] == s:
                         if j not in self.J_pick:
@@ -175,16 +175,23 @@ class Parameters:
 
         self.J = self.J_pick
 
+        # J_is_p is a subset of J which contains the parcels for a combination of crowdshipper i and station s
+        # which can be delivered to the next station (being at stations at r or later and at s+1 at d or earlier) 
+        # thus generating valid X
+        self.J_is_p = {}
+        for i in self.I:
+            for s in self.S:
+                if s in self.S_i_p[i]:
+                    self.J_is_p[i, s] = [j for j in self.J 
+                                    if self.t[i, s] >= self.r[j] and self.t[i, self.s_is_p[i, s]] <= self.d[j]]
+                else:
+                    self.J_is_p[i, s] = []
+
         # Remove every parcel that cannot be picked up in time from J_is
-        J_is_new = {}
         for (i, s), parcels in self.J_is.items():
-            tmp = self.J_is[i, s].copy()
             for parcel in parcels:
                 if parcel not in self.J_pick:
-                    tmp.remove(parcel)
-            J_is_new[i, s] = tmp
-
-        self.J_is = J_is_new
+                    self.J_is[i, s].remove(parcel)
 
         # generate subsets for non finished entrainments
         for s in self.S:

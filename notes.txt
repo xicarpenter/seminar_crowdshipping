@@ -1,7 +1,1 @@
-- J_is ist relevant für alles bzgl losschicken von Paketen (bzgl release date von parcel)
-- J_is_p ist relevant für alles bzgl der Ankunft von Paketen (bzgl deadline von parcel)
-
-Muss auf X angewandt werden; X muss definiert werden wenn t[i,s] >= release date und t[i, s_is_p[i,s]] <= deadline date
-
 - Fix randrange in InstanceGenerator
-- Check alle for j in [...] ob so sinnvoll oder auszutauschen durch j in J oder j in J_is_p
