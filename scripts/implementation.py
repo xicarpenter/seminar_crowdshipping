@@ -1,5 +1,5 @@
 import gurobipy as gp
-from gurobipy import *
+from gurobipy import GRB
 from classes import Parameters, InstanceGenerator, update_minimalinstanz
 import random
 
