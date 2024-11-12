@@ -94,27 +94,26 @@ class CrowdshippingModel(gp.Model):
         # 3 -> checked
         self.addConstrs((gp.quicksum(self._X[i, s, j] 
                                     for i in self._params.I 
-                                    if ((i,s) in self._params.J_is.keys() and j in self._params.J_is[i, s]
-                                        and (i, s, j) in self._X.keys())) <= 1 
-
-                                for j in self._params.J for s in self._params.S), "Constraint_3")
+                                    if j in self._params.J_is[i, s]) <= 1 
+                                for j in self._params.J 
+                                for s in self._params.S), "Constraint_3")
         
         # 3.5 Every parcel can only be moved to a single station once
         if self._of in ["MAX_PARCELS", "MAX_PROFIT"]:
-            self.addConstrs((gp.quicksum(self._X[i, s, j] 
-                                        for i in self._params.I 
-                                        for s in self._params.S_i[i] 
-                                        if (i, s) in self._params.s_is_p.keys() and self._params.s_is_p[i, s] == next_station
+            self.addConstrs((gp.quicksum(self._X[i, s, j]  
+                                        for (i, s) in self._params.s_is_p.keys() 
+                                        if self._params.s_is_p[i, s] == next_station
                                         and (i, s, j) in self._X.keys()) <= 1
                             for next_station in self._params.S 
                             for j in self._params.J), "Constraint_3.5")
 
         # 4 -> checked
-        self.addConstrs((self._X[i, s, j] - gp.quicksum(self._X[i_p, self._params.s_is_p[i, s], j] 
+        self.addConstrs((self._X[i, s, j] 
+                         - gp.quicksum(self._X[i_p, self._params.s_is_p[i, s], j] 
                                         for i_p in self._params.I_is_p[i, self._params.s_is_p[i, s]]
                                         if (i_p, self._params.s_is_p[i, s], j) in self._X.keys()) <= 0 # Adjusted
-
-                            for (i, s, j) in indices_ISJ if self._params.s_is_p[i, s] != self._params.omega[j]), "Constraint_4")
+                            for (i, s, j) in indices_ISJ 
+                            if self._params.s_is_p[i, s] != self._params.omega[j]), "Constraint_4")
 
         # 5 -> checked
         self.addConstrs(((gp.quicksum(self._X[i, self._params.alpha[j], j] 
@@ -428,4 +427,5 @@ if __name__ == "__main__":
     test_seeds(num_crowdshippers, 
                num_parcels,
                entrainment_fee,
-               of=of)
+               of=of,
+               number_of_seeds=10)
