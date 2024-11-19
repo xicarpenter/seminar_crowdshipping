@@ -99,13 +99,13 @@ class CrowdshippingModel(gp.Model):
                                 for s in self._params.S), "Constraint_3")
         
         # 3.5 Every parcel can only be moved to a single station once
-        if self._of in ["MAX_PARCELS", "MAX_PROFIT"]:
-            self.addConstrs((gp.quicksum(self._X[i, s, j]  
-                                        for (i, s) in self._params.s_is_p.keys() 
-                                        if self._params.s_is_p[i, s] == next_station
-                                        and (i, s, j) in self._X.keys()) <= 1
-                            for next_station in self._params.S 
-                            for j in self._params.J), "Constraint_3.5")
+        # if self._of in ["MAX_PARCELS", "MAX_PROFIT"]:
+        #     self.addConstrs((gp.quicksum(self._X[i, s, j]  
+        #                                 for (i, s) in self._params.s_is_p.keys() 
+        #                                 if self._params.s_is_p[i, s] == next_station
+        #                                 and (i, s, j) in self._X.keys()) <= 1
+        #                     for next_station in self._params.S 
+        #                     for j in self._params.J), "Constraint_3.5")
 
         # 4 -> checked
         self.addConstrs((self._X[i, s, j] 
@@ -169,7 +169,7 @@ class CrowdshippingModel(gp.Model):
                             for j in self._params.J), "Constraint_12")
         
         # Save model to lp file
-        # self.write("model.lp")
+        self.write("model.lp")
 
 
     @staticmethod
@@ -257,7 +257,7 @@ class CrowdshippingModel(gp.Model):
                         print(f"X[{i, s, j}] is invalid!")
                         
             max_parcels = self.calc_max_parcels()
-            max_profit = self.calc_max_profit(output_print=False)
+            max_profit = self.calc_max_profit(output_print=True)
 
             print(f"Number of parcels: {max_parcels}")
             print(f"Profit: {max_profit}\n")
@@ -422,10 +422,10 @@ if __name__ == "__main__":
     num_crowdshippers = 150
     num_parcels = 50
     entrainment_fee = 5
-    of = "MAX_PARCELS"
+    of = "MAX_PROFIT"
 
     test_seeds(num_crowdshippers, 
                num_parcels,
                entrainment_fee,
                of=of,
-               number_of_seeds=10)
+               number_of_seeds=1)
