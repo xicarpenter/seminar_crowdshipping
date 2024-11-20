@@ -2,6 +2,7 @@ import gurobipy as gp
 from gurobipy import GRB
 from classes import Parameters, InstanceGenerator, update_minimalinstanz
 import random
+import pickle
 
 
 
@@ -11,7 +12,7 @@ class CrowdshippingModel(gp.Model):
                  of: str = "MAX_PROFIT",
                  use_3_5: bool = True):
         super().__init__()
-        self._use_constraint_3_5 = use_3_5
+        self._use_3_5 = use_3_5
         self._params = params
         self._of = of
 
@@ -101,7 +102,7 @@ class CrowdshippingModel(gp.Model):
                                 for s in self._params.S), "Constraint_3")
         
         # 3.5 Every parcel can only be moved to a single station once
-        if self._use_constraint_3_5:
+        if self._use_3_5:
             self.addConstrs((gp.quicksum(self._X[i, s, j]  
                                         for (i, s) in self._params.s_is_p.keys() 
                                         if self._params.s_is_p[i, s] == next_station
@@ -178,7 +179,7 @@ class CrowdshippingModel(gp.Model):
                             for j in self._params.J), "Constraint_12")
         
         # Save model to lp file
-        # self.write("model.lp")
+        self.write(f"output/model_{'3_5' if self._use_3_5 else 'no_3_5'}.lp")
 
 
     @staticmethod
@@ -247,7 +248,6 @@ class CrowdshippingModel(gp.Model):
                     max_profit -= self._params.f * self._Y[i, s].x
 
         if print_level > 0:
-            print("\n")
             print(f"Parcels: {parcels}")
 
         return max_profit
@@ -256,7 +256,7 @@ class CrowdshippingModel(gp.Model):
     def check_results(self, print_level: int = 0):
         if self.status == GRB.OPTIMAL:
             if print_level > 0:
-                print("\nFound an optimal solution:\n")
+                print("\nFound an optimal solution:")
             self._parcels = {}
             
             for (i, s, j), val in self._X.items():
@@ -493,13 +493,14 @@ def compare_3_5(num_crowdshippers: int,
                entrainment_fee: int, 
                of: str = "MAX_PARCELS",
                seed: int = None,
-               number_of_seeds: int = 1):
+               number_of_seeds: int = 1,
+               print_level: int = 0):
     if number_of_seeds == 1:
         if seed is None:
             seeds, model_3_5 = test_seeds(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
-                                print_level=0,
+                                print_level=print_level,
                                 of=of,
                                 seed=seed,
                                 use_3_5=True,
@@ -511,7 +512,7 @@ def compare_3_5(num_crowdshippers: int,
             model_no_3_5 = test_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
-                                print_level=0,
+                                print_level=print_level,
                                 of=of,
                                 seed=seed,
                                 use_3_5=False)
@@ -536,7 +537,7 @@ def compare_3_5(num_crowdshippers: int,
             model_3_5 = test_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
-                                print_level=0,
+                                print_level=print_level,
                                 of=of,
                                 seed=seed,
                                 use_3_5=True)
@@ -544,15 +545,18 @@ def compare_3_5(num_crowdshippers: int,
             model_no_3_5 = test_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
-                                print_level=0,
+                                print_level=print_level,
                                 of=of,
                                 seed=seed,
                                 use_3_5=False)
             
+            with open(f"output/models_{seed}.pkl", "wb") as f:
+                pickle.dump(model_3_5._params, f)
+            
             print(f"--- Seed: {seed} ---")
             if of == "MAX_PROFIT":
-                of_3_5 = model_3_5.calc_max_profit(print_level=False)
-                of_no_3_5 = model_no_3_5.calc_max_profit(print_level=False)
+                of_3_5 = model_3_5.calc_max_profit(print_level=0)
+                of_no_3_5 = model_no_3_5.calc_max_profit(print_level=0)
 
                 print()
                 print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
@@ -570,7 +574,7 @@ def compare_3_5(num_crowdshippers: int,
         used_seeds, models_3_5 = test_seeds(num_crowdshippers, 
                               num_parcels, 
                               entrainment_fee,  
-                              print_level=0,
+                              print_level=print_level,
                               of=of,
                               number_of_seeds=number_of_seeds,
                               use_3_5=True)
@@ -578,7 +582,7 @@ def compare_3_5(num_crowdshippers: int,
         _, models_no_3_5 = test_seeds(num_crowdshippers, 
                               num_parcels, 
                               entrainment_fee,  
-                              print_level=0,
+                              print_level=print_level,
                               of=of,
                               number_of_seeds=number_of_seeds,
                               use_3_5=False,
@@ -607,16 +611,16 @@ if __name__ == "__main__":
 
     num_crowdshippers = 150
     num_parcels = 50
-    entrainment_fee = 5
+    entrainment_fee = 1
     of = "MAX_PROFIT"
-    use_3_5 = False
     print_level = 0
-    seed = None # 61748 # Seed to none for test_seeds if unproucable behaviour is needed
-    number_of_seeds = 5
+    seed = 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
+    number_of_seeds = 1
 
     compare_3_5(num_crowdshippers, 
                 num_parcels, 
                 entrainment_fee,
                 of=of,
                 seed=seed,  
-                number_of_seeds=number_of_seeds)
+                number_of_seeds=number_of_seeds,
+                print_level=print_level)
