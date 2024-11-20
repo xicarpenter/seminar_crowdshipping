@@ -144,13 +144,15 @@ class Parameters:
             for j in self.J:
                 if self.alpha[j] == s:
                     if (s != self.sorted_stations[i][-1] 
-                        and self.t[i, s] >= self.r[j] and self.t[i, self.s_is_p[i, s]] <= self.d[j]):
+                        and self.t[i, s] >= self.r[j] # ): 
+                        and self.t[i, self.s_is_p[i, s]] <= self.d[j]):
                         if i not in self.I_j_1[j]:
                             self.I_j_1[j].append(i)
 
                 if self.omega[j] == s:
                     if (s != self.sorted_stations[i][0] 
-                        and self.t[i, self.s_is_m[i, s]] >= self.r[j] and self.t[i, s] <= self.d[j]):
+                        and self.t[i, self.s_is_m[i, s]] >= self.r[j] # ): 
+                        and self.t[i, s] <= self.d[j]):
                         if i not in self.I_j_2[j]:
                             self.I_j_2[j].append(i)
 
@@ -308,7 +310,7 @@ class InstanceGenerator:
         self.generate_graph()
 
         self.l = {s: random.randint(1, 4) for s in self.S}
-        self.p = {p: random.randint(1, 10) for p in self.J}
+        self.p = {p: 5 for p in self.J} # {p: random.randint(1, 10) for p in self.J}
         self.f = entrainment_fee
 
         self.init_parcels()

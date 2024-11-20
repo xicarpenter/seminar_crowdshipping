@@ -8,8 +8,10 @@ import random
 class CrowdshippingModel(gp.Model):
     def __init__(self, 
                  params: Parameters,
-                 of: str = "MAX_PROFIT"):
+                 of: str = "MAX_PROFIT",
+                 use_3_5: bool = True):
         super().__init__()
+        self._use_constraint_3_5 = use_3_5
         self._params = params
         self._of = of
 
@@ -60,7 +62,7 @@ class CrowdshippingModel(gp.Model):
                     indices_ISJ.append((i, s, j))
 
                     if (j, s) not in indices_JS:
-                        indices_JS.append((j, s))
+                        indices_JS.append((j, s))                
 
         self._X = self.addVars(indices_ISJ, vtype=GRB.BINARY, name="X") # 9
         self._Y = self.addVars(indices_IS, vtype=GRB.CONTINUOUS, name="Y", lb=0) # 10
@@ -99,15 +101,15 @@ class CrowdshippingModel(gp.Model):
                                 for s in self._params.S), "Constraint_3")
         
         # 3.5 Every parcel can only be moved to a single station once
-        # if self._of in ["MAX_PARCELS", "MAX_PROFIT"]:
-        #     self.addConstrs((gp.quicksum(self._X[i, s, j]  
-        #                                 for (i, s) in self._params.s_is_p.keys() 
-        #                                 if self._params.s_is_p[i, s] == next_station
-        #                                 and (i, s, j) in self._X.keys()) <= 1
-        #                     for next_station in self._params.S 
-        #                     for j in self._params.J), "Constraint_3.5")
+        if self._use_constraint_3_5:
+            self.addConstrs((gp.quicksum(self._X[i, s, j]  
+                                        for (i, s) in self._params.s_is_p.keys() 
+                                        if self._params.s_is_p[i, s] == next_station
+                                        and (i, s, j) in self._X.keys()) <= 1
+                            for next_station in self._params.S 
+                            for j in self._params.J), "Constraint_3.5")
 
-        # 4 -> checked
+        # 4 -> checked Problem here somewhere
         self.addConstrs((self._X[i, s, j] 
                          - gp.quicksum(self._X[i_p, self._params.s_is_p[i, s], j] 
                                         for i_p in self._params.I_is_p[i, self._params.s_is_p[i, s]]
@@ -145,16 +147,23 @@ class CrowdshippingModel(gp.Model):
 
                                         for i in self._params.I for s in self._params.S_i[i]), "Constraint_6")
 
-        # 7 -> checked
-        self.addConstrs((self._X[i, s, j] - self._X[i, self._params.s_is_m[i, s], j] <= self._Y[i, s] 
-                            for (i, s, j) in indices_ISJ if i in self._params.I_s_p[s]
-                            and (i, self._params.s_is_m[i, s], j) in self._X.keys()), "Constraint_7") # Adjusted
+        # i = "C28"
+        # s = "Friedenauer Strasse"
+        # j = "P42"
 
-        # 8 -> checked
-        self.addConstrs(self._X[i, s, j] <= self._Y[i, s] 
-                            for i in self._params.I for s in self._params.S_i_p[i] 
-                            for j in self._params.J_is[i, s] 
-                            if i not in self._params.I_s_p[s]), "Constraint_8"
+        # print(self._params.S_i[i], self._params.t[i, s], self._params.r[j], self._params.d[j])
+
+
+        # 7 and 8
+        for (i, s, j) in indices_ISJ:
+            if i in self._params.I_s_p[s] and (i, self._params.s_is_m[i, s], j) in self._X.keys():
+                self.addConstr((self._X[i, s, j] 
+                                - self._X[i, self._params.s_is_m[i, s], j] 
+                                <= self._Y[i, s]), "Constraint_7")
+
+            else:
+                self.addConstr((self._X[i, s, j] 
+                                <= self._Y[i, s]), "Constraint_8")
         
         # 11
         self.addConstrs((gp.quicksum(self._X[i, self._params.s_is_m[i, self._params.alpha[j]], j]
@@ -169,7 +178,7 @@ class CrowdshippingModel(gp.Model):
                             for j in self._params.J), "Constraint_12")
         
         # Save model to lp file
-        self.write("model.lp")
+        # self.write("model.lp")
 
 
     @staticmethod
@@ -220,11 +229,13 @@ class CrowdshippingModel(gp.Model):
         if output_print:
             print("Using ", end="")
 
+        parcels = []
         for j in self._params.J:
             for i in self._params.I_j_1[j]:
                 if (i, self._params.alpha[j], j) in self._X.keys() and self._X[i, self._params.alpha[j], j].x > 0:
                     if output_print:
                         print(f"X[{i, self._params.alpha[j], j}]", end=", ")
+                    parcels.append(j)
                     max_profit += self._params.p[j] * self._X[i, self._params.alpha[j], j].x
 
         for i in self._params.I:
@@ -236,6 +247,8 @@ class CrowdshippingModel(gp.Model):
 
         if output_print:
             print("\n")
+
+        print(f"Parcels: {parcels}")
 
         return max_profit
 
@@ -324,15 +337,16 @@ class CrowdshippingModel(gp.Model):
                 print("Invalid!\n")
 
 
-    def check_parcels(self, seed):
+    def check_parcels(self, seed, long_print):
         count = 0
         for j, stations in self._parcels.items():
             if not self.check_validity(j, stations):
-                print(f"Parcel {j} is invalid!")
-                print("Seed:", seed)
-                print(f"Origin station: {self._params.alpha[j]} @{self._params.r[j]}min\n"\
-                      f"Target station: {self._params.omega[j]} @{self._params.d[j]}min\n")
-                print(stations, "\n")
+                if not long_print:
+                    print(f"Parcel {j} is invalid!")
+                    print("Seed:", seed)
+                    print(f"Origin station: {self._params.alpha[j]} @{self._params.r[j]}min\n"\
+                        f"Target station: {self._params.omega[j]} @{self._params.d[j]}min\n")
+                    print(stations, "\n")
                 count += 1
 
         return count
@@ -341,9 +355,11 @@ class CrowdshippingModel(gp.Model):
 def test_seeds(num_crowdshippers: int, 
                num_parcels: int, 
                entrainment_fee: int, 
+               long_print: bool = False,
                output: bool = False, 
                of: str = "MAX_PARCELS",
-               number_of_seeds: int = 5):
+               number_of_seeds: int = 5,
+               use_3_5: bool = True):
     """
     Test 10 different seeds of the given parameters and print the results.
     """
@@ -368,7 +384,7 @@ def test_seeds(num_crowdshippers: int,
         params = Parameters(**generator.return_kwargs())
 
         # MODEL
-        model = CrowdshippingModel(params, of=of)
+        model = CrowdshippingModel(params, of=of, use_3_5=use_3_5)
 
         if not output:
             model.setParam(GRB.Param.OutputFlag, 0)
@@ -377,9 +393,9 @@ def test_seeds(num_crowdshippers: int,
         model.optimize()
 
         # PRINT
-        model.check_results(long_print=False)
+        model.check_results(long_print=long_print)
         
-        count = model.check_parcels(seed)
+        count = model.check_parcels(seed, long_print)
 
         print("Done with seed:", seed)
         print(f"Invalid parcels: {count}\n")
@@ -387,6 +403,42 @@ def test_seeds(num_crowdshippers: int,
         used_seeds.append(seed)
 
     return used_seeds
+
+
+def test_seed(num_crowdshippers: int, 
+               num_parcels: int, 
+               entrainment_fee: int, 
+               long_print: bool = False,
+               output: bool = False, 
+               of: str = "MAX_PARCELS",
+               seed: int = 42,
+               use_3_5: bool = True):
+    """
+    Test 10 different seeds of the given parameters and print the results.
+    """
+    generator = InstanceGenerator(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                seed=seed)
+
+    params = Parameters(**generator.return_kwargs())
+
+    # MODEL
+    model = CrowdshippingModel(params, of=of, use_3_5=use_3_5)
+
+    if not output:
+        model.setParam(GRB.Param.OutputFlag, 0)
+
+    # OPTIMIZATION
+    model.optimize()
+
+    # PRINT
+    model.check_results(long_print=long_print)
+    
+    count = model.check_parcels(seed, long_print)
+
+    print("Done with seed:", seed)
+    print(f"Invalid parcels: {count}\n")
     
 
 def check_minimalinstanz(path: str = "data/minimalinstanz.pkl"):
@@ -421,11 +473,16 @@ if __name__ == "__main__":
 
     num_crowdshippers = 150
     num_parcels = 50
-    entrainment_fee = 5
+    entrainment_fee = 1
     of = "MAX_PROFIT"
+    use_3_5 = False
+    long_print = False
+    seed = 61748
 
-    test_seeds(num_crowdshippers, 
+    test_seed(num_crowdshippers, 
                num_parcels,
                entrainment_fee,
+               long_print=long_print,
                of=of,
-               number_of_seeds=1)
+               seed=seed,
+               use_3_5=use_3_5)
