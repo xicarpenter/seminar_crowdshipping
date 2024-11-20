@@ -223,17 +223,18 @@ class CrowdshippingModel(gp.Model):
         return max_parcels
 
 
-    def calc_max_profit(self, output_print: bool = True):
+    def calc_max_profit(self, 
+                        print_level: int = 0):
         max_profit = 0
 
-        if output_print:
+        if print_level > 1:
             print("Using ", end="")
 
         parcels = []
         for j in self._params.J:
             for i in self._params.I_j_1[j]:
                 if (i, self._params.alpha[j], j) in self._X.keys() and self._X[i, self._params.alpha[j], j].x > 0:
-                    if output_print:
+                    if print_level > 1:
                         print(f"X[{i, self._params.alpha[j], j}]", end=", ")
                     parcels.append(j)
                     max_profit += self._params.p[j] * self._X[i, self._params.alpha[j], j].x
@@ -241,11 +242,11 @@ class CrowdshippingModel(gp.Model):
         for i in self._params.I:
             for s in self._params.S_i_p[i]:
                 if self._Y[i, s].x > 0:
-                    if output_print:
+                    if print_level > 1:
                         print(f"Y[{i, s}]", end=", ")
                     max_profit -= self._params.f * self._Y[i, s].x
 
-        if output_print:
+        if print_level > 0:
             print("\n")
             print(f"Parcels: {parcels}")
 
@@ -271,7 +272,7 @@ class CrowdshippingModel(gp.Model):
                             print(f"X[{i, s, j}] is invalid!")
                         
             max_parcels = self.calc_max_parcels()
-            max_profit = self.calc_max_profit(output_print=print_level)
+            max_profit = self.calc_max_profit(print_level=print_level)
 
             if print_level > 0:
                 print(f"Number of parcels: {max_parcels}")
@@ -517,8 +518,8 @@ def compare_3_5(num_crowdshippers: int,
             
             print(f"--- Seed: {seed} ---")
             if of == "MAX_PROFIT":
-                of_3_5 = model_3_5.calc_max_profit(output_print=False)
-                of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
+                of_3_5 = model_3_5.calc_max_profit(print_level=0)
+                of_no_3_5 = model_no_3_5.calc_max_profit(print_level=0)
 
                 print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
 
@@ -550,8 +551,8 @@ def compare_3_5(num_crowdshippers: int,
             
             print(f"--- Seed: {seed} ---")
             if of == "MAX_PROFIT":
-                of_3_5 = model_3_5.calc_max_profit(output_print=False)
-                of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
+                of_3_5 = model_3_5.calc_max_profit(print_level=False)
+                of_no_3_5 = model_no_3_5.calc_max_profit(print_level=False)
 
                 print()
                 print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
@@ -586,8 +587,8 @@ def compare_3_5(num_crowdshippers: int,
         for model_3_5, model_no_3_5 in zip(models_3_5, models_no_3_5):
             print(f"--- Seed: {used_seeds[models_3_5.index(model_3_5)]} ---")
             if of == "MAX_PROFIT":
-                of_3_5 = model_3_5.calc_max_profit(output_print=False)
-                of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
+                of_3_5 = model_3_5.calc_max_profit(print_level=0)
+                of_no_3_5 = model_no_3_5.calc_max_profit(print_level=0)
 
                 print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
             
