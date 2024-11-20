@@ -247,8 +247,7 @@ class CrowdshippingModel(gp.Model):
 
         if output_print:
             print("\n")
-
-        print(f"Parcels: {parcels}")
+            print(f"Parcels: {parcels}")
 
         return max_profit
 
@@ -359,27 +358,42 @@ def test_seeds(num_crowdshippers: int,
                output: bool = False, 
                of: str = "MAX_PARCELS",
                number_of_seeds: int = 5,
-               use_3_5: bool = True):
+               use_3_5: bool = True,
+               seed: int = None,
+               used_seeds: list = None):
     """
     Test 10 different seeds of the given parameters and print the results.
     """
-    random.seed(42) # Make reproducible by setting with some seed if needed
-    used_seeds = []
-    
-    while len(used_seeds) < number_of_seeds:
-        seed = random.randint(0, 1e5)
+    models = []
 
-        while seed in used_seeds:
+    if used_seeds is None:
+        if seed is not None:
+            random.seed(seed) # Make reproducible by setting with some seed if needed
+
+        used_seeds = []
+    
+    while len(models) < number_of_seeds:
+        if len(used_seeds) <= len(models):
             seed = random.randint(0, 1e5)
 
-        try:
+            while seed in used_seeds:
+                seed = random.randint(0, 1e5)
+
+            try:
+                generator = InstanceGenerator(num_crowdshippers, 
+                                            num_parcels, 
+                                            entrainment_fee,
+                                            seed=seed)
+            # Seed is invalid
+            except ValueError:
+                continue
+
+        else:
+            seed = used_seeds[len(models)]
             generator = InstanceGenerator(num_crowdshippers, 
                                         num_parcels, 
                                         entrainment_fee,
                                         seed=seed)
-        # Seed is invalid
-        except ValueError:
-            continue
 
         params = Parameters(**generator.return_kwargs())
 
@@ -394,15 +408,16 @@ def test_seeds(num_crowdshippers: int,
 
         # PRINT
         model.check_results(long_print=long_print)
-        
+
         count = model.check_parcels(seed, long_print)
 
         print("Done with seed:", seed)
         print(f"Invalid parcels: {count}\n")
 
         used_seeds.append(seed)
+        models.append(model)
 
-    return used_seeds
+    return used_seeds, models
 
 
 def test_seed(num_crowdshippers: int, 
@@ -439,6 +454,8 @@ def test_seed(num_crowdshippers: int,
 
     print("Done with seed:", seed)
     print(f"Invalid parcels: {count}\n")
+
+    return model
     
 
 def check_minimalinstanz(path: str = "data/minimalinstanz.pkl"):
@@ -468,21 +485,125 @@ def check_minimalinstanz(path: str = "data/minimalinstanz.pkl"):
     print("Invalid parcels:", model.check_parcels(seed=None))
 
 
+def compare_3_5(num_crowdshippers: int, 
+               num_parcels: int, 
+               entrainment_fee: int, 
+               output: bool = False, 
+               of: str = "MAX_PARCELS",
+               seed: int = None,
+               number_of_seeds: int = 1):
+    if number_of_seeds == 1:
+        if seed is None:
+            seeds, model_3_5 = test_seeds(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                long_print=False,
+                                output=output,
+                                of=of,
+                                seed=seed,
+                                use_3_5=True,
+                                number_of_seeds=number_of_seeds)
+            
+            seed = seeds[0]
+            model_3_5 = model_3_5[0]
+            
+            model_no_3_5 = test_seed(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                long_print=False,
+                                output=output,
+                                of=of,
+                                seed=seed,
+                                use_3_5=False)
+            
+            of_3_5 = model_3_5.calc_max_profit(output_print=False)
+            of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
+
+            print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}")
+
+        else:
+            model_3_5 = test_seed(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                long_print=False,
+                                output=output,
+                                of=of,
+                                seed=seed,
+                                use_3_5=True)
+            
+            model_no_3_5 = test_seed(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                long_print=False,
+                                output=output,
+                                of=of,
+                                seed=seed,
+                                use_3_5=False)
+            
+            of_3_5 = model_3_5.calc_max_profit(output_print=False)
+            of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
+
+            print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}")
+    
+    else:
+        used_seeds, models_3_5 = test_seeds(num_crowdshippers, 
+                              num_parcels, 
+                              entrainment_fee,  
+                              long_print=False,
+                              output=output,
+                              of=of,
+                              number_of_seeds=number_of_seeds,
+                              use_3_5=True)
+        
+        _, models_no_3_5 = test_seeds(num_crowdshippers, 
+                              num_parcels, 
+                              entrainment_fee,  
+                              long_print=False,
+                              output=output,
+                              of=of,
+                              number_of_seeds=number_of_seeds,
+                              use_3_5=False,
+                              used_seeds=used_seeds)
+        
+        for model_3_5, model_no_3_5 in zip(models_3_5, models_no_3_5):
+            of_3_5 = model_3_5.calc_max_profit(output_print=False)
+            of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
+
+            print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}")
+
+
 if __name__ == "__main__":
     # check_minimalinstanz()
 
     num_crowdshippers = 150
     num_parcels = 50
-    entrainment_fee = 1
+    entrainment_fee = 5
     of = "MAX_PROFIT"
     use_3_5 = False
     long_print = False
-    seed = 61748
+    seed = None # 61748 # Seed to none for test_seeds if unproucable behaviour is needed
+    number_of_seeds = 5
 
-    test_seed(num_crowdshippers, 
-               num_parcels,
-               entrainment_fee,
-               long_print=long_print,
-               of=of,
-               seed=seed,
-               use_3_5=use_3_5)
+    # test_seed(num_crowdshippers, 
+    #            num_parcels,
+    #            entrainment_fee,
+    #            long_print=long_print,
+    #            of=of,
+    #            seed=seed,
+    #            use_3_5=use_3_5)
+    
+    # test_seeds(num_crowdshippers, 
+    #            num_parcels,
+    #            entrainment_fee,
+    #            long_print=long_print,
+    #            of=of,
+    #            number_of_seeds=number_of_seeds,
+    #            use_3_5=use_3_5,
+    #            seed=seed)
+
+    compare_3_5(num_crowdshippers, 
+                num_parcels, 
+                entrainment_fee,
+                of=of,
+                seed=seed,  
+                number_of_seeds=number_of_seeds)

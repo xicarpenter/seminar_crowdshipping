@@ -310,7 +310,8 @@ class InstanceGenerator:
         self.generate_graph()
 
         self.l = {s: random.randint(1, 4) for s in self.S}
-        self.p = {p: 5 for p in self.J} # {p: random.randint(1, 10) for p in self.J}
+        self.p = {p: random.randint(1, 10) for p in self.J} 
+        # self.p = {p: 0 for p in self.J} 
         self.f = entrainment_fee
 
         self.init_parcels()
