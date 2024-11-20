@@ -108,7 +108,7 @@ class CrowdshippingModel(gp.Model):
                                         if self._params.s_is_p[i, s] == next_station
                                         and (i, s, j) in self._X.keys()) <= 1
                             for next_station in self._params.S 
-                            for j in self._params.J), "Constraint_3.5")
+                            for j in self._params.J if j != "P43"), "Constraint_3.5")
 
         # 4 -> checked Problem here somewhere
         self.addConstrs((self._X[i, s, j] 
@@ -148,13 +148,6 @@ class CrowdshippingModel(gp.Model):
 
                                         for i in self._params.I for s in self._params.S_i[i]), "Constraint_6")
 
-        # i = "C28"
-        # s = "Friedenauer Strasse"
-        # j = "P42"
-
-        # print(self._params.S_i[i], self._params.t[i, s], self._params.r[j], self._params.d[j])
-
-
         # 7 and 8
         for (i, s, j) in indices_ISJ:
             if i in self._params.I_s_p[s] and (i, self._params.s_is_m[i, s], j) in self._X.keys():
@@ -179,7 +172,7 @@ class CrowdshippingModel(gp.Model):
                             for j in self._params.J), "Constraint_12")
         
         # Save model to lp file
-        self.write(f"output/model_{'3_5' if self._use_3_5 else 'no_3_5'}.lp")
+        # self.write(f"output/model_{'3_5' if self._use_3_5 else 'no_3_5'}.lp")
 
 
     @staticmethod
@@ -228,14 +221,14 @@ class CrowdshippingModel(gp.Model):
                         print_level: int = 0):
         max_profit = 0
 
-        if print_level > 1:
+        if print_level > 0:
             print("Using ", end="")
 
         parcels = []
         for j in self._params.J:
             for i in self._params.I_j_1[j]:
                 if (i, self._params.alpha[j], j) in self._X.keys() and self._X[i, self._params.alpha[j], j].x > 0:
-                    if print_level > 1:
+                    if print_level > 0:
                         print(f"X[{i, self._params.alpha[j], j}]", end=", ")
                     parcels.append(j)
                     max_profit += self._params.p[j] * self._X[i, self._params.alpha[j], j].x
@@ -243,7 +236,7 @@ class CrowdshippingModel(gp.Model):
         for i in self._params.I:
             for s in self._params.S_i_p[i]:
                 if self._Y[i, s].x > 0:
-                    if print_level > 1:
+                    if print_level > 0:
                         print(f"Y[{i, s}]", end=", ")
                     max_profit -= self._params.f * self._Y[i, s].x
 
@@ -550,8 +543,8 @@ def compare_3_5(num_crowdshippers: int,
                                 seed=seed,
                                 use_3_5=False)
             
-            with open(f"output/models_{seed}.pkl", "wb") as f:
-                pickle.dump(model_3_5._params, f)
+            # with open(f"output/models_{seed}.pkl", "wb") as f:
+            #     pickle.dump(model_3_5._params, f)
             
             print(f"--- Seed: {seed} ---")
             if of == "MAX_PROFIT":
@@ -613,7 +606,7 @@ if __name__ == "__main__":
     num_parcels = 50
     entrainment_fee = 1
     of = "MAX_PROFIT"
-    print_level = 0
+    print_level = 3
     seed = 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
     number_of_seeds = 1
 

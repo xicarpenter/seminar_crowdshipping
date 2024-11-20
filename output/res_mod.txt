@@ -5,8 +5,8 @@ Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (linux64 - "Ubuntu 22.04.5 LTS"
 CPU model: Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz, instruction set [SSE2|AVX|AVX2]
 Thread count: 4 physical cores, 8 logical processors, using up to 8 threads
 
-Optimize a model with 146595 rows, 63522 columns and 2596033 nonzeros
-Model fingerprint: 0x96f2fff1
+Optimize a model with 146399 rows, 63522 columns and 2593776 nonzeros
+Model fingerprint: 0x4c568ecd
 Variable types: 2745 continuous, 60777 integer (60777 binary)
 Coefficient statistics:
   Matrix range     [1e+00, 1e+00]
@@ -14,58 +14,54 @@ Coefficient statistics:
   Bounds range     [1e+00, 1e+00]
   RHS range        [1e+00, 4e+00]
 Found heuristic solution: objective -0.0000000
-Presolve removed 61908 rows and 22850 columns (presolve time = 5s) ...
-Presolve removed 93235 rows and 38202 columns (presolve time = 10s) ...
-Presolve removed 105298 rows and 43601 columns (presolve time = 15s) ...
-Presolve removed 110992 rows and 46230 columns (presolve time = 20s) ...
-Presolve removed 140668 rows and 60333 columns
-Presolve time: 21.73s
-Presolved: 5927 rows, 3189 columns, 67089 nonzeros
-Variable types: 0 continuous, 3189 integer (3189 binary)
+Presolve removed 64929 rows and 24539 columns (presolve time = 5s) ...
+Presolve removed 99899 rows and 41190 columns (presolve time = 10s) ...
+Presolve removed 110022 rows and 45852 columns (presolve time = 15s) ...
+Presolve removed 138642 rows and 59456 columns
+Presolve time: 17.84s
+Presolved: 7757 rows, 4066 columns, 93338 nonzeros
+Variable types: 0 continuous, 4066 integer (4066 binary)
 Found heuristic solution: objective 7.0000000
 
 Root simplex log...
 
 Iteration    Objective       Primal Inf.    Dual Inf.      Time
-       0    1.5800000e+02   2.440000e+02   0.000000e+00     22s
-    1078    6.5666667e+01   0.000000e+00   0.000000e+00     22s
+       0    1.5800000e+02   2.930000e+02   0.000000e+00     18s
+    1201    6.6235616e+01   0.000000e+00   0.000000e+00     18s
 
-Root relaxation: objective 6.566667e+01, 1078 iterations, 0.03 seconds (0.03 work units)
-Total elapsed time = 22.16s (DegenMoves)
+Root relaxation: objective 6.623562e+01, 1201 iterations, 0.03 seconds (0.03 work units)
+Total elapsed time = 18.49s (DegenMoves)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0   65.66667    0   71    7.00000   65.66667   838%     -   22s
-H    0     0                      58.0000000   65.66667  13.2%     -   22s
-H    0     0                      63.0000000   65.66667  4.23%     -   22s
+     0     0   66.23562    0  172    7.00000   66.23562   846%     -   18s
+H    0     0                      58.0000000   66.23562  14.2%     -   18s
+H    0     0                      61.0000000   66.23562  8.58%     -   18s
+H    0     0                      64.0000000   66.23562  3.49%     -   18s
+H    0     0                      65.0000000   66.23562  1.90%     -   18s
 
 Cutting planes:
-  Gomory: 7
-  Implied bound: 13
-  MIR: 4
-  Zero half: 11
-  RLT: 14
   BQP: 1
 
-Explored 1 nodes (2045 simplex iterations) in 22.59 seconds (18.13 work units)
+Explored 1 nodes (2377 simplex iterations) in 18.82 seconds (18.65 work units)
 Thread count was 8 (of 8 available processors)
 
-Solution count 5: 63 58 7 ... -0
+Solution count 7: 65 64 61 ... -0
 
 Optimal solution found (tolerance 1.00e-04)
-Best objective 6.300000000000e+01, best bound 6.300000000000e+01, gap 0.0000%
+Best objective 6.500000000000e+01, best bound 6.500000000000e+01, gap 0.0000%
 
 Found an optimal solution:
-Using X[('C110', 'Rethen, Pattenser Strasse', 'P3')], X[('C132', 'Nieschlagstrasse', 'P4')], X[('C112', 'Schlaegerstrasse', 'P6')], X[('C138', 'Oldenburger Allee', 'P9')], X[('C17', 'Bahnhof Leinhausen', 'P12')], X[('C2', 'August-Madsack-Strasse', 'P20')], X[('C37', 'Appelstrasse', 'P22')], X[('C115', 'Nieschlagstrasse', 'P25')], X[('C26', 'Friedenauer Strasse', 'P26')], X[('C119', 'Misburger Strasse', 'P27')], X[('C129', 'Kinderkrankenhs. auf der Bult', 'P30')], X[('C8', 'Emslandstrasse', 'P31')], X[('C34', 'Reiterstadion', 'P32')], X[('C57', 'Sarstedt, Am Boksberg', 'P36')], X[('C77', 'Laatzen, Eichstrasse', 'P40')], X[('C131', 'Laatzen, Eichstrasse', 'P42')], X[('C39', 'Werderstrasse', 'P45')], X[('C147', 'Saarbrueckener Strasse', 'P46')], X[('C143', 'Windausstrasse', 'P49')], Y[('C2', 'August-Madsack-Strasse')], Y[('C8', 'Emslandstrasse')], Y[('C8', 'Kroepcke')], Y[('C17', 'Bahnhof Leinhausen')], Y[('C23', 'Kroepcke')], Y[('C26', 'Friedenauer Strasse')], Y[('C34', 'Reiterstadion')], Y[('C37', 'Appelstrasse')], Y[('C39', 'Werderstrasse')], Y[('C40', 'Schwarzer Baer')], Y[('C57', 'Sarstedt, Am Boksberg')], Y[('C63', 'Aegidientorplatz')], Y[('C64', 'Kroepcke')], Y[('C67', 'Kroepcke')], Y[('C71', 'Bothmerstrasse')], Y[('C74', 'Steintor')], Y[('C77', 'Laatzen, Eichstrasse')], Y[('C98', 'Sedanstrasse, Lister Meile')], Y[('C110', 'Rethen, Pattenser Strasse')], Y[('C112', 'Schlaegerstrasse')], Y[('C115', 'Nieschlagstrasse')], Y[('C116', 'Aegidientorplatz')], Y[('C119', 'Misburger Strasse')], Y[('C120', 'Aegidientorplatz')], Y[('C126', 'Kroepcke')], Y[('C129', 'Kinderkrankenhs. auf der Bult')], Y[('C131', 'Laatzen, Eichstrasse')], Y[('C132', 'Nieschlagstrasse')], Y[('C136', 'Lindener Marktplatz')], Y[('C138', 'Oldenburger Allee')], Y[('C143', 'Windausstrasse')], Y[('C147', 'Saarbrueckener Strasse')], Parcels: ['P3', 'P4', 'P6', 'P9', 'P12', 'P20', 'P22', 'P25', 'P26', 'P27', 'P30', 'P31', 'P32', 'P36', 'P40', 'P42', 'P45', 'P46', 'P49']
-Number of parcels: 19.0
-Profit: 63.0
+Using X[('C110', 'Rethen, Pattenser Strasse', 'P3')], X[('C132', 'Nieschlagstrasse', 'P4')], X[('C112', 'Schlaegerstrasse', 'P6')], X[('C138', 'Oldenburger Allee', 'P9')], X[('C17', 'Bahnhof Leinhausen', 'P12')], X[('C29', 'August-Madsack-Strasse', 'P20')], X[('C37', 'Appelstrasse', 'P22')], X[('C136', 'Nieschlagstrasse', 'P25')], X[('C26', 'Friedenauer Strasse', 'P26')], X[('C119', 'Misburger Strasse', 'P27')], X[('C129', 'Kinderkrankenhs. auf der Bult', 'P30')], X[('C8', 'Emslandstrasse', 'P31')], X[('C34', 'Reiterstadion', 'P32')], X[('C57', 'Sarstedt, Am Boksberg', 'P36')], X[('C77', 'Laatzen, Eichstrasse', 'P40')], X[('C131', 'Laatzen, Eichstrasse', 'P42')], X[('C134', 'Bleekstrasse', 'P43')], X[('C150', 'Werderstrasse', 'P45')], X[('C147', 'Saarbrueckener Strasse', 'P46')], X[('C143', 'Windausstrasse', 'P49')], Y[('C3', 'Hauptbahnhof')], Y[('C8', 'Emslandstrasse')], Y[('C8', 'Kroepcke')], Y[('C17', 'Bahnhof Leinhausen')], Y[('C26', 'Friedenauer Strasse')], Y[('C29', 'August-Madsack-Strasse')], Y[('C34', 'Reiterstadion')], Y[('C37', 'Appelstrasse')], Y[('C40', 'Schwarzer Baer')], Y[('C57', 'Sarstedt, Am Boksberg')], Y[('C63', 'Kroepcke')], Y[('C64', 'Hauptbahnhof')], Y[('C67', 'Kroepcke')], Y[('C71', 'Bothmerstrasse')], Y[('C74', 'Steintor')], Y[('C77', 'Laatzen, Eichstrasse')], Y[('C98', 'Sedanstrasse, Lister Meile')], Y[('C110', 'Rethen, Pattenser Strasse')], Y[('C112', 'Schlaegerstrasse')], Y[('C116', 'Aegidientorplatz')], Y[('C119', 'Misburger Strasse')], Y[('C120', 'Aegidientorplatz')], Y[('C126', 'Aegidientorplatz')], Y[('C129', 'Kinderkrankenhs. auf der Bult')], Y[('C131', 'Laatzen, Eichstrasse')], Y[('C132', 'Nieschlagstrasse')], Y[('C134', 'Bleekstrasse')], Y[('C136', 'Nieschlagstrasse')], Y[('C136', 'Schwarzer Baer')], Y[('C138', 'Altwarmb., Ernst-Grote-Strasse')], Y[('C138', 'Oldenburger Allee')], Y[('C143', 'Windausstrasse')], Y[('C145', 'Kroepcke')], Y[('C147', 'Saarbrueckener Strasse')], Y[('C150', 'Werderstrasse')], Parcels: ['P3', 'P4', 'P6', 'P9', 'P12', 'P20', 'P22', 'P25', 'P26', 'P27', 'P30', 'P31', 'P32', 'P36', 'P40', 'P42', 'P43', 'P45', 'P46', 'P49']
+Number of parcels: 20.0
+Profit: 65.0
 
 --- Parcel P3 ---
 Origin station: Rethen, Pattenser Strasse @88min
 Target station: Altwarmb., Ernst-Grote-Strasse @155min
 
-{('Rethen, Pattenser Strasse', 'Laatzen, Rethener Winkel'): ['C110', 93, 97], ('Laatzen, Rethener Winkel', 'Laatzen'): ['C110', 97, 98], ('Laatzen', 'Laatzen, Park der Sinne'): ['C110', 98, 99], ('Laatzen, Park der Sinne', 'Laatzen, Eichstrasse'): ['C110', 99, 101], ('Laatzen, Eichstrasse', 'Laatzen, Birkenstrasse'): ['C110', 101, 103], ('Laatzen, Birkenstrasse', 'Am Brabrinke'): ['C110', 103, 105], ('Am Brabrinke', 'Wiehbergstrasse'): ['C110', 105, 106], ('Wiehbergstrasse', 'Bothmerstrasse'): ['C110', 106, 108], ('Bothmerstrasse', 'Peiner Strasse'): ['C110', 108, 109], ('Peiner Strasse', 'Fiedelerstrasse'): ['C110', 109, 111], ('Fiedelerstrasse', 'Doehrener Turm'): ['C110', 111, 112], ('Doehrener Turm', 'Altenbekener Damm'): ['C110', 112, 113], ('Altenbekener Damm', 'Geibelstrasse'): ['C110', 113, 115], ('Geibelstrasse', 'Schlaegerstrasse'): ['C110', 115, 116], ('Schlaegerstrasse', 'Aegidientorplatz'): ['C110', 116, 119], ('Aegidientorplatz', 'Kroepcke'): ['C63', 122, 123], ('Kroepcke', 'Hauptbahnhof'): ['C63', 123, 125], ('Hauptbahnhof', 'Sedanstrasse, Lister Meile'): ['C63', 125, 127], ('Sedanstrasse, Lister Meile', 'Lister Platz'): ['C63', 127, 128], ('Lister Platz', 'Lortzingstrasse'): ['C63', 128, 129], ('Lortzingstrasse', 'Vier Grenzen'): ['C63', 129, 130], ('Vier Grenzen', 'Pelikanstrasse'): ['C63', 130, 131], ('Pelikanstrasse', 'Spannhagengarten'): ['C63', 131, 132], ('Spannhagengarten', 'Klingerstrasse'): ['C63', 132, 133], ('Klingerstrasse', 'Noltemeyerbruecke'): ['C63', 133, 134], ('Noltemeyerbruecke', 'In den Sieben Stuecken'): ['C63', 134, 135], ('In den Sieben Stuecken', 'Paracelsusweg'): ['C63', 135, 136], ('Paracelsusweg', 'Stadtfriedhof Lahe'): ['C63', 136, 138], ('Stadtfriedhof Lahe', 'Oldenburger Allee'): ['C63', 138, 139], ('Oldenburger Allee', 'Altwarmb., Opelstrasse'): ['C63', 139, 142], ('Altwarmb., Opelstrasse', 'Altwarmb., Ernst-Grote-Strasse'): ['C63', 142, 144]} 
+{('Rethen, Pattenser Strasse', 'Laatzen, Rethener Winkel'): ['C110', 93, 97], ('Laatzen, Rethener Winkel', 'Laatzen'): ['C110', 97, 98], ('Laatzen', 'Laatzen, Park der Sinne'): ['C110', 98, 99], ('Laatzen, Park der Sinne', 'Laatzen, Eichstrasse'): ['C110', 99, 101], ('Laatzen, Eichstrasse', 'Laatzen, Birkenstrasse'): ['C110', 101, 103], ('Laatzen, Birkenstrasse', 'Am Brabrinke'): ['C110', 103, 105], ('Am Brabrinke', 'Wiehbergstrasse'): ['C110', 105, 106], ('Wiehbergstrasse', 'Bothmerstrasse'): ['C110', 106, 108], ('Bothmerstrasse', 'Peiner Strasse'): ['C110', 108, 109], ('Peiner Strasse', 'Fiedelerstrasse'): ['C110', 109, 111], ('Fiedelerstrasse', 'Doehrener Turm'): ['C110', 111, 112], ('Doehrener Turm', 'Altenbekener Damm'): ['C110', 112, 113], ('Altenbekener Damm', 'Geibelstrasse'): ['C110', 113, 115], ('Geibelstrasse', 'Schlaegerstrasse'): ['C110', 115, 116], ('Schlaegerstrasse', 'Aegidientorplatz'): ['C110', 116, 119], ('Aegidientorplatz', 'Kroepcke'): ['C110', 119, 120], ('Kroepcke', 'Hauptbahnhof'): ['C63', 123, 125], ('Hauptbahnhof', 'Sedanstrasse, Lister Meile'): ['C63', 125, 127], ('Sedanstrasse, Lister Meile', 'Lister Platz'): ['C63', 127, 128], ('Lister Platz', 'Lortzingstrasse'): ['C63', 128, 129], ('Lortzingstrasse', 'Vier Grenzen'): ['C63', 129, 130], ('Vier Grenzen', 'Pelikanstrasse'): ['C63', 130, 131], ('Pelikanstrasse', 'Spannhagengarten'): ['C63', 131, 132], ('Spannhagengarten', 'Klingerstrasse'): ['C63', 132, 133], ('Klingerstrasse', 'Noltemeyerbruecke'): ['C63', 133, 134], ('Noltemeyerbruecke', 'In den Sieben Stuecken'): ['C63', 134, 135], ('In den Sieben Stuecken', 'Paracelsusweg'): ['C63', 135, 136], ('Paracelsusweg', 'Stadtfriedhof Lahe'): ['C63', 136, 138], ('Stadtfriedhof Lahe', 'Oldenburger Allee'): ['C63', 138, 139], ('Oldenburger Allee', 'Altwarmb., Opelstrasse'): ['C63', 139, 142], ('Altwarmb., Opelstrasse', 'Altwarmb., Ernst-Grote-Strasse'): ['C63', 142, 144]} 
 
 Valid!
 
@@ -73,7 +69,7 @@ Valid!
 Origin station: Nieschlagstrasse @77min
 Target station: Braunschweiger Platz @159min
 
-{('Nieschlagstrasse', 'Lindener Marktplatz'): ['C132', 84, 87], ('Lindener Marktplatz', 'Schwarzer Baer'): ['C136', 122, 124], ('Schwarzer Baer', 'Waterloo'): ['C136', 124, 125], ('Waterloo', 'Markthalle, Landtag'): ['C136', 125, 126], ('Markthalle, Landtag', 'Kroepcke'): ['C136', 126, 127], ('Kroepcke', 'Aegidientorplatz'): ['C23', 128, 129], ('Aegidientorplatz', 'Marienstrasse'): ['C23', 129, 131], ('Marienstrasse', 'Braunschweiger Platz'): ['C23', 131, 132]} 
+{('Nieschlagstrasse', 'Lindener Marktplatz'): ['C132', 84, 87], ('Lindener Marktplatz', 'Schwarzer Baer'): ['C132', 87, 89], ('Schwarzer Baer', 'Waterloo'): ['C136', 124, 125], ('Waterloo', 'Markthalle, Landtag'): ['C136', 125, 126], ('Markthalle, Landtag', 'Kroepcke'): ['C136', 126, 127], ('Kroepcke', 'Aegidientorplatz'): ['C145', 144, 145], ('Aegidientorplatz', 'Marienstrasse'): ['C145', 145, 147], ('Marienstrasse', 'Braunschweiger Platz'): ['C145', 147, 148]} 
 
 Valid!
 
@@ -105,7 +101,7 @@ Valid!
 Origin station: August-Madsack-Strasse @70min
 Target station: Bernhard-Caspar-Strasse @131min
 
-{('August-Madsack-Strasse', 'Buenteweg, Ti.Hochschule'): ['C2', 104, 105], ('Buenteweg, Ti.Hochschule', 'Zuschlagstrasse'): ['C2', 105, 106], ('Zuschlagstrasse', 'Kinderkrankenhs. auf der Bult'): ['C2', 106, 107], ('Kinderkrankenhs. auf der Bult', 'Kerstingstrasse'): ['C2', 107, 108], ('Kerstingstrasse', 'Braunschweiger Platz'): ['C2', 108, 110], ('Braunschweiger Platz', 'Marienstrasse'): ['C2', 110, 111], ('Marienstrasse', 'Aegidientorplatz'): ['C2', 111, 113], ('Aegidientorplatz', 'Kroepcke'): ['C2', 113, 114], ('Kroepcke', 'Markthalle, Landtag'): ['C126', 120, 121], ('Markthalle, Landtag', 'Waterloo'): ['C126', 121, 122], ('Waterloo', 'Schwarzer Baer'): ['C126', 122, 123], ('Schwarzer Baer', 'Lindener Marktplatz'): ['C126', 123, 125], ('Lindener Marktplatz', 'Nieschlagstrasse'): ['C126', 125, 128], ('Nieschlagstrasse', 'Bernhard-Caspar-Strasse'): ['C126', 128, 129]} 
+{('August-Madsack-Strasse', 'Buenteweg, Ti.Hochschule'): ['C29', 93, 94], ('Buenteweg, Ti.Hochschule', 'Zuschlagstrasse'): ['C29', 94, 95], ('Zuschlagstrasse', 'Kinderkrankenhs. auf der Bult'): ['C29', 95, 96], ('Kinderkrankenhs. auf der Bult', 'Kerstingstrasse'): ['C29', 96, 97], ('Kerstingstrasse', 'Braunschweiger Platz'): ['C29', 97, 99], ('Braunschweiger Platz', 'Marienstrasse'): ['C29', 99, 100], ('Marienstrasse', 'Aegidientorplatz'): ['C29', 100, 102], ('Aegidientorplatz', 'Kroepcke'): ['C126', 119, 120], ('Kroepcke', 'Markthalle, Landtag'): ['C126', 120, 121], ('Markthalle, Landtag', 'Waterloo'): ['C126', 121, 122], ('Waterloo', 'Schwarzer Baer'): ['C126', 122, 123], ('Schwarzer Baer', 'Lindener Marktplatz'): ['C126', 123, 125], ('Lindener Marktplatz', 'Nieschlagstrasse'): ['C126', 125, 128], ('Nieschlagstrasse', 'Bernhard-Caspar-Strasse'): ['C126', 128, 129]} 
 
 Valid!
 
@@ -121,7 +117,7 @@ Valid!
 Origin station: Nieschlagstrasse @86min
 Target station: Wunstorfer Strasse @178min
 
-{('Nieschlagstrasse', 'Lindener Marktplatz'): ['C115', 124, 127], ('Lindener Marktplatz', 'Schwarzer Baer'): ['C115', 127, 129], ('Schwarzer Baer', 'Humboldtstrasse'): ['C40', 153, 154], ('Humboldtstrasse', 'Goetheplatz'): ['C40', 154, 155], ('Goetheplatz', 'Glocksee'): ['C40', 155, 157], ('Glocksee', 'Am Kuechengarten'): ['C40', 157, 159], ('Am Kuechengarten', 'Leinaustrasse'): ['C40', 159, 160], ('Leinaustrasse', 'Freizeitheim Linden'): ['C40', 160, 161], ('Freizeitheim Linden', 'Wunstorfer Strasse'): ['C40', 161, 164]} 
+{('Nieschlagstrasse', 'Lindener Marktplatz'): ['C136', 119, 122], ('Lindener Marktplatz', 'Schwarzer Baer'): ['C136', 122, 124], ('Schwarzer Baer', 'Humboldtstrasse'): ['C40', 153, 154], ('Humboldtstrasse', 'Goetheplatz'): ['C40', 154, 155], ('Goetheplatz', 'Glocksee'): ['C40', 155, 157], ('Glocksee', 'Am Kuechengarten'): ['C40', 157, 159], ('Am Kuechengarten', 'Leinaustrasse'): ['C40', 159, 160], ('Leinaustrasse', 'Freizeitheim Linden'): ['C40', 160, 161], ('Freizeitheim Linden', 'Wunstorfer Strasse'): ['C40', 161, 164]} 
 
 Valid!
 
@@ -189,11 +185,19 @@ Target station: Stadtfriedhof Seelhorst @152min
 
 Valid!
 
+--- Parcel P43 ---
+Origin station: Bleekstrasse @29min
+Target station: Altwarmb., Ernst-Grote-Strasse @149min
+
+{('Bleekstrasse', 'Annastift'): ['C134', 36, 38], ('Annastift', 'Nackenberg'): ['C134', 38, 39], ('Nackenberg', 'Uhlhornstrasse'): ['C134', 39, 40], ('Uhlhornstrasse', 'Kantplatz'): ['C134', 40, 43], ('Kantplatz', 'Clausewitzstrasse'): ['C134', 43, 44], ('Clausewitzstrasse', 'Braunschweiger Platz'): ['C134', 44, 45], ('Braunschweiger Platz', 'Marienstrasse'): ['C134', 45, 46], ('Marienstrasse', 'Aegidientorplatz'): ['C134', 46, 48], ('Aegidientorplatz', 'Kroepcke'): ['C134', 48, 49], ('Kroepcke', 'Hauptbahnhof'): ['C134', 49, 51], ('Altwarmb., Ernst-Grote-Strasse', 'Altwarmb., Opelstrasse'): ['C138', 70, 72], ('Hauptbahnhof', 'Sedanstrasse, Lister Meile'): ['C3', 87, 89], ('Sedanstrasse, Lister Meile', 'Lister Platz'): ['C3', 89, 90], ('Lister Platz', 'Lortzingstrasse'): ['C3', 90, 91], ('Lortzingstrasse', 'Vier Grenzen'): ['C3', 91, 92], ('Vier Grenzen', 'Pelikanstrasse'): ['C3', 92, 93], ('Pelikanstrasse', 'Spannhagengarten'): ['C3', 93, 94], ('Spannhagengarten', 'Klingerstrasse'): ['C3', 94, 95], ('Klingerstrasse', 'Noltemeyerbruecke'): ['C3', 95, 96], ('Noltemeyerbruecke', 'In den Sieben Stuecken'): ['C3', 96, 97], ('In den Sieben Stuecken', 'Paracelsusweg'): ['C3', 97, 98], ('Paracelsusweg', 'Stadtfriedhof Lahe'): ['C3', 98, 100], ('Stadtfriedhof Lahe', 'Oldenburger Allee'): ['C3', 100, 101], ('Oldenburger Allee', 'Altwarmb., Opelstrasse'): ['C3', 101, 104], ('Altwarmb., Opelstrasse', 'Altwarmb., Ernst-Grote-Strasse'): ['C3', 104, 106]} 
+
+Invalid!
+
 --- Parcel P45 ---
 Origin station: Werderstrasse @57min
 Target station: Stoeckener Markt @168min
 
-{('Werderstrasse', 'Hauptbahnhof'): ['C39', 108, 112], ('Hauptbahnhof', 'Kroepcke'): ['C39', 112, 114], ('Kroepcke', 'Steintor'): ['C8', 122, 126], ('Steintor', 'Koenigsworther Platz'): ['C8', 126, 127], ('Koenigsworther Platz', 'Leibniz Universitaet'): ['C8', 127, 128], ('Leibniz Universitaet', 'Schneiderbg., W.-Busch-Mus.'): ['C8', 128, 130], ('Schneiderbg., W.-Busch-Mus.', 'Appelstrasse'): ['C8', 130, 131], ('Appelstrasse', 'Herrenhaeuser Gaerten'): ['C8', 131, 133], ('Herrenhaeuser Gaerten', 'Schaumburgstrasse'): ['C8', 133, 134], ('Schaumburgstrasse', 'Herrenhaeuser Markt'): ['C8', 134, 135], ('Herrenhaeuser Markt', 'Bahnhof Leinhausen'): ['C8', 135, 136], ('Bahnhof Leinhausen', 'Stadtfriedhof Stoecken'): ['C8', 136, 138], ('Stadtfriedhof Stoecken', 'Freudenthalstrasse'): ['C8', 138, 139], ('Freudenthalstrasse', 'Stoeckener Markt'): ['C8', 139, 142]} 
+{('Werderstrasse', 'Hauptbahnhof'): ['C150', 89, 93], ('Hauptbahnhof', 'Kroepcke'): ['C150', 93, 95], ('Kroepcke', 'Steintor'): ['C8', 122, 126], ('Steintor', 'Koenigsworther Platz'): ['C8', 126, 127], ('Koenigsworther Platz', 'Leibniz Universitaet'): ['C8', 127, 128], ('Leibniz Universitaet', 'Schneiderbg., W.-Busch-Mus.'): ['C8', 128, 130], ('Schneiderbg., W.-Busch-Mus.', 'Appelstrasse'): ['C8', 130, 131], ('Appelstrasse', 'Herrenhaeuser Gaerten'): ['C8', 131, 133], ('Herrenhaeuser Gaerten', 'Schaumburgstrasse'): ['C8', 133, 134], ('Schaumburgstrasse', 'Herrenhaeuser Markt'): ['C8', 134, 135], ('Herrenhaeuser Markt', 'Bahnhof Leinhausen'): ['C8', 135, 136], ('Bahnhof Leinhausen', 'Stadtfriedhof Stoecken'): ['C8', 136, 138], ('Stadtfriedhof Stoecken', 'Freudenthalstrasse'): ['C8', 138, 139], ('Freudenthalstrasse', 'Stoeckener Markt'): ['C8', 139, 142]} 
 
 Valid!
 
@@ -209,12 +213,12 @@ Valid!
 Origin station: Windausstrasse @92min
 Target station: Ahlem @142min
 
-{('Windausstrasse', 'Buettnerstrasse'): ['C143', 98, 99], ('Buettnerstrasse', 'Niedersachsenring'): ['C143', 99, 101], ('Niedersachsenring', 'Dragonerstrasse'): ['C143', 101, 102], ('Dragonerstrasse', 'Vahrenwalder Platz'): ['C143', 102, 103], ('Vahrenwalder Platz', 'Werderstrasse'): ['C143', 103, 104], ('Werderstrasse', 'Hauptbahnhof'): ['C143', 104, 108], ('Hauptbahnhof', 'Kroepcke'): ['C143', 108, 110], ('Kroepcke', 'Steintor'): ['C64', 119, 123], ('Steintor', 'Goetheplatz'): ['C64', 123, 124], ('Goetheplatz', 'Glocksee'): ['C64', 124, 126], ('Glocksee', 'Am Kuechengarten'): ['C64', 126, 128], ('Am Kuechengarten', 'Leinaustrasse'): ['C64', 128, 129], ('Leinaustrasse', 'Freizeitheim Linden'): ['C64', 129, 130], ('Freizeitheim Linden', 'Wunstorfer Strasse'): ['C64', 130, 133], ('Wunstorfer Strasse', 'Harenberger Strasse'): ['C64', 133, 135], ('Harenberger Strasse', 'Brunnenstrasse'): ['C64', 135, 137], ('Brunnenstrasse', 'Ehrhartstrasse'): ['C64', 137, 140], ('Ehrhartstrasse', 'Ahlem'): ['C64', 140, 142]} 
+{('Windausstrasse', 'Buettnerstrasse'): ['C143', 98, 99], ('Buettnerstrasse', 'Niedersachsenring'): ['C143', 99, 101], ('Niedersachsenring', 'Dragonerstrasse'): ['C143', 101, 102], ('Dragonerstrasse', 'Vahrenwalder Platz'): ['C143', 102, 103], ('Vahrenwalder Platz', 'Werderstrasse'): ['C143', 103, 104], ('Werderstrasse', 'Hauptbahnhof'): ['C143', 104, 108], ('Hauptbahnhof', 'Kroepcke'): ['C64', 117, 119], ('Kroepcke', 'Steintor'): ['C64', 119, 123], ('Steintor', 'Goetheplatz'): ['C64', 123, 124], ('Goetheplatz', 'Glocksee'): ['C64', 124, 126], ('Glocksee', 'Am Kuechengarten'): ['C64', 126, 128], ('Am Kuechengarten', 'Leinaustrasse'): ['C64', 128, 129], ('Leinaustrasse', 'Freizeitheim Linden'): ['C64', 129, 130], ('Freizeitheim Linden', 'Wunstorfer Strasse'): ['C64', 130, 133], ('Wunstorfer Strasse', 'Harenberger Strasse'): ['C64', 133, 135], ('Harenberger Strasse', 'Brunnenstrasse'): ['C64', 135, 137], ('Brunnenstrasse', 'Ehrhartstrasse'): ['C64', 137, 140], ('Ehrhartstrasse', 'Ahlem'): ['C64', 140, 142]} 
 
 Valid!
 
 Done with seed: 10751
-Invalid parcels: 0
+Invalid parcels: 1
 
 Gurobi Optimizer version 11.0.0 build v11.0.0rc2 (linux64 - "Ubuntu 22.04.5 LTS")
 
@@ -230,11 +234,11 @@ Coefficient statistics:
   Bounds range     [1e+00, 1e+00]
   RHS range        [1e+00, 4e+00]
 Found heuristic solution: objective -0.0000000
-Presolve removed 54841 rows and 23606 columns (presolve time = 5s) ...
-Presolve removed 90028 rows and 40242 columns (presolve time = 10s) ...
-Presolve removed 100693 rows and 45583 columns (presolve time = 15s) ...
+Presolve removed 62316 rows and 27278 columns (presolve time = 5s) ...
+Presolve removed 92934 rows and 41714 columns (presolve time = 10s) ...
+Presolve removed 101932 rows and 46115 columns (presolve time = 15s) ...
 Presolve removed 119444 rows and 54572 columns
-Presolve time: 19.42s
+Presolve time: 17.62s
 Presolved: 17351 rows, 8950 columns, 237476 nonzeros
 Variable types: 0 continuous, 8950 integer (8950 binary)
 Found heuristic solution: objective 7.0000000
@@ -242,27 +246,27 @@ Found heuristic solution: objective 7.0000000
 Root simplex log...
 
 Iteration    Objective       Primal Inf.    Dual Inf.      Time
-       0    1.7200000e+02   3.180000e+02   0.000000e+00     21s
-    2130    6.8960603e+01   0.000000e+00   0.000000e+00     21s
+       0    1.7200000e+02   3.180000e+02   0.000000e+00     19s
+    2130    6.8960603e+01   0.000000e+00   0.000000e+00     19s
 
-Root relaxation: objective 6.896060e+01, 2130 iterations, 0.09 seconds (0.10 work units)
-Total elapsed time = 21.23s (DegenMoves)
+Root relaxation: objective 6.896060e+01, 2130 iterations, 0.08 seconds (0.10 work units)
+Total elapsed time = 19.28s (DegenMoves)
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0   68.96060    0  577    7.00000   68.96060   885%     -   21s
-H    0     0                      56.0000000   68.96060  23.1%     -   21s
-H    0     0                      65.0000000   68.96060  6.09%     -   22s
-     0     0   66.41580    0  177   65.00000   66.41580  2.18%     -   22s
-     0     0   66.39780    0  394   65.00000   66.39780  2.15%     -   22s
-     0     0   66.38357    0  186   65.00000   66.38357  2.13%     -   22s
-     0     0   66.38357    0  159   65.00000   66.38357  2.13%     -   22s
-     0     0   66.38357    0  181   65.00000   66.38357  2.13%     -   22s
-     0     0   66.38296    0  199   65.00000   66.38296  2.13%     -   22s
-     0     0   66.38284    0  186   65.00000   66.38284  2.13%     -   22s
-H    0     0                      66.0000000   66.38284  0.58%     -   22s
-     0     0   66.38284    0  186   66.00000   66.38284  0.58%     -   22s
+     0     0   68.96060    0  577    7.00000   68.96060   885%     -   19s
+H    0     0                      56.0000000   68.96060  23.1%     -   19s
+H    0     0                      65.0000000   68.96060  6.09%     -   20s
+     0     0   66.41580    0  177   65.00000   66.41580  2.18%     -   20s
+     0     0   66.39780    0  394   65.00000   66.39780  2.15%     -   20s
+     0     0   66.38357    0  186   65.00000   66.38357  2.13%     -   20s
+     0     0   66.38357    0  159   65.00000   66.38357  2.13%     -   20s
+     0     0   66.38357    0  181   65.00000   66.38357  2.13%     -   20s
+     0     0   66.38296    0  199   65.00000   66.38296  2.13%     -   20s
+     0     0   66.38284    0  186   65.00000   66.38284  2.13%     -   20s
+H    0     0                      66.0000000   66.38284  0.58%     -   20s
+     0     0   66.38284    0  186   66.00000   66.38284  0.58%     -   20s
 
 Cutting planes:
   Gomory: 4
@@ -273,7 +277,7 @@ Cutting planes:
   RLT: 63
   BQP: 82
 
-Explored 1 nodes (4719 simplex iterations) in 22.50 seconds (20.43 work units)
+Explored 1 nodes (4719 simplex iterations) in 20.40 seconds (20.43 work units)
 Thread count was 8 (of 8 available processors)
 
 Solution count 6: 66 65 56 ... -0
@@ -418,30 +422,7 @@ Valid!
 Origin station: Bleekstrasse @29min
 Target station: Altwarmb., Ernst-Grote-Strasse @149min
 
-{('Bleekstrasse', 'Annastift'): ['C134', 36, 38], 
- ('Annastift', 'Nackenberg'): ['C134', 38, 39], 
- ('Nackenberg', 'Uhlhornstrasse'): ['C134', 39, 40], 
- ('Uhlhornstrasse', 'Kantplatz'): ['C134', 40, 43], 
- ('Kantplatz', 'Clausewitzstrasse'): ['C134', 43, 44], 
- ('Clausewitzstrasse', 'Braunschweiger Platz'): ['C134', 44, 45], 
- ('Braunschweiger Platz', 'Marienstrasse'): ['C134', 45, 46], 
- ('Marienstrasse', 'Aegidientorplatz'): ['C134', 46, 48], 
- ('Aegidientorplatz', 'Kroepcke'): ['C134', 48, 49], 
- ('Kroepcke', 'Hauptbahnhof'): ['C134', 49, 51], 
- ('Hauptbahnhof', 'Sedanstrasse, Lister Meile'): ['C3', 87, 89], 
- ('Sedanstrasse, Lister Meile', 'Lister Platz'): ['C3', 89, 90], 
- ('Lister Platz', 'Lortzingstrasse'): ['C3', 90, 91], 
- ('Lortzingstrasse', 'Vier Grenzen'): ['C3', 91, 92], 
- ('Vier Grenzen', 'Pelikanstrasse'): ['C3', 92, 93], 
- ('Pelikanstrasse', 'Spannhagengarten'): ['C3', 93, 94], 
- ('Spannhagengarten', 'Klingerstrasse'): ['C3', 94, 95], 
- ('Klingerstrasse', 'Noltemeyerbruecke'): ['C3', 95, 96],
- ('Noltemeyerbruecke', 'In den Sieben Stuecken'): ['C3', 96, 97], 
- ('In den Sieben Stuecken', 'Paracelsusweg'): ['C3', 97, 98], 
- ('Paracelsusweg', 'Stadtfriedhof Lahe'): ['C3', 98, 100], 
- ('Stadtfriedhof Lahe', 'Oldenburger Allee'): ['C3', 100, 101], 
- ('Oldenburger Allee', 'Altwarmb., Opelstrasse'): ['C3', 101, 104], 
- ('Altwarmb., Opelstrasse', 'Altwarmb., Ernst-Grote-Strasse'): ['C3', 104, 106]} 
+{('Bleekstrasse', 'Annastift'): ['C134', 36, 38], ('Annastift', 'Nackenberg'): ['C134', 38, 39], ('Nackenberg', 'Uhlhornstrasse'): ['C134', 39, 40], ('Uhlhornstrasse', 'Kantplatz'): ['C134', 40, 43], ('Kantplatz', 'Clausewitzstrasse'): ['C134', 43, 44], ('Clausewitzstrasse', 'Braunschweiger Platz'): ['C134', 44, 45], ('Braunschweiger Platz', 'Marienstrasse'): ['C134', 45, 46], ('Marienstrasse', 'Aegidientorplatz'): ['C134', 46, 48], ('Aegidientorplatz', 'Kroepcke'): ['C134', 48, 49], ('Kroepcke', 'Hauptbahnhof'): ['C134', 49, 51], ('Hauptbahnhof', 'Sedanstrasse, Lister Meile'): ['C3', 87, 89], ('Sedanstrasse, Lister Meile', 'Lister Platz'): ['C3', 89, 90], ('Lister Platz', 'Lortzingstrasse'): ['C3', 90, 91], ('Lortzingstrasse', 'Vier Grenzen'): ['C3', 91, 92], ('Vier Grenzen', 'Pelikanstrasse'): ['C3', 92, 93], ('Pelikanstrasse', 'Spannhagengarten'): ['C3', 93, 94], ('Spannhagengarten', 'Klingerstrasse'): ['C3', 94, 95], ('Klingerstrasse', 'Noltemeyerbruecke'): ['C3', 95, 96], ('Noltemeyerbruecke', 'In den Sieben Stuecken'): ['C3', 96, 97], ('In den Sieben Stuecken', 'Paracelsusweg'): ['C3', 97, 98], ('Paracelsusweg', 'Stadtfriedhof Lahe'): ['C3', 98, 100], ('Stadtfriedhof Lahe', 'Oldenburger Allee'): ['C3', 100, 101], ('Oldenburger Allee', 'Altwarmb., Opelstrasse'): ['C3', 101, 104], ('Altwarmb., Opelstrasse', 'Altwarmb., Ernst-Grote-Strasse'): ['C3', 104, 106]} 
 
 Valid!
 
@@ -474,5 +455,4 @@ Invalid parcels: 4
 
 --- Seed: 10751 ---
 
-3.5: 63.0, no 3.5: 66.0
-
+3.5: 65.0, no 3.5: 66.0
