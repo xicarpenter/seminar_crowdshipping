@@ -252,9 +252,10 @@ class CrowdshippingModel(gp.Model):
         return max_profit
 
 
-    def check_results(self, long_print: bool = False):
+    def check_results(self, print_level: int = 0):
         if self.status == GRB.OPTIMAL:
-            print("\nFound an optimal solution:\n")
+            if print_level > 0:
+                print("\nFound an optimal solution:\n")
             self._parcels = {}
             
             for (i, s, j), val in self._X.items():
@@ -266,18 +267,20 @@ class CrowdshippingModel(gp.Model):
                             i, self._params.t[i, s], self._params.t[i, self._params.s_is_p[i, s]]] # i, current time, next time
                     
                     except KeyError:
-                        print(f"X[{i, s, j}] is invalid!")
+                        if print_level > 0:
+                            print(f"X[{i, s, j}] is invalid!")
                         
             max_parcels = self.calc_max_parcels()
-            max_profit = self.calc_max_profit(output_print=True)
+            max_profit = self.calc_max_profit(output_print=print_level)
 
-            print(f"Number of parcels: {max_parcels}")
-            print(f"Profit: {max_profit}\n")
+            if print_level > 0:
+                print(f"Number of parcels: {max_parcels}")
+                print(f"Profit: {max_profit}\n")
 
             # Sort parcels
             self.sort_parcels()
 
-            if long_print:
+            if print_level > 1:
                 self.print_parcels()
 
         elif self.status == GRB.INFEASIBLE:
@@ -336,11 +339,11 @@ class CrowdshippingModel(gp.Model):
                 print("Invalid!\n")
 
 
-    def check_parcels(self, seed, long_print):
+    def check_parcels(self, seed, print_level: int = 0):
         count = 0
         for j, stations in self._parcels.items():
             if not self.check_validity(j, stations):
-                if not long_print:
+                if print_level == 1:
                     print(f"Parcel {j} is invalid!")
                     print("Seed:", seed)
                     print(f"Origin station: {self._params.alpha[j]} @{self._params.r[j]}min\n"\
@@ -354,8 +357,7 @@ class CrowdshippingModel(gp.Model):
 def test_seeds(num_crowdshippers: int, 
                num_parcels: int, 
                entrainment_fee: int, 
-               long_print: bool = False,
-               output: bool = False, 
+               print_level: int = 0,
                of: str = "MAX_PARCELS",
                number_of_seeds: int = 5,
                use_3_5: bool = True,
@@ -400,19 +402,20 @@ def test_seeds(num_crowdshippers: int,
         # MODEL
         model = CrowdshippingModel(params, of=of, use_3_5=use_3_5)
 
-        if not output:
+        if print_level < 3:
             model.setParam(GRB.Param.OutputFlag, 0)
 
         # OPTIMIZATION
         model.optimize()
 
         # PRINT
-        model.check_results(long_print=long_print)
+        model.check_results(print_level=print_level)
 
-        count = model.check_parcels(seed, long_print)
+        count = model.check_parcels(seed, print_level)
 
-        print("Done with seed:", seed)
-        print(f"Invalid parcels: {count}\n")
+        if print_level > 0:
+            print("Done with seed:", seed)
+            print(f"Invalid parcels: {count}\n")
 
         used_seeds.append(seed)
         models.append(model)
@@ -423,8 +426,7 @@ def test_seeds(num_crowdshippers: int,
 def test_seed(num_crowdshippers: int, 
                num_parcels: int, 
                entrainment_fee: int, 
-               long_print: bool = False,
-               output: bool = False, 
+               print_level: int = 0,
                of: str = "MAX_PARCELS",
                seed: int = 42,
                use_3_5: bool = True):
@@ -441,16 +443,16 @@ def test_seed(num_crowdshippers: int,
     # MODEL
     model = CrowdshippingModel(params, of=of, use_3_5=use_3_5)
 
-    if not output:
+    if print_level < 3:
         model.setParam(GRB.Param.OutputFlag, 0)
 
     # OPTIMIZATION
     model.optimize()
 
     # PRINT
-    model.check_results(long_print=long_print)
+    model.check_results(print_level=print_level)
     
-    count = model.check_parcels(seed, long_print)
+    count = model.check_parcels(seed, print_level)
 
     print("Done with seed:", seed)
     print(f"Invalid parcels: {count}\n")
@@ -481,14 +483,13 @@ def check_minimalinstanz(path: str = "data/minimalinstanz.pkl"):
     params = Parameters.load(path)
     model = CrowdshippingModel(params)
     model.optimize()
-    model.check_results(long_print=True)
+    model.check_results(print_level=1)
     print("Invalid parcels:", model.check_parcels(seed=None))
 
 
 def compare_3_5(num_crowdshippers: int, 
                num_parcels: int, 
                entrainment_fee: int, 
-               output: bool = False, 
                of: str = "MAX_PARCELS",
                seed: int = None,
                number_of_seeds: int = 1):
@@ -497,8 +498,7 @@ def compare_3_5(num_crowdshippers: int,
             seeds, model_3_5 = test_seeds(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
-                                long_print=False,
-                                output=output,
+                                print_level=0,
                                 of=of,
                                 seed=seed,
                                 use_3_5=True,
@@ -510,23 +510,32 @@ def compare_3_5(num_crowdshippers: int,
             model_no_3_5 = test_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
-                                long_print=False,
-                                output=output,
+                                print_level=0,
                                 of=of,
                                 seed=seed,
                                 use_3_5=False)
             
-            of_3_5 = model_3_5.calc_max_profit(output_print=False)
-            of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
+            print(f"--- Seed: {seed} ---")
+            if of == "MAX_PROFIT":
+                of_3_5 = model_3_5.calc_max_profit(output_print=False)
+                of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
 
-            print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}")
+                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
+
+            elif of == "MAX_PARCELS":
+                of_3_5 = model_3_5.calc_max_parcels()
+                of_no_3_5 = model_no_3_5.calc_max_parcels()
+
+                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
+
+            else:
+                raise ValueError("of must be MAX_PROFIT or MAX_PARCELS")
 
         else:
             model_3_5 = test_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
-                                long_print=False,
-                                output=output,
+                                print_level=0,
                                 of=of,
                                 seed=seed,
                                 use_3_5=True)
@@ -534,23 +543,33 @@ def compare_3_5(num_crowdshippers: int,
             model_no_3_5 = test_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
-                                long_print=False,
-                                output=output,
+                                print_level=0,
                                 of=of,
                                 seed=seed,
                                 use_3_5=False)
             
-            of_3_5 = model_3_5.calc_max_profit(output_print=False)
-            of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
+            print(f"--- Seed: {seed} ---")
+            if of == "MAX_PROFIT":
+                of_3_5 = model_3_5.calc_max_profit(output_print=False)
+                of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
 
-            print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}")
+                print()
+                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
+            
+            elif of == "MAX_PARCELS":
+                of_3_5 = model_3_5.calc_max_parcels()
+                of_no_3_5 = model_no_3_5.calc_max_parcels()
+
+                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
+
+            else:
+                raise ValueError("of must be MAX_PROFIT or MAX_PARCELS")    
     
     else:
         used_seeds, models_3_5 = test_seeds(num_crowdshippers, 
                               num_parcels, 
                               entrainment_fee,  
-                              long_print=False,
-                              output=output,
+                              print_level=0,
                               of=of,
                               number_of_seeds=number_of_seeds,
                               use_3_5=True)
@@ -558,18 +577,28 @@ def compare_3_5(num_crowdshippers: int,
         _, models_no_3_5 = test_seeds(num_crowdshippers, 
                               num_parcels, 
                               entrainment_fee,  
-                              long_print=False,
-                              output=output,
+                              print_level=0,
                               of=of,
                               number_of_seeds=number_of_seeds,
                               use_3_5=False,
                               used_seeds=used_seeds)
         
         for model_3_5, model_no_3_5 in zip(models_3_5, models_no_3_5):
-            of_3_5 = model_3_5.calc_max_profit(output_print=False)
-            of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
+            print(f"--- Seed: {used_seeds[models_3_5.index(model_3_5)]} ---")
+            if of == "MAX_PROFIT":
+                of_3_5 = model_3_5.calc_max_profit(output_print=False)
+                of_no_3_5 = model_no_3_5.calc_max_profit(output_print=False)
 
-            print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}")
+                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
+            
+            elif of == "MAX_PARCELS":
+                of_3_5 = model_3_5.calc_max_parcels()
+                of_no_3_5 = model_no_3_5.calc_max_parcels()
+
+                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
+
+            else:
+                raise ValueError("of must be MAX_PROFIT or MAX_PARCELS")
 
 
 if __name__ == "__main__":
@@ -580,26 +609,9 @@ if __name__ == "__main__":
     entrainment_fee = 5
     of = "MAX_PROFIT"
     use_3_5 = False
-    long_print = False
+    print_level = 0
     seed = None # 61748 # Seed to none for test_seeds if unproucable behaviour is needed
     number_of_seeds = 5
-
-    # test_seed(num_crowdshippers, 
-    #            num_parcels,
-    #            entrainment_fee,
-    #            long_print=long_print,
-    #            of=of,
-    #            seed=seed,
-    #            use_3_5=use_3_5)
-    
-    # test_seeds(num_crowdshippers, 
-    #            num_parcels,
-    #            entrainment_fee,
-    #            long_print=long_print,
-    #            of=of,
-    #            number_of_seeds=number_of_seeds,
-    #            use_3_5=use_3_5,
-    #            seed=seed)
 
     compare_3_5(num_crowdshippers, 
                 num_parcels, 
