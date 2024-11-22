@@ -507,14 +507,6 @@ if __name__ == "__main__":
 
     # check_minimalinstanz(print_level=print_level)
 
-    # compare_3_5(num_crowdshippers, 
-    #             num_parcels, 
-    #             entrainment_fee,
-    #             of=of,
-    #             seed=seed,  
-    #             number_of_seeds=number_of_seeds,
-    #             print_level=print_level)
-
     test_seed(num_crowdshippers, 
                num_parcels, 
                entrainment_fee,
