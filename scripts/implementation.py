@@ -10,10 +10,8 @@ class CrowdshippingModel(gp.Model):
     def __init__(self, 
                  params: Parameters,
                  of: str = "MAX_PROFIT",
-                 use_3_5: bool = True,
                  save_lp: bool = False):
         super().__init__()
-        self._use_3_5 = use_3_5
         self._save_lp = save_lp
         self._params = params
         self._of = of
@@ -72,7 +70,7 @@ class CrowdshippingModel(gp.Model):
 
         # OBJECTIVE
         # MAX-PROFIT
-        # 1 -> checked
+        # 1 
         if self._of == "MAX_PROFIT":
             self.setObjective((gp.quicksum(self._params.p[j] * self._X[i, self._params.alpha[j], j] 
                                             for j in self._params.J 
@@ -91,14 +89,12 @@ class CrowdshippingModel(gp.Model):
             raise ValueError("Objective function not recognized.")
 
         # CONSTRAINTS
-        # 2 -> checked
-        (i_check, s_check, j_check) = ("C138", 'Altwarmb., Ernst-Grote-Strasse', 'P43')
-
+        # 2
         self.addConstrs((gp.quicksum(self._X[i, s, j] 
                                      for j in self._params.J_is[i, s]) <= 1
                         for (i, s) in indices_IS), "Constraint_2")
 
-        # 3 -> checked
+        # 3 
         self.addConstrs((gp.quicksum(self._X[i, s, j] 
                                     for i in self._params.I 
                                     if j in self._params.J_is[i, s]) <= 1 
@@ -106,15 +102,14 @@ class CrowdshippingModel(gp.Model):
                                 for s in self._params.S), "Constraint_3")
         
         # 3.5 Every parcel can only be moved to a single station once
-        if self._use_3_5:
-            self.addConstrs((gp.quicksum(self._X[i, s, j]  
-                                        for (i, s) in self._params.s_is_p.keys() 
-                                        if self._params.s_is_p[i, s] == next_station
-                                        and (i, s, j) in self._X.keys()) <= 1
-                            for next_station in self._params.S 
-                            for j in self._params.J), "Constraint_3.5") # if j != "P43"
+        # self.addConstrs((gp.quicksum(self._X[i, s, j]  
+        #                             for (i, s) in self._params.s_is_p.keys() 
+        #                             if self._params.s_is_p[i, s] == next_station
+        #                             and (i, s, j) in self._X.keys()) <= 1
+        #                 for next_station in self._params.S 
+        #                 for j in self._params.J), "Constraint_3.5") # if j != "P43"
 
-        # 4 -> checked
+        # 4 
         self.addConstrs((self._X[i, s, j] 
                          - gp.quicksum(self._X[i_p, self._params.s_is_p[i, s], j] 
                                         for i_p in self._params.I_is_p[i, self._params.s_is_p[i, s]]
@@ -122,14 +117,14 @@ class CrowdshippingModel(gp.Model):
                             for (i, s, j) in indices_ISJ 
                             if self._params.s_is_p[i, s] != self._params.omega[j]), "Constraint_4")
 
-        # 5 -> checked
+        # 5 
         self.addConstrs(((gp.quicksum(self._X[i, self._params.alpha[j], j] 
                                     for i in self._params.I_j_1[j])
                             - gp.quicksum(self._X[i, self._params.s_is_m[i, self._params.omega[j]], j] 
                                         for i in self._params.I_j_2[j])) == 0
                             for j in self._params.J), "Constraint_5")
-
-        # 6 -> checked Fehler irgendwo hier
+        
+        # 6 
         self.addConstrs((((gp.quicksum(self._X[i_p, self._params.alpha[j], j] 
                                     for j in self._params.J 
                                     for i_p in self._params.I_j_1[j]
@@ -148,7 +143,7 @@ class CrowdshippingModel(gp.Model):
 
                             - gp.quicksum(self._X[i_p, s, j] 
                                         for i_p in self._params.I_is_m[i, s] 
-                                        for j in self._params.J_is[i_p, s])) <= 100)
+                                        for j in self._params.J_is[i_p, s])) <= self._params.l[s])
 
                                         for i in self._params.I for s in self._params.S_i[i]), "Constraint_6")
 
@@ -175,9 +170,23 @@ class CrowdshippingModel(gp.Model):
                                     if j in self._params.J_is[i, self._params.omega[j]]) <= 0
                             for j in self._params.J), "Constraint_12")
         
+        # 13
+        # Pakets can only be transported if they are at the station
+        # they are transported from at the right time
+        self.addConstrs((self._X[i, s, j] <= (gp.quicksum(self._X[i_p, self._params.s_is_m[i_p, s], j] 
+                                                          for i_p in self._params.I 
+                                                          if (i_p, s) in self._params.s_is_m.keys()
+                                                          and (i_p, self._params.s_is_m[i_p, s], j) in self._X.keys()
+                                                          and self._params.t[i_p, self._params.s_is_m[i_p, s]] 
+                                                            <= self._params.t[i, s])) 
+                         for i in self._params.I 
+                         for s in self._params.S_i[i] 
+                         for j in self._params.J_is[i, s] 
+                         if s != self._params.alpha[j]), "Constraint_13")
+        
         # Save model to lp file
         if self._save_lp:
-            self.write(f"output/model_{'3_5' if self._use_3_5 else 'no_3_5'}.lp")
+            self.write(f"output/model.lp")
 
 
     @staticmethod
@@ -197,7 +206,7 @@ class CrowdshippingModel(gp.Model):
             print("Sorting failed due to invalid parcel name. \n")
 
 
-    def calc_max_parcels(self):
+    def calc_max_parcels(self, eps: float = 1e-3):
         """
         Calculate the maximum number of parcels that can be moved.
 
@@ -216,14 +225,15 @@ class CrowdshippingModel(gp.Model):
         max_parcels = 0
         for j in self._params.J:
             for i in self._params.I_j_1[j]:
-                if (i, self._params.alpha[j], j) in self._X.keys():
-                    max_parcels += self._X[i, self._params.alpha[j], j].x
+                if (i, self._params.alpha[j], j) in self._X.keys() and self._X[i, self._params.alpha[j], j].x > eps:
+                    max_parcels += 1
 
         return max_parcels
 
 
     def calc_max_profit(self, 
-                        print_level: int = 0):
+                        print_level: int = 0,
+                        eps: float = 1e-3):
         max_profit = 0
 
         if print_level > 0:
@@ -232,18 +242,18 @@ class CrowdshippingModel(gp.Model):
         parcels = []
         for j in self._params.J:
             for i in self._params.I_j_1[j]:
-                if (i, self._params.alpha[j], j) in self._X.keys() and self._X[i, self._params.alpha[j], j].x > 0:
+                if self._X[i, self._params.alpha[j], j].x > eps:
                     if print_level > 0:
                         print(f"X[{i, self._params.alpha[j], j}]", end=", ")
                     parcels.append(j)
-                    max_profit += self._params.p[j] * self._X[i, self._params.alpha[j], j].x
+                    max_profit += self._params.p[j]             
 
         for i in self._params.I:
             for s in self._params.S_i_p[i]:
-                if self._Y[i, s].x > 0:
+                if self._Y[i, s].x > eps:
                     if print_level > 0:
                         print(f"Y[{i, s}]", end=", ")
-                    max_profit -= self._params.f * self._Y[i, s].x
+                    max_profit -= self._params.f
 
         if print_level > 0:
             print(f"Parcels: {parcels}")
@@ -251,23 +261,19 @@ class CrowdshippingModel(gp.Model):
         return max_profit
 
 
-    def check_results(self, print_level: int = 0):
+    def check_results(self, print_level: int = 1, eps: float = 1e-3):
         if self.status == GRB.OPTIMAL:
             if print_level > 0:
                 print("\nFound an optimal solution:")
             self._parcels = {}
             
             for (i, s, j), val in self._X.items():
-                if val.x > 0:
+                if val.x > eps:
                     if j not in self._parcels.keys():
                         self._parcels[j] = {}
-                    try:
-                        self._parcels[j][(s, self._params.s_is_p[i, s])] = [
-                            i, self._params.t[i, s], self._params.t[i, self._params.s_is_p[i, s]]] # i, current time, next time
                     
-                    except KeyError:
-                        if print_level > 0:
-                            print(f"X[{i, s, j}] is invalid!")
+                    self._parcels[j][(s, self._params.s_is_p[i, s])] = [
+                        i, self._params.t[i, s], self._params.t[i, self._params.s_is_p[i, s]]]
                         
             max_parcels = self.calc_max_parcels()
             max_profit = self.calc_max_profit(print_level=print_level)
@@ -359,7 +365,7 @@ def test_seeds(num_crowdshippers: int,
                print_level: int = 0,
                of: str = "MAX_PARCELS",
                number_of_seeds: int = 5,
-               use_3_5: bool = True,
+               use_3_5: bool = False,
                seed: int = None,
                used_seeds: list = None):
     """
@@ -428,7 +434,8 @@ def test_seed(num_crowdshippers: int,
                print_level: int = 0,
                of: str = "MAX_PARCELS",
                seed: int = 42,
-               use_3_5: bool = True):
+               use_3_5: bool = False,
+               save_lp: bool = False):
     """
     Test 10 different seeds of the given parameters and print the results.
     """
@@ -440,7 +447,7 @@ def test_seed(num_crowdshippers: int,
     params = Parameters(**generator.return_kwargs())
 
     # MODEL
-    model = CrowdshippingModel(params, of=of, use_3_5=use_3_5)
+    model = CrowdshippingModel(params, of=of, use_3_5=use_3_5, save_lp=save_lp)
 
     if print_level < 3:
         model.setParam(GRB.Param.OutputFlag, 0)
@@ -456,10 +463,13 @@ def test_seed(num_crowdshippers: int,
     print("Done with seed:", seed)
     print(f"Invalid parcels: {count}\n")
 
+    with open(f"output/params.pkl", "wb") as f:
+                pickle.dump(model._params, f)
+
     return model
     
 
-def check_minimalinstanz(path: str = "data/minimalinstanz.pkl"):
+def check_minimalinstanz(path: str = "data/minimalinstanz.pkl", print_level: int = 0):
     """
     Load parameters from a specified file, update the minimal instance,
     and optimize the crowdshipper model using these parameters.
@@ -482,143 +492,33 @@ def check_minimalinstanz(path: str = "data/minimalinstanz.pkl"):
     params = Parameters.load(path)
     model = CrowdshippingModel(params)
     model.optimize()
-    model.check_results(print_level=1)
+    model.check_results(print_level=print_level)
     print("Invalid parcels:", model.check_parcels(seed=None))
 
 
-def compare_3_5(num_crowdshippers: int, 
-               num_parcels: int, 
-               entrainment_fee: int, 
-               of: str = "MAX_PARCELS",
-               seed: int = None,
-               number_of_seeds: int = 1,
-               print_level: int = 0):
-    if number_of_seeds == 1:
-        if seed is None:
-            seeds, model_3_5 = test_seeds(num_crowdshippers, 
-                                num_parcels, 
-                                entrainment_fee,
-                                print_level=print_level,
-                                of=of,
-                                seed=seed,
-                                use_3_5=True,
-                                number_of_seeds=number_of_seeds)
-            
-            seed = seeds[0]
-            model_3_5 = model_3_5[0]
-            
-            model_no_3_5 = test_seed(num_crowdshippers, 
-                                num_parcels, 
-                                entrainment_fee,
-                                print_level=print_level,
-                                of=of,
-                                seed=seed,
-                                use_3_5=False)
-            
-            print(f"--- Seed: {seed} ---")
-            if of == "MAX_PROFIT":
-                of_3_5 = model_3_5.calc_max_profit(print_level=0)
-                of_no_3_5 = model_no_3_5.calc_max_profit(print_level=0)
-
-                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
-
-            elif of == "MAX_PARCELS":
-                of_3_5 = model_3_5.calc_max_parcels()
-                of_no_3_5 = model_no_3_5.calc_max_parcels()
-
-                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
-
-            else:
-                raise ValueError("of must be MAX_PROFIT or MAX_PARCELS")
-
-        else:
-            model_3_5 = test_seed(num_crowdshippers, 
-                                num_parcels, 
-                                entrainment_fee,
-                                print_level=print_level,
-                                of=of,
-                                seed=seed,
-                                use_3_5=True)
-            
-            model_no_3_5 = test_seed(num_crowdshippers, 
-                                num_parcels, 
-                                entrainment_fee,
-                                print_level=print_level,
-                                of=of,
-                                seed=seed,
-                                use_3_5=False)
-            
-            # with open(f"output/models_{seed}.pkl", "wb") as f:
-            #     pickle.dump(model_3_5._params, f)
-            
-            print(f"--- Seed: {seed} ---")
-            if of == "MAX_PROFIT":
-                of_3_5 = model_3_5.calc_max_profit(print_level=0)
-                of_no_3_5 = model_no_3_5.calc_max_profit(print_level=0)
-
-                print()
-                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
-            
-            elif of == "MAX_PARCELS":
-                of_3_5 = model_3_5.calc_max_parcels()
-                of_no_3_5 = model_no_3_5.calc_max_parcels()
-
-                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
-
-            else:
-                raise ValueError("of must be MAX_PROFIT or MAX_PARCELS")    
-    
-    else:
-        used_seeds, models_3_5 = test_seeds(num_crowdshippers, 
-                              num_parcels, 
-                              entrainment_fee,  
-                              print_level=print_level,
-                              of=of,
-                              number_of_seeds=number_of_seeds,
-                              use_3_5=True)
-        
-        _, models_no_3_5 = test_seeds(num_crowdshippers, 
-                              num_parcels, 
-                              entrainment_fee,  
-                              print_level=print_level,
-                              of=of,
-                              number_of_seeds=number_of_seeds,
-                              use_3_5=False,
-                              used_seeds=used_seeds)
-        
-        for model_3_5, model_no_3_5 in zip(models_3_5, models_no_3_5):
-            print(f"--- Seed: {used_seeds[models_3_5.index(model_3_5)]} ---")
-            if of == "MAX_PROFIT":
-                of_3_5 = model_3_5.calc_max_profit(print_level=0)
-                of_no_3_5 = model_no_3_5.calc_max_profit(print_level=0)
-
-                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
-            
-            elif of == "MAX_PARCELS":
-                of_3_5 = model_3_5.calc_max_parcels()
-                of_no_3_5 = model_no_3_5.calc_max_parcels()
-
-                print(f"3.5: {of_3_5}, no 3.5: {of_no_3_5}\n")
-
-            else:
-                raise ValueError("of must be MAX_PROFIT or MAX_PARCELS")
-
-
 if __name__ == "__main__":
-    # check_minimalinstanz()
-
     num_crowdshippers = 150
     num_parcels = 50
     entrainment_fee = 1
     of = "MAX_PROFIT"
-    print_level = 0
-    seed = None # 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
-    number_of_seeds = 20
+    print_level = 1
+    seed = 81302 # 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
+    number_of_seeds = 1
 
-    compare_3_5(num_crowdshippers, 
-                num_parcels, 
-                entrainment_fee,
-                of=of,
-                seed=seed,  
-                number_of_seeds=number_of_seeds,
-                print_level=print_level)
+    # check_minimalinstanz(print_level=print_level)
+
+    # compare_3_5(num_crowdshippers, 
+    #             num_parcels, 
+    #             entrainment_fee,
+    #             of=of,
+    #             seed=seed,  
+    #             number_of_seeds=number_of_seeds,
+    #             print_level=print_level)
+
+    test_seed(num_crowdshippers, 
+               num_parcels, 
+               entrainment_fee,
+               of=of,
+               seed=seed,  
+               print_level=print_level,
+               save_lp=False)

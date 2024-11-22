@@ -189,7 +189,31 @@ Valid!
 Origin station: Bleekstrasse @29min
 Target station: Altwarmb., Ernst-Grote-Strasse @149min
 
-{('Bleekstrasse', 'Annastift'): ['C134', 36, 38], ('Annastift', 'Nackenberg'): ['C134', 38, 39], ('Nackenberg', 'Uhlhornstrasse'): ['C134', 39, 40], ('Uhlhornstrasse', 'Kantplatz'): ['C134', 40, 43], ('Kantplatz', 'Clausewitzstrasse'): ['C134', 43, 44], ('Clausewitzstrasse', 'Braunschweiger Platz'): ['C134', 44, 45], ('Braunschweiger Platz', 'Marienstrasse'): ['C134', 45, 46], ('Marienstrasse', 'Aegidientorplatz'): ['C134', 46, 48], ('Aegidientorplatz', 'Kroepcke'): ['C134', 48, 49], ('Kroepcke', 'Hauptbahnhof'): ['C134', 49, 51], ('Altwarmb., Ernst-Grote-Strasse', 'Altwarmb., Opelstrasse'): ['C138', 70, 72], ('Hauptbahnhof', 'Sedanstrasse, Lister Meile'): ['C3', 87, 89], ('Sedanstrasse, Lister Meile', 'Lister Platz'): ['C3', 89, 90], ('Lister Platz', 'Lortzingstrasse'): ['C3', 90, 91], ('Lortzingstrasse', 'Vier Grenzen'): ['C3', 91, 92], ('Vier Grenzen', 'Pelikanstrasse'): ['C3', 92, 93], ('Pelikanstrasse', 'Spannhagengarten'): ['C3', 93, 94], ('Spannhagengarten', 'Klingerstrasse'): ['C3', 94, 95], ('Klingerstrasse', 'Noltemeyerbruecke'): ['C3', 95, 96], ('Noltemeyerbruecke', 'In den Sieben Stuecken'): ['C3', 96, 97], ('In den Sieben Stuecken', 'Paracelsusweg'): ['C3', 97, 98], ('Paracelsusweg', 'Stadtfriedhof Lahe'): ['C3', 98, 100], ('Stadtfriedhof Lahe', 'Oldenburger Allee'): ['C3', 100, 101], ('Oldenburger Allee', 'Altwarmb., Opelstrasse'): ['C3', 101, 104], ('Altwarmb., Opelstrasse', 'Altwarmb., Ernst-Grote-Strasse'): ['C3', 104, 106]} 
+{('Bleekstrasse', 'Annastift'): ['C134', 36, 38], 
+('Annastift', 'Nackenberg'): ['C134', 38, 39], 
+('Nackenberg', 'Uhlhornstrasse'): ['C134', 39, 40], 
+('Uhlhornstrasse', 'Kantplatz'): ['C134', 40, 43], 
+('Kantplatz', 'Clausewitzstrasse'): ['C134', 43, 44], 
+('Clausewitzstrasse', 'Braunschweiger Platz'): ['C134', 44, 45], 
+('Braunschweiger Platz', 'Marienstrasse'): ['C134', 45, 46], 
+('Marienstrasse', 'Aegidientorplatz'): ['C134', 46, 48], 
+('Aegidientorplatz', 'Kroepcke'): ['C134', 48, 49], 
+('Kroepcke', 'Hauptbahnhof'): ['C134', 49, 51], 
+('Altwarmb., Ernst-Grote-Strasse', 'Altwarmb., Opelstrasse'): ['C138', 70, 72], 
+('Hauptbahnhof', 'Sedanstrasse, Lister Meile'): ['C3', 87, 89], 
+('Sedanstrasse, Lister Meile', 'Lister Platz'): ['C3', 89, 90], 
+('Lister Platz', 'Lortzingstrasse'): ['C3', 90, 91], 
+('Lortzingstrasse', 'Vier Grenzen'): ['C3', 91, 92], 
+('Vier Grenzen', 'Pelikanstrasse'): ['C3', 92, 93], 
+('Pelikanstrasse', 'Spannhagengarten'): ['C3', 93, 94], 
+('Spannhagengarten', 'Klingerstrasse'): ['C3', 94, 95], 
+('Klingerstrasse', 'Noltemeyerbruecke'): ['C3', 95, 96], 
+('Noltemeyerbruecke', 'In den Sieben Stuecken'): ['C3', 96, 97], 
+('In den Sieben Stuecken', 'Paracelsusweg'): ['C3', 97, 98], 
+('Paracelsusweg', 'Stadtfriedhof Lahe'): ['C3', 98, 100], 
+('Stadtfriedhof Lahe', 'Oldenburger Allee'): ['C3', 100, 101], 
+('Oldenburger Allee', 'Altwarmb., Opelstrasse'): ['C3', 101, 104],
+ ('Altwarmb., Opelstrasse', 'Altwarmb., Ernst-Grote-Strasse'): ['C3', 104, 106]} 
 
 Invalid!
 
