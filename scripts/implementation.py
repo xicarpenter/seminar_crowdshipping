@@ -10,9 +10,11 @@ class CrowdshippingModel(gp.Model):
     def __init__(self, 
                  params: Parameters,
                  of: str = "MAX_PROFIT",
-                 use_3_5: bool = True):
+                 use_3_5: bool = True,
+                 save_lp: bool = False):
         super().__init__()
         self._use_3_5 = use_3_5
+        self._save_lp = save_lp
         self._params = params
         self._of = of
 
@@ -90,6 +92,8 @@ class CrowdshippingModel(gp.Model):
 
         # CONSTRAINTS
         # 2 -> checked
+        (i_check, s_check, j_check) = ("C138", 'Altwarmb., Ernst-Grote-Strasse', 'P43')
+
         self.addConstrs((gp.quicksum(self._X[i, s, j] 
                                      for j in self._params.J_is[i, s]) <= 1
                         for (i, s) in indices_IS), "Constraint_2")
@@ -108,9 +112,9 @@ class CrowdshippingModel(gp.Model):
                                         if self._params.s_is_p[i, s] == next_station
                                         and (i, s, j) in self._X.keys()) <= 1
                             for next_station in self._params.S 
-                            for j in self._params.J if j != "P43"), "Constraint_3.5")
+                            for j in self._params.J), "Constraint_3.5") # if j != "P43"
 
-        # 4 -> checked Problem here somewhere
+        # 4 -> checked
         self.addConstrs((self._X[i, s, j] 
                          - gp.quicksum(self._X[i_p, self._params.s_is_p[i, s], j] 
                                         for i_p in self._params.I_is_p[i, self._params.s_is_p[i, s]]
@@ -125,7 +129,7 @@ class CrowdshippingModel(gp.Model):
                                         for i in self._params.I_j_2[j])) == 0
                             for j in self._params.J), "Constraint_5")
 
-        # 6 -> checked
+        # 6 -> checked Fehler irgendwo hier
         self.addConstrs((((gp.quicksum(self._X[i_p, self._params.alpha[j], j] 
                                     for j in self._params.J 
                                     for i_p in self._params.I_j_1[j]
@@ -144,7 +148,7 @@ class CrowdshippingModel(gp.Model):
 
                             - gp.quicksum(self._X[i_p, s, j] 
                                         for i_p in self._params.I_is_m[i, s] 
-                                        for j in self._params.J_is[i_p, s])) <= self._params.l[s])
+                                        for j in self._params.J_is[i_p, s])) <= 100)
 
                                         for i in self._params.I for s in self._params.S_i[i]), "Constraint_6")
 
@@ -172,7 +176,8 @@ class CrowdshippingModel(gp.Model):
                             for j in self._params.J), "Constraint_12")
         
         # Save model to lp file
-        # self.write(f"output/model_{'3_5' if self._use_3_5 else 'no_3_5'}.lp")
+        if self._save_lp:
+            self.write(f"output/model_{'3_5' if self._use_3_5 else 'no_3_5'}.lp")
 
 
     @staticmethod
@@ -606,9 +611,9 @@ if __name__ == "__main__":
     num_parcels = 50
     entrainment_fee = 1
     of = "MAX_PROFIT"
-    print_level = 3
-    seed = 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
-    number_of_seeds = 1
+    print_level = 0
+    seed = None # 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
+    number_of_seeds = 20
 
     compare_3_5(num_crowdshippers, 
                 num_parcels, 
