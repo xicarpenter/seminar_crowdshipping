@@ -359,19 +359,68 @@ class CrowdshippingModel(gp.Model):
         return count
 
 
+def test_seed(num_crowdshippers: int, 
+               num_parcels: int, 
+               entrainment_fee: int, 
+               print_level: int = 0,
+               of: str = "MAX_PARCELS",
+               seed: int = 42,
+               save_lp: bool = False):
+    """
+    Test 10 different seeds of the given parameters and print the results.
+    """
+    generator = InstanceGenerator(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                seed=seed)
+
+    params = Parameters(**generator.return_kwargs())
+
+    # MODEL
+    model = CrowdshippingModel(params, of=of, save_lp=save_lp)
+
+    if print_level < 3:
+        model.setParam(GRB.Param.OutputFlag, 0)
+
+    # OPTIMIZATION
+    model.optimize()
+
+    # PRINT
+    model.check_results(print_level=print_level)
+    
+    count = model.check_parcels(seed, print_level)
+
+    print("Done with seed:", seed)
+    print(f"Invalid parcels: {count}\n")
+
+    with open(f"output/params.pkl", "wb") as f:
+                pickle.dump(model._params, f)
+
+    return model
+
+
 def test_seeds(num_crowdshippers: int, 
                num_parcels: int, 
                entrainment_fee: int, 
                print_level: int = 0,
                of: str = "MAX_PARCELS",
                number_of_seeds: int = 5,
-               use_3_5: bool = False,
                seed: int = None,
-               used_seeds: list = None):
+               used_seeds: list = None) -> list[CrowdshippingModel] | CrowdshippingModel:
     """
     Test 10 different seeds of the given parameters and print the results.
     """
     models = []
+
+    if number_of_seeds == 1 and seed is not None:
+        model = test_seed(num_crowdshippers,
+                    num_parcels,
+                    entrainment_fee,
+                    print_level=print_level,
+                    of=of,
+                    seed=seed)
+        
+        return model
 
     if used_seeds is None:
         if seed is not None:
@@ -405,7 +454,7 @@ def test_seeds(num_crowdshippers: int,
         params = Parameters(**generator.return_kwargs())
 
         # MODEL
-        model = CrowdshippingModel(params, of=of, use_3_5=use_3_5)
+        model = CrowdshippingModel(params, of=of)
 
         if print_level < 3:
             model.setParam(GRB.Param.OutputFlag, 0)
@@ -427,46 +476,6 @@ def test_seeds(num_crowdshippers: int,
 
     return used_seeds, models
 
-
-def test_seed(num_crowdshippers: int, 
-               num_parcels: int, 
-               entrainment_fee: int, 
-               print_level: int = 0,
-               of: str = "MAX_PARCELS",
-               seed: int = 42,
-               use_3_5: bool = False,
-               save_lp: bool = False):
-    """
-    Test 10 different seeds of the given parameters and print the results.
-    """
-    generator = InstanceGenerator(num_crowdshippers, 
-                                num_parcels, 
-                                entrainment_fee,
-                                seed=seed)
-
-    params = Parameters(**generator.return_kwargs())
-
-    # MODEL
-    model = CrowdshippingModel(params, of=of, use_3_5=use_3_5, save_lp=save_lp)
-
-    if print_level < 3:
-        model.setParam(GRB.Param.OutputFlag, 0)
-
-    # OPTIMIZATION
-    model.optimize()
-
-    # PRINT
-    model.check_results(print_level=print_level)
-    
-    count = model.check_parcels(seed, print_level)
-
-    print("Done with seed:", seed)
-    print(f"Invalid parcels: {count}\n")
-
-    with open(f"output/params.pkl", "wb") as f:
-                pickle.dump(model._params, f)
-
-    return model
     
 
 def check_minimalinstanz(path: str = "data/minimalinstanz.pkl", print_level: int = 0):
@@ -502,8 +511,8 @@ if __name__ == "__main__":
     entrainment_fee = 1
     of = "MAX_PROFIT"
     print_level = 1
-    seed = None # 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
-    number_of_seeds = 20
+    seed = 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
+    number_of_seeds = 1
 
     # check_minimalinstanz(print_level=print_level)
 
