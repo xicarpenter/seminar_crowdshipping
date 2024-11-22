@@ -502,15 +502,15 @@ if __name__ == "__main__":
     entrainment_fee = 1
     of = "MAX_PROFIT"
     print_level = 1
-    seed = 81302 # 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
-    number_of_seeds = 1
+    seed = None # 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
+    number_of_seeds = 20
 
     # check_minimalinstanz(print_level=print_level)
 
-    test_seed(num_crowdshippers, 
+    test_seeds(num_crowdshippers, 
                num_parcels, 
                entrainment_fee,
                of=of,
                seed=seed,  
                print_level=print_level,
-               save_lp=False)
+               number_of_seeds=number_of_seeds)
