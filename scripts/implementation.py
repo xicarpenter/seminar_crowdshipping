@@ -53,17 +53,13 @@ class CrowdshippingModel(gp.Model):
         # VARIABLES
         indices_ISJ = []
         indices_IS = []
-        indices_JS = []
         for i in self._params.I:
             for s in self._params.S_i_p[i]:
                 if (i, s) not in indices_IS:
                     indices_IS.append((i, s))
 
                 for j in self._params.J_is[i, s]:
-                    indices_ISJ.append((i, s, j))
-
-                    if (j, s) not in indices_JS:
-                        indices_JS.append((j, s))                
+                    indices_ISJ.append((i, s, j))               
 
         self._X = self.addVars(indices_ISJ, vtype=GRB.BINARY, name="X") # 9
         self._Y = self.addVars(indices_IS, vtype=GRB.CONTINUOUS, name="Y", lb=0) # 10
@@ -143,7 +139,7 @@ class CrowdshippingModel(gp.Model):
         # 7 and 8
         for (i, s, j) in indices_ISJ:
             if (i in self._params.I_s_p[s] 
-                and self._params.check_time(i, self._params.s_is_m[i, s], j)):
+                and self._params.t[i, self._params.s_is_m[i, s]] >= self._params.r[j]):
                 self.addConstr((self._X[i, s, j] 
                                 - self._X[i, self._params.s_is_m[i, s], j] 
                                 <= self._Y[i, s]), "Constraint_7")
