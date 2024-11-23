@@ -163,7 +163,7 @@ class Parameters:
             for s in self.S:
                 if s in self.S_i_p[i]:
                     self.J_is[i, s] = [j for j in self.J 
-                                    if self.t[i, s] >= self.r[j] and self.t[i, self.s_is_p[i, s]] <= self.d[j]]
+                                    if self.check_time(i, s, j)]
                 else:
                     self.J_is[i, s] = []
 
@@ -175,7 +175,11 @@ class Parameters:
                 
                 self.I_is_p[i, s] = [c for c in self.I_s[s] 
                                      if self.t[c, s] >= self.t[i, s]]
-        
+    
+
+    def check_time(self, i: str, s: str, j: str) -> bool:
+        return self.t[i, s] >= self.r[j] and self.t[i, self.s_is_p[i, s]] <= self.d[j]
+
 
     def get_last_station(self, i: int, s: str) -> str:
         """

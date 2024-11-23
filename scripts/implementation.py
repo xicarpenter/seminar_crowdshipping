@@ -100,20 +100,13 @@ class CrowdshippingModel(gp.Model):
                                     if j in self._params.J_is[i, s]) <= 1 
                                 for j in self._params.J 
                                 for s in self._params.S), "Constraint_3")
-        
-        # 3.5 Every parcel can only be moved to a single station once
-        # self.addConstrs((gp.quicksum(self._X[i, s, j]  
-        #                             for (i, s) in self._params.s_is_p.keys() 
-        #                             if self._params.s_is_p[i, s] == next_station
-        #                             and (i, s, j) in self._X.keys()) <= 1
-        #                 for next_station in self._params.S 
-        #                 for j in self._params.J), "Constraint_3.5") # if j != "P43"
 
         # 4 
         self.addConstrs((self._X[i, s, j] 
                          - gp.quicksum(self._X[i_p, self._params.s_is_p[i, s], j] 
                                         for i_p in self._params.I_is_p[i, self._params.s_is_p[i, s]]
-                                        if (i_p, self._params.s_is_p[i, s], j) in self._X.keys()) <= 0 # Adjusted
+                                        if self._params.s_is_p[i, s] in self._params.S_i_p[i_p]
+                                        and self._params.check_time(i_p, self._params.s_is_p[i, s], j)) <= 0
                             for (i, s, j) in indices_ISJ 
                             if self._params.s_is_p[i, s] != self._params.omega[j]), "Constraint_4")
 
@@ -144,12 +137,12 @@ class CrowdshippingModel(gp.Model):
                             - gp.quicksum(self._X[i_p, s, j] 
                                         for i_p in self._params.I_is_m[i, s] 
                                         for j in self._params.J_is[i_p, s])) <= self._params.l[s])
-
                                         for i in self._params.I for s in self._params.S_i[i]), "Constraint_6")
 
         # 7 and 8
         for (i, s, j) in indices_ISJ:
-            if i in self._params.I_s_p[s] and (i, self._params.s_is_m[i, s], j) in self._X.keys():
+            if (i in self._params.I_s_p[s] 
+                and self._params.check_time(i, self._params.s_is_m[i, s], j)):
                 self.addConstr((self._X[i, s, j] 
                                 - self._X[i, self._params.s_is_m[i, s], j] 
                                 <= self._Y[i, s]), "Constraint_7")
@@ -175,8 +168,8 @@ class CrowdshippingModel(gp.Model):
         # they are transported from at the right time
         self.addConstrs((self._X[i, s, j] <= (gp.quicksum(self._X[i_p, self._params.s_is_m[i_p, s], j] 
                                                           for i_p in self._params.I 
-                                                          if (i_p, s) in self._params.s_is_m.keys()
-                                                          and (i_p, self._params.s_is_m[i_p, s], j) in self._X.keys()
+                                                          if i_p in self._params.I_s_p[s]
+                                                          and self._params.check_time(i_p, self._params.s_is_m[i_p, s], j)
                                                           and self._params.t[i_p, self._params.s_is_m[i_p, s]] 
                                                             <= self._params.t[i, s])) 
                          for i in self._params.I 
@@ -225,7 +218,7 @@ class CrowdshippingModel(gp.Model):
         max_parcels = 0
         for j in self._params.J:
             for i in self._params.I_j_1[j]:
-                if (i, self._params.alpha[j], j) in self._X.keys() and self._X[i, self._params.alpha[j], j].x > eps:
+                if self._params.check_time(i, self._params.alpha[j], j) and self._X[i, self._params.alpha[j], j].x > eps:
                     max_parcels += 1
 
         return max_parcels
@@ -256,7 +249,7 @@ class CrowdshippingModel(gp.Model):
                     max_profit -= self._params.f
 
         if print_level > 0:
-            print(f"Parcels: {parcels}")
+            print(f"\n\nParcels: {parcels}")
 
         return max_profit
 
@@ -511,7 +504,7 @@ if __name__ == "__main__":
     entrainment_fee = 1
     of = "MAX_PROFIT"
     print_level = 1
-    seed = 10751 # Seed to none for test_seeds if unproucable behaviour is needed 90016
+    seed = 10751 # Seed to none for test_seeds if unproucable behaviour is needed
     number_of_seeds = 1
 
     # check_minimalinstanz(print_level=print_level)

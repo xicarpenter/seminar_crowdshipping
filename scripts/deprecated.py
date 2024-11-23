@@ -118,4 +118,12 @@ def compare_3_5(num_crowdshippers: int,
 
             else:
                 raise ValueError("of must be MAX_PROFIT or MAX_PARCELS")
-            
+
+### DEPRECATED RESTRICTION
+# 3.5 Every parcel can only be moved to a single station once
+    # self.addConstrs((gp.quicksum(self._X[i, s, j]  
+    #                             for (i, s) in self._params.s_is_p.keys() 
+    #                             if self._params.s_is_p[i, s] == next_station
+    #                             and (i, s, j) in self._X.keys()) <= 1
+    #                 for next_station in self._params.S 
+    #                 for j in self._params.J), "Constraint_3.5") # if j != "P43" 
