@@ -179,7 +179,7 @@ class Parameters:
 
     def check_time(self, i: str, s: str, j: str) -> bool:
         return self.t[i, s] >= self.r[j] and self.t[i, self.s_is_p[i, s]] <= self.d[j]
-
+    # self.t[i_p, self.s_is_p[i_p, self._params.s_is_m[i_p, s]]]
 
     def get_last_station(self, i: int, s: str) -> str:
         """

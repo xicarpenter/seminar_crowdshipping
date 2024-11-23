@@ -137,6 +137,7 @@ class CrowdshippingModel(gp.Model):
                             - gp.quicksum(self._X[i_p, s, j] 
                                         for i_p in self._params.I_is_m[i, s] 
                                         for j in self._params.J_is[i_p, s])) <= self._params.l[s])
+
                                         for i in self._params.I for s in self._params.S_i[i]), "Constraint_6")
 
         # 7 and 8
@@ -167,11 +168,9 @@ class CrowdshippingModel(gp.Model):
         # Pakets can only be transported if they are at the station
         # they are transported from at the right time
         self.addConstrs((self._X[i, s, j] <= (gp.quicksum(self._X[i_p, self._params.s_is_m[i_p, s], j] 
-                                                          for i_p in self._params.I 
-                                                          if i_p in self._params.I_s_p[s]
-                                                          and self._params.check_time(i_p, self._params.s_is_m[i_p, s], j)
-                                                          and self._params.t[i_p, self._params.s_is_m[i_p, s]] 
-                                                            <= self._params.t[i, s])) 
+                                                          for i_p in self._params.I_s_p[s]
+                                                          if self._params.t[i_p, self._params.s_is_m[i_p, s]] >= self._params.r[j]
+                                                          and self._params.t[i_p, s] <= self._params.t[i, s])) 
                          for i in self._params.I 
                          for s in self._params.S_i[i] 
                          for j in self._params.J_is[i, s] 
