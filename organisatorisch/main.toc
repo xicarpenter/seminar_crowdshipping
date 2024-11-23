@@ -1,0 +1,22 @@
+\babel@toc {ngerman}{}\relax 
+\babel@toc {ngerman}{}\relax 
+\contentsline {section}{Abbildungsverzeichnis}{ii}{section*.3}%
+\contentsline {section}{Tabellenverzeichnis}{ii}{section*.4}%
+\contentsline {section}{Algorithmusverzeichnis}{ii}{section*.4}%
+\contentsline {section}{Quellcodeverzeichnis}{ii}{section*.5}%
+\contentsline {section}{Abkürzungsverzeichnis}{ii}{section*.7}%
+\contentsline {section}{Symbolverzeichnis}{iii}{section*.8}%
+\contentsline {section}{\numberline {1}Hinweise zur Einleitung}{1}{section.1}%
+\contentsline {section}{\numberline {2}Beispiele}{1}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Beispiele zum Fließtext}{1}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Beispiele zu Abbildungen}{2}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Beispiele zu Tabellen}{4}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Beispiele zu mathematischen Formeln, Notation und Modellannahmen}{5}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Beispiel zu Pseudocode}{8}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Beispiel zu To-dos}{8}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Beispiele zu Farben}{9}{subsection.2.7}%
+\contentsline {subsection}{\numberline {2.8}Beispiele zu TikZ}{9}{subsection.2.8}%
+\contentsline {section}{\numberline {3}Ein neues Kapitel}{10}{section.3}%
+\contentsline {section}{\numberline {A}Überschrift für den Inhalt des Anhangs}{11}{appendix.A}%
+\contentsline {section}{\numberline {B}Python-Code Beispiele}{12}{appendix.B}%
+\contentsline {section}{\numberline {C}Code-Beispiele für weitere Programmiersprachen}{14}{appendix.C}%

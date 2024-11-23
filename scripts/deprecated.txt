@@ -127,3 +127,37 @@ def compare_3_5(num_crowdshippers: int,
     #                             and (i, s, j) in self._X.keys()) <= 1
     #                 for next_station in self._params.S 
     #                 for j in self._params.J), "Constraint_3.5") # if j != "P43" 
+
+'''
+% \definecolor{Gray}{gray}{0.9}
+% \renewcommand{\arraystretch}{1.5}
+% \begin{table}[!ht]  
+%     \begin{tabular}{p{3cm} p{13cm}}
+%         \Xhline{4\arrayrulewidth}
+%         Symbol & \hspace{3cm} Bedeutung \\
+%         \hline
+%         \rowcolor{Gray}
+%          & \hspace{3cm} \textbf{Indizes und Sets} \\
+%         \hline
+%         $i, j \in \mathcal{I}$ & \hspace{3cm} Stände $\mathcal{I} = \{1, \ldots, I\}$ \\
+        
+%         \hline 
+%         \rowcolor{Gray}
+%          & \hspace{3cm} \textbf{Parameter} \\
+%         \hline
+%         $w_{ic}$ & \hspace{3cm} Standbreite von Stand$_{ic}$ \\ 
+        
+%         \hline
+%         \rowcolor{Gray}
+%         & \hspace{3cm} \textbf{Entscheidungsvariablen} \\
+%         \hline
+%         $X_{ic} \in \mathbb{R}_{0}^{+}$ & \hspace{3cm} X Koordinate von Stand$_{ic}$\\
+%         $z_{icjk}^p, z_{icjk}^n \in \mathbb{R}_{0}^{+}$ & \hspace{3cm} $d_{icjk}^x + d_{icjk}^y$, wenn Stand$_{ic}$ und Stand$_{jk}$ ausgewählt sind\\ 
+%         & \hspace{3cm} $(hw + hh)$ sonst\\
+%         \Xhline{4\arrayrulewidth}
+%     \end{tabular} 
+%     \caption{Einführung der Notation des mathematischen Modells} 
+%     \label{tab:Notation}
+% \end{table}
+
+'''
