@@ -130,7 +130,6 @@ class CrowdshippingModel(gp.Model):
                                         for j in self._params.J_is[i_p, s])) <= self._params.l[s])
 
                                         for i in self._params.I for s in self._params.S_i[i]), "Constraint_5")
-
         # 6, 7
         for (i, s, j) in indices_ISJ:
             if (i in self._params.I_s_p[s] 
