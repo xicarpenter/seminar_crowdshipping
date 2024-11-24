@@ -102,7 +102,7 @@ class CrowdshippingModel(gp.Model):
                          - gp.quicksum(self._X[i_p, self._params.s_is_p[i, s], j] 
                                         for i_p in self._params.I_is_p[i, self._params.s_is_p[i, s]]
                                         if self._params.s_is_p[i, s] in self._params.S_i_p[i_p]
-                                        and self._params.check_time(i_p, self._params.s_is_p[i, s], j)) <= 0
+                                        and j in self._params.J_is[i_p, self._params.s_is_p[i, s]]) <= 0
                             for (i, s, j) in indices_ISJ 
                             if self._params.s_is_p[i, s] != self._params.omega[j]), "Constraint_4")
 
@@ -114,21 +114,16 @@ class CrowdshippingModel(gp.Model):
                             for j in self._params.J), "Constraint_5")
         
         # 6 
-        self.addConstrs((((gp.quicksum(self._X[i_p, self._params.alpha[j], j] 
+        self.addConstrs((((gp.quicksum(self._X[i_p, s, j] 
                                     for j in self._params.J 
                                     for i_p in self._params.I_j_1[j]
                                     if (self._params.alpha[j] == s and self._params.t[i, s] >= self._params.r[j]))
 
                             + gp.quicksum(self._X[i_p, self._params.s_is_m[i_p, s], j] 
-                                            for i_p in (set(self._params.I_is_m[i, s]) & set(self._params.I_s_p[s])) 
-                                            for j in self._params.J_is[i_p, self._params.s_is_m[i_p, s]] 
-                                            if self._params.omega[j] != s)
-
-                            + gp.quicksum(self._X[i_p, self._params.s_is_m[i_p, s], j] 
                                             for i_p in (set(self._params.I_is_m[i,s]) & set(self._params.I_s_p[s]))
                                             for j in self._params.J_is[i_p, self._params.s_is_m[i_p, s]]
-                                            if (self._params.omega[j] == s 
-                                                and self._params.d[j] >= self._params.t[i, s]))
+                                            if (self._params.omega[j] != s 
+                                                or self._params.d[j] >= self._params.t[i, s]))
 
                             - gp.quicksum(self._X[i_p, s, j] 
                                         for i_p in self._params.I_is_m[i, s] 
