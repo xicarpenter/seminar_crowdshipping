@@ -61,8 +61,8 @@ class CrowdshippingModel(gp.Model):
                 for j in self._params.J_is[i, s]:
                     indices_ISJ.append((i, s, j))               
 
-        self._X = self.addVars(indices_ISJ, vtype=GRB.BINARY, name="X") # 9
-        self._Y = self.addVars(indices_IS, vtype=GRB.CONTINUOUS, name="Y", lb=0) # 10
+        self._X = self.addVars(indices_ISJ, vtype=GRB.BINARY, name="X") # 11
+        self._Y = self.addVars(indices_IS, vtype=GRB.CONTINUOUS, name="Y", lb=0) # 12
 
         # OBJECTIVE
         # MAX-PROFIT
@@ -85,35 +85,35 @@ class CrowdshippingModel(gp.Model):
             raise ValueError("Objective function not recognized.")
 
         # CONSTRAINTS
-        # 2
+        # 1
         self.addConstrs((gp.quicksum(self._X[i, s, j] 
                                      for j in self._params.J_is[i, s]) <= 1
-                        for (i, s) in indices_IS), "Constraint_2")
+                        for (i, s) in indices_IS), "Constraint_1")
 
-        # 3 
+        # 2 
         self.addConstrs((gp.quicksum(self._X[i, s, j] 
                                     for i in self._params.I 
                                     if j in self._params.J_is[i, s]) <= 1 
                                 for j in self._params.J 
-                                for s in self._params.S), "Constraint_3")
+                                for s in self._params.S), "Constraint_2")
 
-        # 4 
+        # 3 
         self.addConstrs((self._X[i, s, j] 
                          - gp.quicksum(self._X[i_p, self._params.s_is_p[i, s], j] 
                                         for i_p in self._params.I_is_p[i, self._params.s_is_p[i, s]]
                                         if self._params.s_is_p[i, s] in self._params.S_i_p[i_p]
                                         and j in self._params.J_is[i_p, self._params.s_is_p[i, s]]) <= 0
                             for (i, s, j) in indices_ISJ 
-                            if self._params.s_is_p[i, s] != self._params.omega[j]), "Constraint_4")
+                            if self._params.s_is_p[i, s] != self._params.omega[j]), "Constraint_3")
 
-        # 5 
+        # 4 
         self.addConstrs(((gp.quicksum(self._X[i, self._params.alpha[j], j] 
                                     for i in self._params.I_j_1[j])
                             - gp.quicksum(self._X[i, self._params.s_is_m[i, self._params.omega[j]], j] 
                                         for i in self._params.I_j_2[j])) == 0
-                            for j in self._params.J), "Constraint_5")
+                            for j in self._params.J), "Constraint_4")
         
-        # 6 
+        # 5 
         self.addConstrs((((gp.quicksum(self._X[i_p, s, j] 
                                     for j in self._params.J 
                                     for i_p in self._params.I_j_1[j]
@@ -129,33 +129,33 @@ class CrowdshippingModel(gp.Model):
                                         for i_p in self._params.I_is_m[i, s] 
                                         for j in self._params.J_is[i_p, s])) <= self._params.l[s])
 
-                                        for i in self._params.I for s in self._params.S_i[i]), "Constraint_6")
+                                        for i in self._params.I for s in self._params.S_i[i]), "Constraint_5")
 
-        # 7 and 8
+        # 6, 7
         for (i, s, j) in indices_ISJ:
             if (i in self._params.I_s_p[s] 
                 and self._params.t[i, self._params.s_is_m[i, s]] >= self._params.r[j]):
                 self.addConstr((self._X[i, s, j] 
                                 - self._X[i, self._params.s_is_m[i, s], j] 
-                                <= self._Y[i, s]), "Constraint_7")
+                                <= self._Y[i, s]), "Constraint_6")
 
             else:
                 self.addConstr((self._X[i, s, j] 
-                                <= self._Y[i, s]), "Constraint_8")
+                                <= self._Y[i, s]), "Constraint_7")
         
-        # 11
+        # 8
         self.addConstrs((gp.quicksum(self._X[i, self._params.s_is_m[i, self._params.alpha[j]], j]
                                     for i in self._params.I_s_p[self._params.alpha[j]] 
                                     if j in self._params.J_is[i, self._params.s_is_m[i, self._params.alpha[j]]]) <= 0
-                                    for j in self._params.J), "Constraint_11")
+                                    for j in self._params.J), "Constraint_8")
         
-        # 12 
+        # 9 
         self.addConstrs((gp.quicksum(self._X[i, self._params.omega[j], j] 
                                     for i in self._params.I_s_p[self._params.omega[j]] 
                                     if j in self._params.J_is[i, self._params.omega[j]]) <= 0
-                            for j in self._params.J), "Constraint_12")
+                            for j in self._params.J), "Constraint_9")
         
-        # 13
+        # 10
         # Pakets can only be transported if they are at the station
         # they are transported from at the right time
         self.addConstrs((self._X[i, s, j] <= (gp.quicksum(self._X[i_p, self._params.s_is_m[i_p, s], j] 
@@ -165,7 +165,7 @@ class CrowdshippingModel(gp.Model):
                          for i in self._params.I 
                          for s in self._params.S_i[i] 
                          for j in self._params.J_is[i, s] 
-                         if s != self._params.alpha[j]), "Constraint_13")
+                         if s != self._params.alpha[j]), "Constraint_10")
         
         # Save model to lp file
         if self._save_lp:
