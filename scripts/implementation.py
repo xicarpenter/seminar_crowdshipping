@@ -10,8 +10,10 @@ class CrowdshippingModel(gp.Model):
     def __init__(self, 
                  params: Parameters,
                  of: str = "MAX_PROFIT",
-                 save_lp: bool = False):
+                 save_lp: bool = False,
+                 use_ten: bool = False):
         super().__init__()
+        self._use_ten = use_ten
         self._save_lp = save_lp
         self._params = params
         self._of = of
@@ -157,14 +159,15 @@ class CrowdshippingModel(gp.Model):
         # 10
         # Pakets can only be transported if they are at the station
         # they are transported from at the right time
-        self.addConstrs((self._X[i, s, j] <= (gp.quicksum(self._X[i_p, self._params.s_is_m[i_p, s], j] 
-                                                          for i_p in self._params.I_s_p[s]
-                                                          if self._params.t[i_p, self._params.s_is_m[i_p, s]] >= self._params.r[j]
-                                                          and self._params.t[i_p, s] <= self._params.t[i, s])) 
-                         for i in self._params.I 
-                         for s in self._params.S_i[i] 
-                         for j in self._params.J_is[i, s] 
-                         if s != self._params.alpha[j]), "Constraint_10")
+        if self._use_ten:
+            self.addConstrs((self._X[i, s, j] <= (gp.quicksum(self._X[i_p, self._params.s_is_m[i_p, s], j] 
+                                                            for i_p in self._params.I_s_p[s]
+                                                            if self._params.t[i_p, self._params.s_is_m[i_p, s]] >= self._params.r[j]
+                                                            and self._params.t[i_p, s] <= self._params.t[i, s])) 
+                            for i in self._params.I 
+                            for s in self._params.S_i[i] 
+                            for j in self._params.J_is[i, s] 
+                            if s != self._params.alpha[j]), "Constraint_10")
         
         # Save model to lp file
         if self._save_lp:
@@ -347,7 +350,8 @@ def test_seed(num_crowdshippers: int,
                print_level: int = 0,
                of: str = "MAX_PARCELS",
                seed: int = 42,
-               save_lp: bool = False):
+               save_lp: bool = False,
+               use_ten: bool = False):
     """
     Test 10 different seeds of the given parameters and print the results.
     """
@@ -359,7 +363,7 @@ def test_seed(num_crowdshippers: int,
     params = Parameters(**generator.return_kwargs())
 
     # MODEL
-    model = CrowdshippingModel(params, of=of, save_lp=save_lp)
+    model = CrowdshippingModel(params, of=of, save_lp=save_lp, use_ten=use_ten)
 
     if print_level < 3:
         model.setParam(GRB.Param.OutputFlag, 0)
@@ -388,7 +392,8 @@ def test_seeds(num_crowdshippers: int,
                of: str = "MAX_PARCELS",
                number_of_seeds: int = 5,
                seed: int = None,
-               used_seeds: list = None) -> list[CrowdshippingModel] | CrowdshippingModel:
+               used_seeds: list = None,
+               use_ten: bool = False) -> list[CrowdshippingModel] | CrowdshippingModel:
     """
     Test 10 different seeds of the given parameters and print the results.
     """
@@ -400,7 +405,8 @@ def test_seeds(num_crowdshippers: int,
                     entrainment_fee,
                     print_level=print_level,
                     of=of,
-                    seed=seed)
+                    seed=seed,
+                    use_ten=use_ten)
         
         return model
 
@@ -436,7 +442,7 @@ def test_seeds(num_crowdshippers: int,
         params = Parameters(**generator.return_kwargs())
 
         # MODEL
-        model = CrowdshippingModel(params, of=of)
+        model = CrowdshippingModel(params, of=of, use_ten=use_ten)
 
         if print_level < 3:
             model.setParam(GRB.Param.OutputFlag, 0)
@@ -485,23 +491,142 @@ def check_minimalinstanz(path: str = "data/minimalinstanz.pkl", print_level: int
     model.optimize()
     model.check_results(print_level=print_level)
     print("Invalid parcels:", model.check_parcels(seed=None))
+    
+    
+def compare_10(num_crowdshippers: int, 
+               num_parcels: int, 
+               entrainment_fee: int, 
+               of: str = "MAX_PARCELS",
+               seed: int = None,
+               number_of_seeds: int = 1,
+               print_level: int = 0):
+    if number_of_seeds == 1:
+        if seed is None:
+            seeds, model_10 = test_seeds(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                print_level=print_level,
+                                of=of,
+                                seed=seed,
+                                use_ten=True,
+                                number_of_seeds=number_of_seeds)
+            
+            seed = seeds[0]
+            model_10 = model_10[0]
+            
+            model_no_10 = test_seed(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                print_level=print_level,
+                                of=of,
+                                seed=seed,
+                                use_ten=False)
+            
+            print(f"--- Seed: {seed} ---")
+            if of == "MAX_PROFIT":
+                of_10 = model_10.calc_max_profit(print_level=0)
+                of_no_10 = model_no_10.calc_max_profit(print_level=0)
+
+                print(f"10: {of_10}, no 10: {of_no_10}\n")
+
+            elif of == "MAX_PARCELS":
+                of_10 = model_10.calc_max_parcels()
+                of_no_10 = model_no_10.calc_max_parcels()
+
+                print(f"10: {of_10}, no 10: {of_no_10}\n")
+
+            else:
+                raise ValueError("of must be MAX_PROFIT or MAX_PARCELS")
+
+        else:
+            model_10 = test_seed(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                print_level=print_level,
+                                of=of,
+                                seed=seed,
+                                use_ten=True)
+            
+            model_no_10 = test_seed(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                print_level=print_level,
+                                of=of,
+                                seed=seed,
+                                use_ten=False)
+            
+            with open(f"output/params.pkl", "wb") as f:
+                pickle.dump(model_10._params, f)
+            
+            print(f"--- Seed: {seed} ---")
+            if of == "MAX_PROFIT":
+                of_10 = model_10.calc_max_profit(print_level=0)
+                of_no_10 = model_no_10.calc_max_profit(print_level=0)
+
+                print()
+                print(f"10: {of_10}, no 10: {of_no_10}\n")
+            
+            elif of == "MAX_PARCELS":
+                of_10 = model_10.calc_max_parcels()
+                of_no_10 = model_no_10.calc_max_parcels()
+
+                print(f"10: {of_10}, no 10: {of_no_10}\n")
+
+            else:
+                raise ValueError("of must be MAX_PROFIT or MAX_PARCELS")    
+    
+    else:
+        used_seeds, models_10 = test_seeds(num_crowdshippers, 
+                              num_parcels, 
+                              entrainment_fee,  
+                              print_level=print_level,
+                              of=of,
+                              number_of_seeds=number_of_seeds,
+                              use_ten=True)
+        
+        _, models_no_10 = test_seeds(num_crowdshippers, 
+                              num_parcels, 
+                              entrainment_fee,  
+                              print_level=print_level,
+                              of=of,
+                              number_of_seeds=number_of_seeds,
+                              use_ten=False,
+                              used_seeds=used_seeds)
+        
+        for model_10, model_no_10 in zip(models_10, models_no_10):
+            print(f"--- Seed: {used_seeds[models_10.index(model_10)]} ---")
+            if of == "MAX_PROFIT":
+                of_10 = model_10.calc_max_profit(print_level=0)
+                of_no_10 = model_no_10.calc_max_profit(print_level=0)
+
+                print(f"10: {of_10}, no 10: {of_no_10}\n")
+            
+            elif of == "MAX_PARCELS":
+                of_10 = model_10.calc_max_parcels()
+                of_no_10 = model_no_10.calc_max_parcels()
+
+                print(f"10: {of_10}, no 10: {of_no_10}\n")
+
+            else:
+                raise ValueError("of must be MAX_PROFIT or MAX_PARCELS")
 
 
 if __name__ == "__main__":
     num_crowdshippers = 150
-    num_parcels = 50
+    num_parcels = 100
     entrainment_fee = 1
     of = "MAX_PROFIT"
     print_level = 1
-    seed = 10751 # Seed to none for test_seeds if unproucable behaviour is needed
+    seed = 26432 # Seed to none for test_seeds if unproucable behaviour is needed
     number_of_seeds = 1
 
     # check_minimalinstanz(print_level=print_level)
 
-    test_seeds(num_crowdshippers, 
-               num_parcels, 
-               entrainment_fee,
-               of=of,
-               seed=seed,  
-               print_level=print_level,
-               number_of_seeds=number_of_seeds)
+    compare_10(num_crowdshippers, 
+              num_parcels, 
+              entrainment_fee,
+              print_level=print_level,
+              of=of,
+              seed=seed,
+              number_of_seeds=number_of_seeds)
+    
