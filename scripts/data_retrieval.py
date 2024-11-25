@@ -5,6 +5,7 @@ from pypdf import PdfReader
 import re
 import os
 import pickle
+import random
 
 
 URL_JOURNEY = '''https://gvh.hafas.de/hamm?requestId=undefined&hciMethod=StationBoard&hciVersion=
@@ -224,7 +225,7 @@ def convert_hh_mm_ss_to_timedelta(time_string):
 
 def get_times_along_line(standard_times: dict):
     connections = {}
-    print(standard_times)
+    
     for idx, (station, rides) in enumerate(standard_times.items()):
         if idx == 0:
             try:
@@ -242,11 +243,13 @@ def get_times_along_line(standard_times: dict):
                 
                 connections[last_station, station] = (convert_hh_mm_ss_to_timedelta(min_time) 
                                                     - convert_hh_mm_ss_to_timedelta(start_time)).total_seconds()/60
+                connections[last_station, station] %= 10
                 start_time = min_time
                 last_station = station
 
             except ValueError:
-                print(f"ValueError: Station {station} not found in dictionary.")
+                print(f"ValueError: Station {station} not found in dictionary. Setting random. ")
+                connections[last_station, station] = random.randint(1, 3)
             
     return connections
 
@@ -382,5 +385,9 @@ def test_line(folder: str = "data/gvh_linien", line_nr: int = 1):
 
 
 if __name__ == "__main__":
+    folder = "data/gvh_linien"
     lines_dict, stations_dict = generate()
-    get_duration(lines_dict, "U1")
+
+    for i in os.listdir(folder):
+        line = f"U{i.split('.')[0]}"
+        print(get_duration(lines_dict, line))
