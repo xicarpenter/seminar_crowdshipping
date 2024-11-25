@@ -305,7 +305,7 @@ class InstanceGenerator:
         random.seed(self.seed)
 
         self.lines, self.stations = generate()
-        self.travel_times = self.gen_travel_times()
+        self.travel_times = self.read_travel_times()
 
         self.I = [f"C{i}" for i in range(1, self.num_crowdshippers + 1)]
         self.J = [f"P{j}" for j in range(1, self.num_parcels + 1)]
@@ -322,7 +322,7 @@ class InstanceGenerator:
         self.init_crowdshippers()
 
 
-    def gen_travel_times(self):
+    def read_travel_times(self):
         """
         Generate travel times between stations.
 
@@ -336,22 +336,44 @@ class InstanceGenerator:
             A dictionary mapping each line to a dictionary mapping each pair of
             stations to the travel time between the two stations.
         """
-        # connections = {line: dict() for line in self.lines.keys()}
-        # choices = {1: 0.5, 2: 0.3, 3: 0.15, 4: 0.05}
-
-        # for line in self.lines.keys():
-        #     for idx, station in enumerate(self.lines[line]["stations"]):
-        #         if idx == 0:
-        #             last_station = station
-                    
-        #         else:
-        #             connections[line][last_station, station] = npr.choice(list(choices.keys()), 1,
-        #                             p=list(choices.values()))[0]
-        #             last_station = station
         with open("data/connections_full.pkl", "rb") as f:
             connections = pickle.load(f)
                 
         return connections    
+    
+
+    def gen_travel_times(self):
+        """
+        Generate travel times between stations on each line.
+
+        This function initializes a dictionary of connections for each line,
+        where each connection represents the travel time between two directly
+        connected stations. The travel times are randomly generated based on
+        a predefined probability distribution given by `choices`.
+
+        The keys of the `connections` dictionary are tuples representing pairs
+        of stations, and the values are the travel times between those stations.
+
+        Returns
+        -------
+        connections : dict
+            A dictionary representing the travel times between stations for
+            each line.
+        """
+        connections = {line: dict() for line in self.lines.keys()}
+        choices = {1: 0.5, 2: 0.3, 3: 0.15, 4: 0.05}
+
+        for line in self.lines.keys():
+            for idx, station in enumerate(self.lines[line]["stations"]):
+                if idx == 0:
+                    last_station = station
+                    
+                else:
+                    connections[line][last_station, station] = npr.choice(list(choices.keys()), 1,
+                                    p=list(choices.values()))[0]
+                    last_station = station
+
+        return connections
 
 
     def init_crowdshippers(self):
