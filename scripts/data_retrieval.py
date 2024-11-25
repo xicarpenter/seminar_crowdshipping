@@ -6,6 +6,7 @@ import re
 import os
 import pickle
 import random
+from copy import deepcopy
 
 
 URL_JOURNEY = '''https://gvh.hafas.de/hamm?requestId=undefined&hciMethod=StationBoard&hciVersion=
@@ -228,14 +229,8 @@ def get_times_along_line(standard_times: dict):
     
     for idx, (station, rides) in enumerate(standard_times.items()):
         if idx == 0:
-            try:
-                start_time = rides[list(rides.keys())[0]]
-                last_station = station
-
-            except IndexError:
-                start_time = 0
-                last_station = station
-                print(f"IndexError: Station {station} not found in dictionary.")
+            start_time = rides[list(rides.keys())[0]]
+            last_station = station
             
         else:
             try:
@@ -244,20 +239,46 @@ def get_times_along_line(standard_times: dict):
                 connections[last_station, station] = (convert_hh_mm_ss_to_timedelta(min_time) 
                                                     - convert_hh_mm_ss_to_timedelta(start_time)).total_seconds()/60
                 connections[last_station, station] %= 10
+
+                if connections[last_station, station] > 3 or connections[last_station, station] < 1:
+                    print(f"Time is out of bounds for station {station}. Will be set at random.")
+                    connections[last_station, station] = None
+                
                 start_time = min_time
                 last_station = station
 
-            except ValueError:
-                print(f"ValueError: Station {station} not found in dictionary. Setting random. ")
-                connections[last_station, station] = random.randint(1, 3)
+            except (ValueError, TypeError):
+                print(f"Error: Station {station} not found in dictionary. Will be set at random. ")
+                connections[last_station, station] = None
             
     return connections
 
 
 def get_duration(lines_dict: dict, line_nr: str) -> dict:
     standard_times = get_x_along_line(lines_dict, line_nr, filter=True)
-    duration = get_times_along_line(standard_times)
+
+    try:
+        duration = get_times_along_line(standard_times)
+
+    except IndexError:
+        try:
+            lines_dict_new = deepcopy(lines_dict)
+            lines_dict_new[line_nr]["start_station"] = f"Hannover, {lines_dict_new[line_nr]['start_station']}"
+            print("Attention!!!!")
+            standard_times = get_x_along_line(lines_dict_new, line_nr, filter=True, print_times=True)
+            duration = get_times_along_line(standard_times)
+
+        except IndexError:
+            duration = {}
     
+            for idx, (station, rides) in enumerate(standard_times.items()):
+                if idx == 0:
+                    last_station = station
+                    
+                else:
+                    duration[last_station, station] = None
+                    last_station = station
+
     return duration
 
 
@@ -386,8 +407,20 @@ def test_line(folder: str = "data/gvh_linien", line_nr: int = 1):
 
 if __name__ == "__main__":
     folder = "data/gvh_linien"
-    lines_dict, stations_dict = generate()
 
+    save()
+
+    with open("data/lines.pkl", "rb") as f:
+        lines_dict, stations_dict = pickle.load(f)
+
+    connections = {}
     for i in os.listdir(folder):
         line = f"U{i.split('.')[0]}"
-        print(get_duration(lines_dict, line))
+        dur = get_duration(lines_dict, line)
+        connections[line] = dur
+
+        print(line)
+        print(dur)
+
+    with open("data/connections.pkl", "wb") as f:
+        pickle.dump(connections, f)

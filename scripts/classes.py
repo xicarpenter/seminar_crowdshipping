@@ -336,18 +336,20 @@ class InstanceGenerator:
             A dictionary mapping each line to a dictionary mapping each pair of
             stations to the travel time between the two stations.
         """
-        connections = {line: dict() for line in self.lines.keys()}
-        choices = {1: 0.5, 2: 0.3, 3: 0.15, 4: 0.05}
+        # connections = {line: dict() for line in self.lines.keys()}
+        # choices = {1: 0.5, 2: 0.3, 3: 0.15, 4: 0.05}
 
-        for line in self.lines.keys():
-            for idx, station in enumerate(self.lines[line]["stations"]):
-                if idx == 0:
-                    last_station = station
+        # for line in self.lines.keys():
+        #     for idx, station in enumerate(self.lines[line]["stations"]):
+        #         if idx == 0:
+        #             last_station = station
                     
-                else:
-                    connections[line][last_station, station] = npr.choice(list(choices.keys()), 1,
-                                    p=list(choices.values()))[0]
-                    last_station = station
+        #         else:
+        #             connections[line][last_station, station] = npr.choice(list(choices.keys()), 1,
+        #                             p=list(choices.values()))[0]
+        #             last_station = station
+        with open("data/connections_full.pkl", "rb") as f:
+            connections = pickle.load(f)
                 
         return connections    
 

@@ -393,7 +393,7 @@ def test_seeds(num_crowdshippers: int,
                number_of_seeds: int = 5,
                seed: int = None,
                used_seeds: list = None,
-               use_ten: bool = False) -> list[CrowdshippingModel] | CrowdshippingModel:
+               use_ten: bool = True) -> list[CrowdshippingModel] | CrowdshippingModel:
     """
     Test 10 different seeds of the given parameters and print the results.
     """
@@ -617,16 +617,23 @@ if __name__ == "__main__":
     entrainment_fee = 1
     of = "MAX_PROFIT"
     print_level = 1
-    seed = 26432 # Seed to none for test_seeds if unproucable behaviour is needed
+    seed = None # Seed to none for test_seeds if unproucable behaviour is needed
     number_of_seeds = 1
 
     # check_minimalinstanz(print_level=print_level)
 
-    compare_10(num_crowdshippers, 
+    # compare_10(num_crowdshippers, 
+    #           num_parcels, 
+    #           entrainment_fee,
+    #           print_level=print_level,
+    #           of=of,
+    #           seed=seed,
+    #           number_of_seeds=number_of_seeds)
+    test_seeds(num_crowdshippers, 
               num_parcels, 
               entrainment_fee,
               print_level=print_level,
               of=of,
-              seed=seed,
-              number_of_seeds=number_of_seeds)
+              number_of_seeds=number_of_seeds,
+              seed=seed)
     
