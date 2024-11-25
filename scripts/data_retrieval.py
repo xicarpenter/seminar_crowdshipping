@@ -5,8 +5,6 @@ from pypdf import PdfReader
 import re
 import os
 import pickle
-import osmnx as ox
-import json
 
 
 URL_JOURNEY = '''https://gvh.hafas.de/hamm?requestId=undefined&hciMethod=StationBoard&hciVersion=
@@ -283,8 +281,8 @@ def remove_non_stations(string_list, forbidden_substrings = [" - ",
                                                              "Samstag", 
                                                              "=",
                                                              "- ",
-                                                             "alle",
-                                                             "Min"]):
+                                                             "Min"],
+                                                             forbidden_strings = ["alle"]):
     ret = []
     for string in string_list:
         string = string.replace(" ab", "")
@@ -298,6 +296,11 @@ def remove_non_stations(string_list, forbidden_substrings = [" - ",
 
     out = list(dict.fromkeys(ret))
     ext = extend_slashes(out)
+
+    for string in ext:
+        for forbidden_string in forbidden_strings:
+            if forbidden_string == string:
+                ext.remove(string)
 
     return [station.replace("/ ", ", ").replace("/", ", ") for station in ext]
 
@@ -375,41 +378,9 @@ def save(file_path: str = "data/lines.pkl"):
 def test_line(folder: str = "data/gvh_linien", line_nr: int = 1):
     split_text = read_pdf(os.path.join(folder, f"{line_nr}.pdf"))
     stations = remove_non_stations(split_text)
-
     print(stations)
-
-
-def get_geo_location(stations: list):
-        # Dictionary to store station names and their coordinates
-        station_coords = {}
-
-        # Query OSM for each station to get coordinates
-        for station_name in stations:
-            try:
-                location = ox.geocode(f"{station_name}, Hannover, Germany")
-                station_coords[station_name] = location
-                print(f"Found coordinates for {station_name}: {location}")
-
-            except Exception as e:
-                print(f"Could not find coordinates for {station_name}: {e}\n Trying again with different format...")
-
-                try:
-                    location = ox.geocode(f"{station_name}, Germany")
-                    station_coords[station_name] = list(location)
-                    print(f"Found coordinates for {station_name}: {location}")
-
-                except Exception as e:
-                    print(f"Could not find coordinates for {station_name}: {e}")
-                    station_coords[station_name] = [0, 0]
-
-        # Check coordinates
-        print("Station coordinates:", station_coords)
-
-        # Saving to json
-        with open("data/station_coords.json", "w") as f:
-            json.dump(station_coords, f, indent=4)
 
 
 if __name__ == "__main__":
     lines_dict, stations_dict = generate()
-    print(stations_dict.keys())
+    get_duration(lines_dict, "U1")

@@ -535,6 +535,6 @@ if __name__ == "__main__":
 
     params = Parameters(**generator.return_kwargs())
 
-    print(params)
+    print(len(params.S))
 
 
