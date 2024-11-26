@@ -5,8 +5,8 @@ from pypdf import PdfReader
 import re
 import os
 import pickle
-import osmnx as ox
-import json
+import random
+from copy import deepcopy
 
 
 URL_JOURNEY = '''https://gvh.hafas.de/hamm?requestId=undefined&hciMethod=StationBoard&hciVersion=
@@ -226,17 +226,11 @@ def convert_hh_mm_ss_to_timedelta(time_string):
 
 def get_times_along_line(standard_times: dict):
     connections = {}
-    print(standard_times)
+    
     for idx, (station, rides) in enumerate(standard_times.items()):
         if idx == 0:
-            try:
-                start_time = rides[list(rides.keys())[0]]
-                last_station = station
-
-            except IndexError:
-                start_time = 0
-                last_station = station
-                print(f"IndexError: Station {station} not found in dictionary.")
+            start_time = rides[list(rides.keys())[0]]
+            last_station = station
             
         else:
             try:
@@ -244,19 +238,47 @@ def get_times_along_line(standard_times: dict):
                 
                 connections[last_station, station] = (convert_hh_mm_ss_to_timedelta(min_time) 
                                                     - convert_hh_mm_ss_to_timedelta(start_time)).total_seconds()/60
+                connections[last_station, station] %= 10
+
+                if connections[last_station, station] > 3 or connections[last_station, station] < 1:
+                    print(f"Time is out of bounds for station {station}. Will be set at random.")
+                    connections[last_station, station] = None
+                
                 start_time = min_time
                 last_station = station
 
-            except ValueError:
-                print(f"ValueError: Station {station} not found in dictionary.")
+            except (ValueError, TypeError):
+                print(f"Error: Station {station} not found in dictionary. Will be set at random. ")
+                connections[last_station, station] = None
             
     return connections
 
 
 def get_duration(lines_dict: dict, line_nr: str) -> dict:
     standard_times = get_x_along_line(lines_dict, line_nr, filter=True)
-    duration = get_times_along_line(standard_times)
+
+    try:
+        duration = get_times_along_line(standard_times)
+
+    except IndexError:
+        try:
+            lines_dict_new = deepcopy(lines_dict)
+            lines_dict_new[line_nr]["start_station"] = f"Hannover, {lines_dict_new[line_nr]['start_station']}"
+            print("Attention!!!!")
+            standard_times = get_x_along_line(lines_dict_new, line_nr, filter=True, print_times=True)
+            duration = get_times_along_line(standard_times)
+
+        except IndexError:
+            duration = {}
     
+            for idx, (station, rides) in enumerate(standard_times.items()):
+                if idx == 0:
+                    last_station = station
+                    
+                else:
+                    duration[last_station, station] = None
+                    last_station = station
+
     return duration
 
 
@@ -283,8 +305,8 @@ def remove_non_stations(string_list, forbidden_substrings = [" - ",
                                                              "Samstag", 
                                                              "=",
                                                              "- ",
-                                                             "alle",
-                                                             "Min"]):
+                                                             "Min"],
+                                                             forbidden_strings = ["alle"]):
     ret = []
     for string in string_list:
         string = string.replace(" ab", "")
@@ -298,6 +320,11 @@ def remove_non_stations(string_list, forbidden_substrings = [" - ",
 
     out = list(dict.fromkeys(ret))
     ext = extend_slashes(out)
+
+    for string in ext:
+        for forbidden_string in forbidden_strings:
+            if forbidden_string == string:
+                ext.remove(string)
 
     return [station.replace("/ ", ", ").replace("/", ", ") for station in ext]
 
@@ -375,41 +402,25 @@ def save(file_path: str = "data/lines.pkl"):
 def test_line(folder: str = "data/gvh_linien", line_nr: int = 1):
     split_text = read_pdf(os.path.join(folder, f"{line_nr}.pdf"))
     stations = remove_non_stations(split_text)
-
     print(stations)
 
 
-def get_geo_location(stations: list):
-        # Dictionary to store station names and their coordinates
-        station_coords = {}
-
-        # Query OSM for each station to get coordinates
-        for station_name in stations:
-            try:
-                location = ox.geocode(f"{station_name}, Hannover, Germany")
-                station_coords[station_name] = location
-                print(f"Found coordinates for {station_name}: {location}")
-
-            except Exception as e:
-                print(f"Could not find coordinates for {station_name}: {e}\n Trying again with different format...")
-
-                try:
-                    location = ox.geocode(f"{station_name}, Germany")
-                    station_coords[station_name] = list(location)
-                    print(f"Found coordinates for {station_name}: {location}")
-
-                except Exception as e:
-                    print(f"Could not find coordinates for {station_name}: {e}")
-                    station_coords[station_name] = [0, 0]
-
-        # Check coordinates
-        print("Station coordinates:", station_coords)
-
-        # Saving to json
-        with open("data/station_coords.json", "w") as f:
-            json.dump(station_coords, f, indent=4)
-
-
 if __name__ == "__main__":
-    lines_dict, stations_dict = generate()
-    print(stations_dict.keys())
+    folder = "data/gvh_linien"
+
+    save()
+
+    with open("data/lines.pkl", "rb") as f:
+        lines_dict, stations_dict = pickle.load(f)
+
+    connections = {}
+    for i in os.listdir(folder):
+        line = f"U{i.split('.')[0]}"
+        dur = get_duration(lines_dict, line)
+        connections[line] = dur
+
+        print(line)
+        print(dur)
+
+    with open("data/connections.pkl", "wb") as f:
+        pickle.dump(connections, f)

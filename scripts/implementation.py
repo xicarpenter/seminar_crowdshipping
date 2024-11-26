@@ -623,7 +623,7 @@ if __name__ == "__main__":
     entrainment_fee = 1
     of = "MAX_PROFIT"
     print_level = 1
-    seed = 26432 # Seed to none for test_seeds if unproucable behaviour is needed
+    seed = None # Seed to none for test_seeds if unproucable behaviour is needed
     number_of_seeds = 1
     load_from_file = "output/params_26432.pkl" # None 
 
