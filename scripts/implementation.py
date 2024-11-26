@@ -351,7 +351,8 @@ def test_seed(num_crowdshippers: int,
                of: str = "MAX_PARCELS",
                seed: int = 42,
                save_lp: bool = False,
-               use_ten: bool = False):
+               use_ten: bool = True,
+               load_from_file: str = None):
     """
     Test 10 different seeds of the given parameters and print the results.
     """
@@ -360,7 +361,10 @@ def test_seed(num_crowdshippers: int,
                                 entrainment_fee,
                                 seed=seed)
 
-    params = Parameters(**generator.return_kwargs())
+    if load_from_file is not None:
+        params = Parameters.load(load_from_file)
+    else:
+        params = Parameters(**generator.return_kwargs())
 
     # MODEL
     model = CrowdshippingModel(params, of=of, save_lp=save_lp, use_ten=use_ten)
@@ -379,8 +383,8 @@ def test_seed(num_crowdshippers: int,
     print("Done with seed:", seed)
     print(f"Invalid parcels: {count}\n")
 
-    with open(f"output/params.pkl", "wb") as f:
-                pickle.dump(model._params, f)
+    # with open(f"output/params_{seed}.pkl", "wb") as f:
+    #     pickle.dump(model._params, f)
 
     return model
 
@@ -393,7 +397,8 @@ def test_seeds(num_crowdshippers: int,
                number_of_seeds: int = 5,
                seed: int = None,
                used_seeds: list = None,
-               use_ten: bool = False) -> list[CrowdshippingModel] | CrowdshippingModel:
+               use_ten: bool = True,
+               load_from_file: str = None) -> list[CrowdshippingModel] | CrowdshippingModel:
     """
     Test 10 different seeds of the given parameters and print the results.
     """
@@ -406,7 +411,8 @@ def test_seeds(num_crowdshippers: int,
                     print_level=print_level,
                     of=of,
                     seed=seed,
-                    use_ten=use_ten)
+                    use_ten=use_ten,
+                    load_from_file=load_from_file)
         
         return model
 
@@ -499,7 +505,8 @@ def compare_10(num_crowdshippers: int,
                of: str = "MAX_PARCELS",
                seed: int = None,
                number_of_seeds: int = 1,
-               print_level: int = 0):
+               print_level: int = 0,
+               load_from_file: str = None):
     if number_of_seeds == 1:
         if seed is None:
             seeds, model_10 = test_seeds(num_crowdshippers, 
@@ -509,7 +516,8 @@ def compare_10(num_crowdshippers: int,
                                 of=of,
                                 seed=seed,
                                 use_ten=True,
-                                number_of_seeds=number_of_seeds)
+                                number_of_seeds=number_of_seeds,
+                                load_from_file=load_from_file)
             
             seed = seeds[0]
             model_10 = model_10[0]
@@ -520,7 +528,8 @@ def compare_10(num_crowdshippers: int,
                                 print_level=print_level,
                                 of=of,
                                 seed=seed,
-                                use_ten=False)
+                                use_ten=False,
+                                load_from_file=load_from_file)
             
             print(f"--- Seed: {seed} ---")
             if of == "MAX_PROFIT":
@@ -554,9 +563,6 @@ def compare_10(num_crowdshippers: int,
                                 of=of,
                                 seed=seed,
                                 use_ten=False)
-            
-            with open(f"output/params.pkl", "wb") as f:
-                pickle.dump(model_10._params, f)
             
             print(f"--- Seed: {seed} ---")
             if of == "MAX_PROFIT":
@@ -619,14 +625,24 @@ if __name__ == "__main__":
     print_level = 1
     seed = 26432 # Seed to none for test_seeds if unproucable behaviour is needed
     number_of_seeds = 1
+    load_from_file = "output/params_26432.pkl" # None 
 
     # check_minimalinstanz(print_level=print_level)
 
+    # compare_10(num_crowdshippers, 
+    #           num_parcels, 
+    #           entrainment_fee,
+    #           print_level=print_level,
+    #           of=of,
+    #           seed=seed,
+    #           number_of_seeds=number_of_seeds)
+    
     compare_10(num_crowdshippers, 
               num_parcels, 
               entrainment_fee,
               print_level=print_level,
               of=of,
+              number_of_seeds=number_of_seeds,
               seed=seed,
-              number_of_seeds=number_of_seeds)
+              load_from_file=load_from_file)
     
