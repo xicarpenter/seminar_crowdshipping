@@ -5,7 +5,7 @@ import pickle
 from copy import deepcopy
 import networkx as nx
 import matplotlib.pyplot as plt
-import numpy.random as npr
+import numpy as np
 
 
 class Parameters:
@@ -46,7 +46,7 @@ class Parameters:
         if "l" in kwargs:
             self.l = kwargs["l"]
         else:
-            self.l = {s: random.randint(1, 4) for s in self.S}
+            self.l = {s: 20 for s in self.S}
 
         # generate subsets based on sets and parameters
         self.generate_subsets()
@@ -298,13 +298,16 @@ class InstanceGenerator:
         self.num_crowdshippers = num_crowdshippers
         self.num_parcels = num_parcels
         self.seed = seed
-        self.max_time = 180
+        self.max_time = 600
 
         # Setting random seeds
-        npr.seed(self.seed)
+        np.random.seed(self.seed)
         random.seed(self.seed)
 
-        self.lines, self.stations = generate()
+        with open("data/stations_data/lines.pkl", "rb") as f:
+            self.lines, self.stations = pickle.load(f)
+
+        # self.lines, self.stations = generate()
         self.travel_times = self.read_travel_times()
 
         self.I = [f"C{i}" for i in range(1, self.num_crowdshippers + 1)]
@@ -312,9 +315,17 @@ class InstanceGenerator:
         self.S = list(self.stations.keys())
         
         self.generate_graph()
+        
+        self.l = {}
+        for s in self.S:
+            if s in ["Kroepcke", "Aegidientorplatz", "Hauptbahnhof"]:
+                self.l[s] = np.random.binomial(len(self.J)//2, 0.5)
+            else:
+                self.l[s] = np.random.binomial(len(self.J)//4, 0.5)
 
-        self.l = {s: random.randint(1, 4) for s in self.S}
+        # self.l = {s: random.randint(1, 4) for s in self.S}
         # self.p = {p: random.randint(1, 10) for p in self.J} 
+
         self.p = {p: 5 for p in self.J} 
         self.f = entrainment_fee
 
@@ -336,44 +347,10 @@ class InstanceGenerator:
             A dictionary mapping each line to a dictionary mapping each pair of
             stations to the travel time between the two stations.
         """
-        with open("data/connections_full.pkl", "rb") as f:
+        with open("data/stations_data/connections_full.pkl", "rb") as f:
             connections = pickle.load(f)
                 
         return connections    
-    
-
-    def gen_travel_times(self):
-        """
-        Generate travel times between stations on each line.
-
-        This function initializes a dictionary of connections for each line,
-        where each connection represents the travel time between two directly
-        connected stations. The travel times are randomly generated based on
-        a predefined probability distribution given by `choices`.
-
-        The keys of the `connections` dictionary are tuples representing pairs
-        of stations, and the values are the travel times between those stations.
-
-        Returns
-        -------
-        connections : dict
-            A dictionary representing the travel times between stations for
-            each line.
-        """
-        connections = {line: dict() for line in self.lines.keys()}
-        choices = {1: 0.5, 2: 0.3, 3: 0.15, 4: 0.05}
-
-        for line in self.lines.keys():
-            for idx, station in enumerate(self.lines[line]["stations"]):
-                if idx == 0:
-                    last_station = station
-                    
-                else:
-                    connections[line][last_station, station] = npr.choice(list(choices.keys()), 1,
-                                    p=list(choices.values()))[0]
-                    last_station = station
-
-        return connections
 
 
     def init_crowdshippers(self):
@@ -394,6 +371,9 @@ class InstanceGenerator:
         self.alpha_crowd = {c: random.choice(self.S) for c in self.I}
         self.omega_crowd = {c: random.choice([s for s in self.S if s != self.alpha_crowd[c]]) for c in self.I}
 
+        choices = {1: 0.4, # early movers
+                   2: 0.2, # working hours
+                   3: 0.4} # late hours
         self.r_crowd = {}
         self.d_crowd = {}
         self.t = {}
@@ -403,7 +383,18 @@ class InstanceGenerator:
             target_station = self.omega_crowd[i]
             path, time_taken = self.find_path(starting_station, target_station)
 
-            self.r_crowd[i] = random.randint(0, self.max_time-1 - time_taken)
+            draw = int(np.random.choice(list(choices.keys()), 1, p=list(choices.values()))[0])
+
+            if draw == 1:
+                start = random.randint(1, 0.3*self.max_time)
+
+            elif draw == 2:
+                start = random.randint(0.3*self.max_time, 0.6*self.max_time)
+
+            elif draw == 3:
+                start = random.randint(0.6*self.max_time, 0.9*self.max_time)
+
+            self.r_crowd[i] = start
             self.d_crowd[i] = self.r_crowd[i] + time_taken
 
             for idx, station in enumerate(path):
@@ -430,8 +421,11 @@ class InstanceGenerator:
         """
         self.alpha = {j: random.choice(self.S) for j in self.J}
         self.omega = {j: random.choice(self.S) for j in self.J if j != self.alpha[j]}
-        self.r = {j: random.randint(0, self.max_time-self.find_path(self.alpha[j], self.omega[j])[1]) for j in self.J}
-        self.d = {j: random.randint(self.r[j]+self.find_path(self.alpha[j], self.omega[j])[1], self.max_time-1) for j in self.J}
+        # self.r = {j: random.randint(0, self.max_time-self.find_path(self.alpha[j], self.omega[j])[1]) for j in self.J}
+        # self.d = {j: random.randint(self.r[j]+self.find_path(self.alpha[j], self.omega[j])[1], self.max_time-1) for j in self.J}
+
+        self.r = {j: random.randint(1, 0.1*self.max_time) for j in self.J}
+        self.d = {j: random.randint(0.9*self.max_time, self.max_time) for j in self.J}
 
 
     def find_path(self, i, j):
