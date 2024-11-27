@@ -367,6 +367,8 @@ def test_seed(num_crowdshippers: int,
 
     if load_from_file is not None:
         params = Parameters.load(load_from_file)
+        print("USINGF PARAMETERS")
+        print(params.l["Kroepcke"])
         
     else:
         generator = InstanceGenerator(num_crowdshippers, 
@@ -782,7 +784,12 @@ if __name__ == "__main__":
     print_level = 3
     seed = 26432 # 26432 # Seed to none for test_seeds if unproucable behaviour is needed
     number_of_seeds = 1
-    load_from_file = "output/params_26432.pkl" # "output/params_26432.pkl"
+    load_from_file = "output/params_26432-example.pkl" # "output/params_26432.pkl"
+
+    with open(load_from_file, "rb") as f:
+        params = pickle.load(f)
+
+    print(params.l["Kroepcke"])
 
     # check_minimalinstanz(print_level=print_level)
     
@@ -795,11 +802,11 @@ if __name__ == "__main__":
     #             seed=seed,
     #             load_from_file=load_from_file)
 
-    compare_of(num_crowdshippers, 
-                num_parcels, 
-                entrainment_fee,
-                print_level=print_level,
-                number_of_seeds=number_of_seeds,
-                seed=seed,
-                load_from_file=load_from_file)
+    # compare_of(num_crowdshippers, 
+    #             num_parcels, 
+    #             entrainment_fee,
+    #             print_level=print_level,
+    #             number_of_seeds=number_of_seeds,
+    #             seed=seed,
+    #             load_from_file=load_from_file)
     
