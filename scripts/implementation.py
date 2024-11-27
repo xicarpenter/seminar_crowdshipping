@@ -732,16 +732,24 @@ if __name__ == "__main__":
     of = "MAX_PROFIT"
     print_level = 3
     seed = None # 26432 # Seed to none for test_seeds if unproucable behaviour is needed
-    number_of_seeds = 50
+    number_of_seeds = 2
     load_from_file = None # "output/params_26432.pkl"
 
     # check_minimalinstanz(print_level=print_level)
     
-    results, seeds = compare_10(num_crowdshippers, 
+    # results, seeds = compare_10(num_crowdshippers, 
+    #                             num_parcels, 
+    #                             entrainment_fee,
+    #                             print_level=print_level,
+    #                             of=of,
+    #                             number_of_seeds=number_of_seeds,
+    #                             seed=seed,
+    #                             load_from_file=load_from_file)
+    
+    results, seeds = compare_of(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
                                 print_level=print_level,
-                                of=of,
                                 number_of_seeds=number_of_seeds,
                                 seed=seed,
                                 load_from_file=load_from_file)
