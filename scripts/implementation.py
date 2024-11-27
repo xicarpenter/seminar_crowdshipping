@@ -498,6 +498,139 @@ def check_minimalinstanz(path: str = "data/minimalinstanz.pkl", print_level: int
     print("Invalid parcels:", model.check_parcels(seed=None))
             
 
+def compare_of(num_crowdshippers, 
+               num_parcels, 
+               entrainment_fee,
+               print_level: int = 0,
+               number_of_seeds: int = 1,
+               seed: int = None,
+               load_from_file: str = None):
+    
+    results = {"MAX_PROFIT": {}, 
+               "MAX_PARCELS": {}}
+    
+    if number_of_seeds == 1:
+        if seed is None:
+            seeds, model_max_profit = test_seeds(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                print_level=print_level,
+                                of="MAX_PROFIT",
+                                seed=seed,
+                                number_of_seeds=number_of_seeds)
+            
+            seed = seeds[0]
+            model_max_profit = model_max_profit[0]
+            
+            model_max_parcels = test_seed(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                print_level=print_level,
+                                of="MAX_PARCELS",
+                                seed=seed)
+            
+            results = add_results(results, seed, model_max_profit, model_max_parcels, mode="of")
+
+            return results, seed
+
+        else:
+            model_max_profit = test_seed(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                print_level=print_level,
+                                of="MAX_PROFIT",
+                                seed=seed,
+                                load_from_file=load_from_file)
+            
+            model_max_parcels = test_seed(num_crowdshippers, 
+                                num_parcels, 
+                                entrainment_fee,
+                                print_level=print_level,
+                                of="MAX_PARCELS",
+                                seed=seed,
+                                load_from_file=load_from_file)
+            
+            results = add_results(results, seed, model_max_profit, model_max_parcels, mode="of")
+
+            return results    
+    
+    else:
+        used_seeds, models_max_profit = test_seeds(num_crowdshippers, 
+                              num_parcels, 
+                              entrainment_fee,  
+                              print_level=print_level,
+                              of="MAX_PROFIT",
+                              number_of_seeds=number_of_seeds)
+        
+        _, models_max_parcels = test_seeds(num_crowdshippers, 
+                              num_parcels, 
+                              entrainment_fee,  
+                              print_level=print_level,
+                              of="MAX_PARCELS",
+                              number_of_seeds=number_of_seeds,
+                              used_seeds=used_seeds)
+        
+        return_seeds = []
+        for model_max_profit, model_max_parcels in zip(models_max_profit, models_max_parcels):
+            results = add_results(results, 
+                                  used_seeds[models_max_profit.index(model_max_profit)], 
+                                  model_max_profit, 
+                                  model_max_parcels, 
+                                  mode="of")   
+            return_seeds.append(used_seeds[models_max_profit.index(model_max_profit)])
+
+        print("--- Summary ---")
+        print(results, return_seeds)
+
+        with open(f"output/results_of.pkl", "wb") as f:
+            pickle.dump((results, return_seeds), f)
+
+        return results, return_seeds
+    
+
+def add_results(results, seed, model_1, model_2, mode = "10"):
+    if mode == "10":
+        results["models_10"][seed] = {}
+        results["models_no_10"][seed] = {}
+
+        results["models_10"][seed]["MAX_PROFIT"] = model_1.calc_max_profit(print_level=0)
+        results["models_no_10"][seed]["MAX_PROFIT"] = model_2.calc_max_profit(print_level=0)
+
+        results["models_10"][seed]["MAX_PARCELS"] = model_1.calc_max_parcels()
+        results["models_no_10"][seed]["MAX_PARCELS"] = model_2.calc_max_parcels()
+
+        results["models_10"][seed]["Runtime"] = round(model_1.runtime, 3)
+        results["models_no_10"][seed]["Runtime"] = round(model_2.runtime, 3)
+
+        print(f"--- Seed: {seed} ---")
+        print("Results for 10:", results["models_10"][seed])
+        print("Results for no 10:", results["models_no_10"][seed])
+        print("\n")
+
+    elif mode == "of":
+        results["MAX_PROFIT"][seed] = {}
+        results["MAX_PARCELS"][seed] = {}
+
+        results["MAX_PROFIT"][seed]["MAX_PROFIT"] = model_1.calc_max_profit(print_level=0)
+        results["MAX_PARCELS"][seed]["PARCELS"] = model_1.calc_max_parcels()
+
+        results["MAX_PROFIT"][seed]["PROFIT"] = model_2.calc_max_profit(print_level=0)
+        results["MAX_PARCELS"][seed]["MAX_PARCELS"] = model_2.calc_max_parcels()
+
+        results["MAX_PROFIT"][seed]["Runtime"] = round(model_1.runtime, 3)
+        results["MAX_PARCELS"][seed]["Runtime"] = round(model_2.runtime, 3)
+
+        print(f"--- Seed: {seed} ---")
+        print("Results for MAX_PROFIT:", results["MAX_PROFIT"][seed])
+        print("Results for MAX_PARCELS:", results["MAX_PARCELS"][seed])
+        print("\n")
+
+    else:
+        raise ValueError("Mode not in available modes. ")
+
+    return results
+    
+
 def compare_10(num_crowdshippers, 
                num_parcels, 
                entrainment_fee,
@@ -506,154 +639,9 @@ def compare_10(num_crowdshippers,
                number_of_seeds: int = 1,
                seed: int = None,
                load_from_file: str = None):
-    results = {"models_10": {}, 
-               "models_no_10": {}}
-    if number_of_seeds == 1:
-        if seed is None:
-            seeds, model_10 = test_seeds(num_crowdshippers, 
-                                num_parcels, 
-                                entrainment_fee,
-                                print_level=print_level,
-                                of=of,
-                                seed=seed,
-                                use_ten=True,
-                                number_of_seeds=number_of_seeds)
-            
-            seed = seeds[0]
-            model_10 = model_10[0]
-            
-            model_no_10 = test_seed(num_crowdshippers, 
-                                num_parcels, 
-                                entrainment_fee,
-                                print_level=print_level,
-                                of=of,
-                                seed=seed,
-                                use_ten=False)
-            
-            results["models_10"][seed] = {}
-            results["models_no_10"][seed] = {}
-
-            results["models_10"][seed]["MAX_PROFIT"] = model_10.calc_max_profit(print_level=0)
-            results["models_no_10"][seed]["MAX_PROFIT"] = model_no_10.calc_max_profit(print_level=0)
-
-            results["models_10"][seed]["MAX_PARCELS"] = model_10.calc_max_parcels()
-            results["models_no_10"][seed]["MAX_PARCELS"] = model_no_10.calc_max_parcels()
-
-            results["models_10"][seed]["Runtime"] = model_10.runtime
-            results["models_no_10"][seed]["Runtime"] = model_no_10.runtime
-
-            print(f"--- Seed: {seed} ---")
-            print("Results for 10:", results["models_10"][seed])
-            print("Results for no 10:", results["models_no_10"][seed])
-            print("\n")
-
-            return results, seed
-
-        else:
-            model_10 = test_seed(num_crowdshippers, 
-                                num_parcels, 
-                                entrainment_fee,
-                                print_level=print_level,
-                                of=of,
-                                seed=seed,
-                                use_ten=True,
-                                load_from_file=load_from_file)
-            
-            model_no_10 = test_seed(num_crowdshippers, 
-                                num_parcels, 
-                                entrainment_fee,
-                                print_level=print_level,
-                                of=of,
-                                seed=seed,
-                                use_ten=False,
-                                load_from_file=load_from_file)
-            
-            results["models_10"][seed] = {}
-            results["models_no_10"][seed] = {}
-
-            results["models_10"][seed]["MAX_PROFIT"] = model_10.calc_max_profit(print_level=0)
-            results["models_no_10"][seed]["MAX_PROFIT"] = model_no_10.calc_max_profit(print_level=0)
-
-            results["models_10"][seed]["MAX_PARCELS"] = model_10.calc_max_parcels()
-            results["models_no_10"][seed]["MAX_PARCELS"] = model_no_10.calc_max_parcels()
-
-            print(f"--- Seed: {seed} ---")
-            print("Results for 10:", results["models_10"][seed])
-            print("Results for no 10:", results["models_no_10"][seed])
-            print("\n")
-
-            return results    
     
-    else:
-        used_seeds, models_10 = test_seeds(num_crowdshippers, 
-                              num_parcels, 
-                              entrainment_fee,  
-                              print_level=print_level,
-                              of=of,
-                              number_of_seeds=number_of_seeds,
-                              use_ten=True)
-        
-        _, models_no_10 = test_seeds(num_crowdshippers, 
-                              num_parcels, 
-                              entrainment_fee,  
-                              print_level=print_level,
-                              of=of,
-                              number_of_seeds=number_of_seeds,
-                              use_ten=False,
-                              used_seeds=used_seeds)
-        
-        for model_10, model_no_10 in zip(models_10, models_no_10):
-            results["models_10"][seed] = {}
-            results["models_no_10"][seed] = {}
-
-            results["models_10"][seed]["MAX_PROFIT"] = model_10.calc_max_profit(print_level=0)
-            results["models_no_10"][seed]["MAX_PROFIT"] = model_no_10.calc_max_profit(print_level=0)
-
-            results["models_10"][seed]["MAX_PARCELS"] = model_10.calc_max_parcels()
-            results["models_no_10"][seed]["MAX_PARCELS"] = model_no_10.calc_max_parcels()
-
-            print(f"--- Seed: {seed} ---")
-            print("Results for 10:", results["models_10"][seed])
-            print("Results for no 10:", results["models_no_10"][seed])
-            print("\n")
-
-        print("--- Summary ---")
-        print(results, used_seeds)
-
-        return results, used_seeds
-    
-
-def add_results(results, seed, model_10, model_no_10):
-    results["models_10"][seed] = {}
-    results["models_no_10"][seed] = {}
-
-    results["models_10"][seed]["MAX_PROFIT"] = model_10.calc_max_profit(print_level=0)
-    results["models_no_10"][seed]["MAX_PROFIT"] = model_no_10.calc_max_profit(print_level=0)
-
-    results["models_10"][seed]["MAX_PARCELS"] = model_10.calc_max_parcels()
-    results["models_no_10"][seed]["MAX_PARCELS"] = model_no_10.calc_max_parcels()
-
-    results["models_10"][seed]["Runtime"] = round(model_10.runtime, 3)
-    results["models_no_10"][seed]["Runtime"] = round(model_no_10.runtime, 3)
-
-    print(f"--- Seed: {seed} ---")
-    print("Results for 10:", results["models_10"][seed])
-    print("Results for no 10:", results["models_no_10"][seed])
-    print("\n")
-
-    return results
-    
-
-def compare_of(num_crowdshippers, 
-               num_parcels, 
-               entrainment_fee,
-               print_level: int = 0,
-               of: str = "MAX_PARCELS",
-               number_of_seeds: int = 1,
-               seed: int = None,
-               load_from_file: str = None):
-    
-    results = {"models_10": {}, 
+    results = {"objective": of,
+                "models_10": {}, 
                "models_no_10": {}}
     
     if number_of_seeds == 1:
@@ -731,6 +719,9 @@ def compare_of(num_crowdshippers,
         print("--- Summary ---")
         print(results, return_seeds)
 
+        with open(f"output/results_10.pkl", "wb") as f:
+            pickle.dump((results, return_seeds), f)
+
         return results, return_seeds
             
 
@@ -741,7 +732,7 @@ if __name__ == "__main__":
     of = "MAX_PROFIT"
     print_level = 3
     seed = None # 26432 # Seed to none for test_seeds if unproucable behaviour is needed
-    number_of_seeds = 2
+    number_of_seeds = 50
     load_from_file = None # "output/params_26432.pkl"
 
     # check_minimalinstanz(print_level=print_level)
