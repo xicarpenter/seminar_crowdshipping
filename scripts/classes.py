@@ -323,6 +323,9 @@ class InstanceGenerator:
             else:
                 self.l[s] = np.random.binomial(len(self.J)//4, 0.5)
 
+            if self.l[s] == 0:
+                self.l[s] = 1
+
         # self.l = {s: random.randint(1, 4) for s in self.S}
         # self.p = {p: random.randint(1, 10) for p in self.J} 
 

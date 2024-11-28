@@ -344,7 +344,7 @@ class CrowdshippingModel(gp.Model):
         return count
 
 
-def test_seed(num_crowdshippers: int, 
+def run_seed(num_crowdshippers: int, 
                num_parcels: int, 
                entrainment_fee: int, 
                print_level: int = 0,
@@ -381,6 +381,8 @@ def test_seed(num_crowdshippers: int,
     if print_level < 3:
         model.setParam(GRB.Param.OutputFlag, 0)
 
+    model.setParam(GRB.Param.TimeLimit, 1200)
+
     # OPTIMIZATION
     model.optimize()
 
@@ -408,7 +410,7 @@ def test_seed(num_crowdshippers: int,
         return results
 
 
-def test_seeds(num_crowdshippers: int, 
+def run_seeds(num_crowdshippers: int, 
                num_parcels: int, 
                entrainment_fee: int, 
                print_level: int = 0,
@@ -434,7 +436,7 @@ def test_seeds(num_crowdshippers: int,
             results = {"10" if use_ten else "no_10": {}}
 
     if number_of_seeds == 1 and seed is not None:
-        model = test_seed(num_crowdshippers,
+        model = run_seed(num_crowdshippers,
                     num_parcels,
                     entrainment_fee,
                     print_level=print_level,
@@ -482,6 +484,8 @@ def test_seeds(num_crowdshippers: int,
 
         if print_level < 3:
             model.setParam(GRB.Param.OutputFlag, 0)
+
+        model.setParam(GRB.Param.TimeLimit, 1200)
 
         # OPTIMIZATION
         model.optimize()
@@ -554,7 +558,7 @@ def compare_of(num_crowdshippers,
                load_from_file: str = None):
     if number_of_seeds == 1:
         if seed is None:
-            seeds, results = test_seeds(num_crowdshippers, 
+            seeds, results = run_seeds(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
                                 print_level=print_level,
@@ -564,7 +568,7 @@ def compare_of(num_crowdshippers,
                                 number_of_seeds=number_of_seeds)
             
             seed = seeds[0]
-            results_ext = test_seed(num_crowdshippers, 
+            results_ext = run_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
                                 print_level=print_level,
@@ -585,7 +589,7 @@ def compare_of(num_crowdshippers,
             return results, seed
 
         else:
-            results = test_seed(num_crowdshippers, 
+            results = run_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
                                 print_level=print_level,
@@ -594,7 +598,7 @@ def compare_of(num_crowdshippers,
                                 load_from_file=load_from_file,
                                 return_model=False,)
             
-            results_ext = test_seed(num_crowdshippers, 
+            results_ext = run_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
                                 print_level=print_level,
@@ -616,14 +620,14 @@ def compare_of(num_crowdshippers,
             return results    
     
     else:
-        used_seeds, results = test_seeds(num_crowdshippers, 
+        used_seeds, results = run_seeds(num_crowdshippers, 
                               num_parcels, 
                               entrainment_fee,  
                               print_level=print_level,
                               of="MAX_PROFIT",
                               number_of_seeds=number_of_seeds)
         
-        _, results_ext = test_seeds(num_crowdshippers, 
+        _, results_ext = run_seeds(num_crowdshippers, 
                               num_parcels, 
                               entrainment_fee,  
                               print_level=print_level,
@@ -692,7 +696,7 @@ def compare_10(num_crowdshippers,
     
     if number_of_seeds == 1:
         if seed is None:
-            seeds, results = test_seeds(num_crowdshippers, 
+            seeds, results = run_seeds(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
                                 print_level=print_level,
@@ -704,7 +708,7 @@ def compare_10(num_crowdshippers,
                                 use_ten=True)
             
             seed = seeds[0]
-            results_ext = test_seed(num_crowdshippers, 
+            results_ext = run_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
                                 print_level=print_level,
@@ -728,7 +732,7 @@ def compare_10(num_crowdshippers,
             return results, seed
 
         else:
-            results = test_seed(num_crowdshippers, 
+            results = run_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
                                 print_level=print_level,
@@ -739,7 +743,7 @@ def compare_10(num_crowdshippers,
                                 mode="10",
                                 use_ten=True)
             
-            results_ext = test_seed(num_crowdshippers, 
+            results_ext = run_seed(num_crowdshippers, 
                                 num_parcels, 
                                 entrainment_fee,
                                 print_level=print_level,
@@ -764,7 +768,7 @@ def compare_10(num_crowdshippers,
             return results 
     
     else:
-        used_seeds, results = test_seeds(num_crowdshippers, 
+        used_seeds, results = run_seeds(num_crowdshippers, 
                               num_parcels, 
                               entrainment_fee,  
                               print_level=print_level,
@@ -773,7 +777,7 @@ def compare_10(num_crowdshippers,
                               use_ten=True,
                               mode="10")
         
-        _, results_ext = test_seeds(num_crowdshippers, 
+        _, results_ext = run_seeds(num_crowdshippers, 
                               num_parcels, 
                               entrainment_fee,  
                               print_level=print_level,
@@ -818,20 +822,20 @@ if __name__ == "__main__":
 
     # check_minimalinstanz(print_level=print_level)
     
-    # compare_10(num_crowdshippers, 
-    #             num_parcels, 
-    #             entrainment_fee,
-    #             print_level=print_level,
-    #             of=of,
-    #             number_of_seeds=number_of_seeds,
-    #             seed=seed,
-    #             load_from_file=load_from_file)
-
-    compare_of(num_crowdshippers, 
+    compare_10(num_crowdshippers, 
                 num_parcels, 
                 entrainment_fee,
                 print_level=print_level,
+                of=of,
                 number_of_seeds=number_of_seeds,
                 seed=seed,
                 load_from_file=load_from_file)
+
+    # compare_of(num_crowdshippers, 
+    #             num_parcels, 
+    #             entrainment_fee,
+    #             print_level=print_level,
+    #             number_of_seeds=number_of_seeds,
+    #             seed=seed,
+    #             load_from_file=load_from_file)
     
