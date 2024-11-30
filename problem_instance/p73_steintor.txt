@@ -1,0 +1,48 @@
+--- Ausgangszustand: l = 1 ---
+
+Start P53
+46
+
+--- l -= 1 ---
+
+C3 Steintor P73
+54 
+
+--- l += 1 ---
+
+C80 Christuskirche P49
+64 
+
+--- l -= 1 ---
+
+C36 Steintor P49
+68 
+
+--- l += 1 ---
+
+C33 Kroepcke P3
+81 
+
+--- l -= 1 ---
+
+C90 Steintor P53
+106 
+
+--- l += 1 ---
+
+C38 Steintor P3
+145 
+
+--- l += 1 ---
+
+C88 Kroepcke P14
+159 
+
+--- l -= 1 ---
+
+C53 Steintor P14
+168 
+
+--- l += 1 ---
+
+--- Endzustand: l = 2 ---

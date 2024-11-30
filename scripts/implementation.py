@@ -167,7 +167,9 @@ class CrowdshippingModel(gp.Model):
                             for i in self._params.I 
                             for s in self._params.S_i[i] 
                             for j in self._params.J_is[i, s] 
-                            if s != self._params.alpha[j]), "Constraint_10")
+                            if s != self._params.alpha[j]
+                            and (j not in ["P73", "P72"] or (i,s) in [("C102", "Wiehbergstrasse"), 
+                                                                      ("C102", "Am Brabrinke")])), "Constraint_10") # ["P73", "P72", "P69", "P56", "P35", "P3"]
         
         # Save model to lp file
         if self._save_lp:
@@ -342,6 +344,27 @@ class CrowdshippingModel(gp.Model):
                 count += 1
 
         return count
+    
+
+    def return_x_y(self, eps: float = 1e-3):
+        X = {}
+        Y = {}
+
+        for (i, s, j), val in self._X.items():
+            if val.x > eps:
+                X[(i, s, j)] = 1
+
+            else:
+                X[(i, s, j)] = 0
+
+        for (i, s), val in self._Y.items():
+            if val.x > eps:
+                Y[(i, s)] = 1
+
+            else:
+                Y[(i, s)] = 0
+
+        return X, Y
 
 
 def run_seed(num_crowdshippers: int, 
@@ -396,6 +419,9 @@ def run_seed(num_crowdshippers: int,
 
     # with open(f"output/params_{seed}.pkl", "wb") as f:
     #     pickle.dump(model._params, f)
+
+    # with open(f"problem_instance/results_{seed}.pkl", "wb") as f:
+    #     pickle.dump(model.return_x_y(), f)
 
     if return_model:
         return model
@@ -511,6 +537,9 @@ def run_seeds(num_crowdshippers: int,
                                   of=of,
                                   use_ten=use_ten,
                                   mode=mode)
+            
+        # with open(f"problem_instance/results_{seed}.pkl", "wb") as f:
+        #     pickle.dump(model.return_x_y(), f)
 
         count += 1
 
@@ -815,21 +844,21 @@ if __name__ == "__main__":
     num_parcels = 40
     entrainment_fee = 1
     of = "MAX_PROFIT"
-    print_level = 3
-    seed = None # 26432 # Seed to none for test_seeds if unproucable behaviour is needed
-    number_of_seeds = 50
-    load_from_file = None
+    print_level = 1
+    seed = 26432 # 26432 # Seed to none for test_seeds if unproucable behaviour is needed
+    number_of_seeds = 1
+    load_from_file = "problem_instance/params.pkl"
 
     # check_minimalinstanz(print_level=print_level)
     
-    compare_10(num_crowdshippers, 
-                num_parcels, 
-                entrainment_fee,
-                print_level=print_level,
-                of=of,
-                number_of_seeds=number_of_seeds,
-                seed=seed,
-                load_from_file=load_from_file)
+    # compare_10(num_crowdshippers, 
+    #             num_parcels, 
+    #             entrainment_fee,
+    #             print_level=print_level,
+    #             of=of,
+    #             number_of_seeds=number_of_seeds,
+    #             seed=seed,
+    #             load_from_file=load_from_file)
 
     # compare_of(num_crowdshippers, 
     #             num_parcels, 
@@ -838,4 +867,13 @@ if __name__ == "__main__":
     #             number_of_seeds=number_of_seeds,
     #             seed=seed,
     #             load_from_file=load_from_file)
+
+    run_seeds(num_crowdshippers, 
+                num_parcels, 
+                entrainment_fee,
+                print_level=print_level,
+                of=of,
+                number_of_seeds=number_of_seeds,
+                seed=seed,
+                load_from_file=load_from_file)
     

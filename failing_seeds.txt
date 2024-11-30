@@ -1,3 +1,0 @@
-10751 on Linux with C=150; P=50
-
-26432 on Mac with C=150; P=100

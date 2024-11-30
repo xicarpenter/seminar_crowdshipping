@@ -1,0 +1,137 @@
+--- l = 1 ---
+
+C43 Christuskirche P23
+18 
+
+C43 Steintor P23
+18 
+
+C67 Christuskirche P61
+25 
+
+C67 Steintor P61
+25 
+
+C18 Kroepcke P56
+35 
+
+C18 Steintor P56
+35 
+
+--- ausgeglichen bis hier --- 
+
+C3 Steintor P73
+54 
+
+--- l += 1 ---
+
+--- P53 ab hier verfügbar; dementsprechend in Locker ---
+--- l -= 1 ---
+
+C80 Christuskirche P49
+64 
+
+C36 Steintor P49
+68 
+
+C33 Kroepcke P3
+81 
+
+--- l -= 1 ---
+
+C65 Goetheplatz P76
+82 
+
+C65 Steintor P76
+82 
+
+C28 Hauptbahnhof, Rosenstrasse P5
+84 
+
+C28 Steintor P5
+84 
+
+C34 Kroepcke P7
+84 
+
+C34 Steintor P7
+84 
+
+C101 Kroepcke P35
+92 
+
+C101 Steintor P35
+92 
+
+C117 Koenigsworther Platz P17
+92 
+
+C117 Steintor P17
+92 
+
+C6 Kroepcke P46
+93 
+
+C6 Steintor P46
+93 
+
+C108 Kroepcke P72
+94 
+
+C108 Steintor P72
+94 
+
+C90 Steintor P53
+106 
+
+--- l += 1 ---
+
+C75 Koenigsworther Platz P24
+111 
+
+C75 Steintor P24
+111 
+
+C54 Kroepcke P99
+123 
+
+C54 Steintor P99
+123 
+
+C4 Kroepcke P43
+125 
+
+C4 Steintor P43
+125 
+
+C116 Koenigsworther Platz P50
+133 
+
+C116 Steintor P50
+133 
+
+C38 Steintor P3
+145 
+
+--- l += 1 ---
+
+C97 Koenigsworther Platz P94
+149 
+
+C97 Steintor P94
+149 
+
+C88 Kroepcke P14
+159 
+
+--- l -= 1 ---
+
+C53 Steintor P14
+168 
+
+--- l += 1 ---
+
+Starts
+P53: 46
+
+Ends
