@@ -76,9 +76,7 @@ def extend_connections(connections: dict, prob_dict: dict) -> None:
     for line, value in connections.items():
         for station_pair, duration in value.items():
             if duration is None:
-                connections[line][station_pair] = int(np.random.choice(list(choices.keys()), 
-                                                                       1, 
-                                                                       p=list(choices.values()))[0])
+                connections[line][station_pair] = int(np.random.choice(list(choices.keys()), 1, p=list(choices.values()))[0])
 
             else:
                 connections[line][station_pair] = int(connections[line][station_pair])

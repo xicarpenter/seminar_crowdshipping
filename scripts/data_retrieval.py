@@ -5,7 +5,6 @@ from pypdf import PdfReader
 import re
 import os
 import pickle
-import random
 from copy import deepcopy
 
 
@@ -408,9 +407,9 @@ def test_line(folder: str = "data/gvh_linien", line_nr: int = 1):
 if __name__ == "__main__":
     folder = "data/gvh_linien"
 
-    save()
+    # save()
 
-    with open("data/lines.pkl", "rb") as f:
+    with open("data/stations_data/lines.pkl", "rb") as f:
         lines_dict, stations_dict = pickle.load(f)
 
     connections = {}
@@ -422,5 +421,5 @@ if __name__ == "__main__":
         print(line)
         print(dur)
 
-    with open("data/connections.pkl", "wb") as f:
-        pickle.dump(connections, f)
+    # with open("data/connections.pkl", "wb") as f:
+    #     pickle.dump(connections, f)

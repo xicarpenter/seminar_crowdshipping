@@ -205,15 +205,13 @@ class CrowdshippingModel(gp.Model):
         # they are transported from at the right time
         if self._use_ten:
             self.addConstrs((self._X[i, s, j] <= (gp.quicksum(self._X[i_p, self._params.s_is_m[i_p, s], j] 
-                                                            for i_p in self._params.I_s_p[s]
-                                                            if self._params.t[i_p, self._params.s_is_m[i_p, s]] >= self._params.r[j]
-                                                            and self._params.t[i_p, s] <= self._params.t[i, s])) 
+                                for i_p in self._params.I_s_p[s]
+                                if self._params.t[i_p, self._params.s_is_m[i_p, s]] >= self._params.r[j]
+                                and self._params.t[i_p, s] <= self._params.t[i, s])) 
                             for i in self._params.I 
                             for s in self._params.S_i[i] 
                             for j in self._params.J_is[i, s] 
-                            if s != self._params.alpha[j]
-                            and (j not in ["P73", "P72"] or (i,s) in [("C102", "Wiehbergstrasse"), 
-                                                                      ("C102", "Am Brabrinke")])), "Constraint_10") # ["P73", "P72", "P69", "P56", "P35", "P3"]
+                            if s != self._params.alpha[j]), "Constraint_10")
         
         # Save model to lp file
         if self._save_lp:
@@ -712,7 +710,7 @@ def run_seeds(num_crowdshippers: int,
 
     Returns
     -------
-    list[CrowdshippingModel] | CrowdshippingModel
+    list[CrowdshippingModel] | CrowdshippingModel | dict
         Either a list of models or a dictionary of results
     """
     if return_model:
