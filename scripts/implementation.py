@@ -843,9 +843,9 @@ def check_minimalinstanz(path: str = "data/minimalinstanz.pkl",
     print("Invalid parcels:", model.check_parcels(seed=None))
             
 
-def compare_of(num_crowdshippers, 
-               num_parcels, 
-               entrainment_fee,
+def compare_of(num_crowdshippers: int, 
+               num_parcels: int, 
+               entrainment_fee: int,
                print_level: int = 0,
                number_of_seeds: int = 1,
                seed: int = None,
@@ -1037,9 +1037,9 @@ def add_results(results: dict, seed: int,
     return results
     
 
-def compare_10(num_crowdshippers, 
-               num_parcels, 
-               entrainment_fee,
+def compare_10(num_crowdshippers: int, 
+               num_parcels: int, 
+               entrainment_fee: int,
                print_level: int = 0,
                of: str = "MAX_PARCELS",
                number_of_seeds: int = 1,
