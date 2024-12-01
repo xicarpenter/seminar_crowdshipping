@@ -5,13 +5,27 @@ import random
 import pickle
 
 
-
 class CrowdshippingModel(gp.Model):
     def __init__(self, 
                  params: Parameters,
                  of: str = "MAX_PROFIT",
                  save_lp: bool = False,
-                 use_ten: bool = False):
+                 use_ten: bool = False) -> None:
+        """
+        Initialize a CrowdshippingModel instance.
+
+        Parameters
+        ----------
+        params : Parameters
+            The parameters instance containing data for the model.
+        of : str, optional
+            The objective function to be used, either "MAX_PROFIT" or another valid option 
+            (default is "MAX_PROFIT").
+        save_lp : bool, optional
+            If True, save the linear programming model (default is False).
+        use_ten : bool, optional
+            If True, utilize the 'ten' feature in the model (default is False).
+        """
         super().__init__()
         self._use_ten = use_ten
         self._save_lp = save_lp
@@ -20,16 +34,43 @@ class CrowdshippingModel(gp.Model):
 
     
     @property
-    def _of(self):
+    def _of(self) -> str:
+        """
+        Get the objective function being used.
+
+        Returns
+        -------
+        str
+            The objective function, either "MAX_PROFIT" or another valid option.
+        """
         return self.__of
     
     @_of.setter
-    def _of(self, of):
+    def _of(self, of: str) -> None:
+        """
+        Set the objective function to be used.
+
+        Parameters
+        ----------
+        of : str
+            The objective function, either "MAX_PROFIT" or another valid option.
+        """
         self.__of = of
         self.build()
 
 
-    def set_params(self, params: Parameters, of: str = None):
+    def set_params(self, params: Parameters, 
+                   of: str = None) -> None:
+        """
+        Set the parameters of the model.
+
+        Parameters
+        ----------
+        params : Parameters
+            The new parameters of the model.
+        of : str, optional
+            The new objective function, if different from the current one (default is None).
+        """
         self._params = params
         if of is not None:
             self._of = of
@@ -38,21 +79,24 @@ class CrowdshippingModel(gp.Model):
             self.build()
 
 
-    def build(self) -> gp.Model:
-        """
-        Build a Gurobi model for the given Parameters instance.
-
-        Parameters
-        ----------
-        params : Parameters
-            The parameters of the model.
-
-        Returns
-        -------
-        model : Model
-            The Gurobi model.
-        """
+    def build(self) -> None:
         # VARIABLES
+        """
+        Build the optimization model for the crowdshipping problem.
+
+        This method constructs the decision variables, objective function, and constraints
+        for the optimization model based on the provided parameters. It supports multiple
+        objective functions, such as maximizing profit or the number of parcels delivered.
+        Various constraints are added to ensure the validity of the problem, including 
+        limitations on parcel pick-up and delivery, crowdshipper availability, and time 
+        windows. Optionally, the model can include an additional constraint set and save 
+        the model to a file.
+
+        Raises
+        ------
+        ValueError
+            If the objective function specified is not recognized.
+        """
         indices_ISJ = []
         indices_IS = []
         for i in self._params.I:
@@ -177,12 +221,48 @@ class CrowdshippingModel(gp.Model):
 
 
     @staticmethod
-    def sort_by_minutes(data):
+    def sort_by_minutes(data) -> dict:
+        """
+        Sort a dictionary by the third element of its values.
+
+        This static method takes a dictionary where each value is a 
+        sequence (e.g., a tuple or list) and sorts the dictionary by 
+        the third element of each value.
+
+        Parameters
+        ----------
+        data : dict
+            A dictionary where each value is a sequence with at least 
+            three elements.
+
+        Returns
+        -------
+        dict
+            A dictionary sorted by the third element of the value sequences.
+        """
         sorted_data = dict(sorted(data.items(), key=lambda item: item[1][2]))
         return sorted_data
 
 
-    def sort_parcels(self):
+    def sort_parcels(self) -> None:
+        """
+        Sorts the parcels dictionary by the parcel number.
+
+        This method sorts the parcels dictionary (self._parcels) by the parcel number.
+        The parcels dictionary is a dictionary where each key is a parcel and each value is a dictionary of stations
+        along with the corresponding time and crowdshipper for each station.
+
+        The sorting is done in two steps. First, the stations of each parcel are sorted by the time they are visited.
+        Then, the parcels are sorted by their parcel number.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         for j in self._parcels.keys():
             self._parcels[j] = self.sort_by_minutes(self._parcels[j])
 
@@ -193,7 +273,7 @@ class CrowdshippingModel(gp.Model):
             print("Sorting failed due to invalid parcel name. \n")
 
 
-    def calc_max_parcels(self, eps: float = 1e-3):
+    def calc_max_parcels(self, eps: float = 1e-3) -> int:
         """
         Calculate the maximum number of parcels that can be moved.
 
@@ -220,7 +300,30 @@ class CrowdshippingModel(gp.Model):
 
     def calc_max_profit(self, 
                         print_level: int = 0,
-                        eps: float = 1e-3):
+                        eps: float = 1e-3) -> float:
+        """
+        Calculate the maximum profit from the crowdshipping model.
+
+        This function computes the maximum profit by evaluating the decision variables
+        for parcels and crowdshippers. It adds the profit for each parcel that can be 
+        moved (i.e., when the decision variable X[i, alpha[j], j] is greater than eps) 
+        and subtracts the fixed costs for each crowdshipper's visit to a station 
+        (i.e., when the decision variable Y[i, s] is greater than eps).
+
+        Parameters
+        ----------
+        print_level : int, optional
+            Determines the level of detail in the printed output. If greater than 0, 
+            prints the decision variable being used.
+        eps : float, optional
+            The threshold for considering a decision variable as active (greater 
+            than this value).
+
+        Returns
+        -------
+        float
+            The maximum profit calculated from the decision variables.
+        """
         max_profit = 0
 
         if print_level > 0:
@@ -248,7 +351,27 @@ class CrowdshippingModel(gp.Model):
         return max_profit
 
 
-    def check_results(self, print_level: int = 1, eps: float = 1e-3):
+    def check_results(self, 
+                      print_level: int = 1, 
+                      eps: float = 1e-3) -> None:
+        """
+        Checks the results of the model and prints a summary of the solution.
+
+        Parameters
+        ----------
+        print_level : int, optional
+            Determines the level of detail in the printed output. If greater than 0, 
+            prints the number of parcels and the profit of the solution. If greater 
+            than 1, also prints all the parcels and their respective stations and 
+            times.
+        eps : float, optional
+            The threshold for considering a decision variable as active (greater 
+            than this value).
+
+        Returns
+        -------
+        None
+        """
         if self.status == GRB.OPTIMAL:
             if print_level > 0:
                 print("\nFound an optimal solution:")
@@ -286,7 +409,25 @@ class CrowdshippingModel(gp.Model):
 
 
     def check_validity(self, parcel_id: str, 
-                       parcel_dict: dict):
+                       parcel_dict: dict) -> bool:
+        """
+        Checks if the given parcel is valid.
+
+        Parameters
+        ----------
+        parcel_id : str
+            ID of the parcel
+        parcel_dict : dict
+            Dictionary of the parcel, where each key is a tuple (start, end) 
+            representing the start and end stations of a part of the parcel, 
+            and each value is a list [crowdshipper_id, start_time, end_time] 
+            representing the crowdshipper's id, start time and end time of the part of the parcel.
+
+        Returns
+        -------
+        bool
+            True if the parcel is valid, False otherwise.
+        """
         last_end = ""
         parcel_start = self._params.r[parcel_id]
         parcel_deadline = self._params.d[parcel_id]
@@ -317,7 +458,22 @@ class CrowdshippingModel(gp.Model):
         return True
 
 
-    def print_parcels(self):
+    def print_parcels(self) -> None:
+        """
+        Prints the parcels and their corresponding stations and times.
+
+        This method prints out the information of each parcel, including the origin station, target station,
+        and the stations and times of each part of the parcel. It also checks if the parcel is valid
+        and prints out "Valid!" if it is, or "Invalid!" if it is not.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
         for j in self._parcels.keys():
             print(f"--- Parcel {j} ---")
             print(f"Origin station: {self._params.alpha[j]}"\
@@ -331,7 +487,31 @@ class CrowdshippingModel(gp.Model):
                 print("Invalid!\n")
 
 
-    def check_parcels(self, seed, print_level: int = 0):
+    def check_parcels(self, seed: int, 
+                      print_level: int = 0) -> int:
+        """
+        Checks all the parcels and counts the number of invalid ones.
+
+        Parameters
+        ----------
+        seed : int
+            The seed used to generate the instance.
+        print_level : int, optional
+            The level of detail in the printed output. If greater than 0,
+            prints the information of the invalid parcels. The default is 0.
+
+        Returns
+        -------
+        int
+            The number of invalid parcels.
+
+        Notes
+        -----
+        This method checks if each parcel is valid by calling the method
+        `check_validity` and increments a counter if it is not valid. If
+        `print_level` is greater than 0, it also prints the information of
+        the invalid parcel.
+        """
         count = 0
         for j, stations in self._parcels.items():
             if not self.check_validity(j, stations):
@@ -346,7 +526,24 @@ class CrowdshippingModel(gp.Model):
         return count
     
 
-    def return_x_y(self, eps: float = 1e-3):
+    def return_x_y(self, 
+                   eps: float = 1e-3) -> tuple:
+        """
+        Return the decision variables X and Y as dictionaries.
+
+        Parameters
+        ----------
+        eps : float, optional
+            The threshold for considering a decision variable as active (greater than this value).
+            The default is 1e-3.
+
+        Returns
+        -------
+        tuple
+            A tuple of two dictionaries. The first dictionary contains the values of X[i, s, j]
+            for i in I, s in S_i and j in J_is[i, s]. The second dictionary contains the values of
+            Y[i, s] for i in I and s in S_i_p[i].
+        """
         X = {}
         Y = {}
 
@@ -377,9 +574,43 @@ def run_seed(num_crowdshippers: int,
                use_ten: bool = True,
                load_from_file: str = None,
                return_model: bool = True,
-               mode = "of"):
+               mode = "of") -> CrowdshippingModel | dict:
     """
-    Test 10 different seeds of the given parameters and print the results.
+    Run the model with the given parameters and options.
+
+    Parameters
+    ----------
+    num_crowdshippers : int
+        The number of crowdshippers.
+    num_parcels : int
+        The number of parcels.
+    entrainment_fee : int
+        The entrainment fee.
+    print_level : int, optional
+        The print level. 0: nothing, 1: invalid parcels, 2: all variables, 3: full log.
+        The default is 0.
+    of : str, optional
+        The objective function. "MAX_PARCELS" or "MAX_PROFIT".
+        The default is "MAX_PARCELS".
+    seed : int, optional
+        The seed. The default is 42.
+    save_lp : bool, optional
+        Whether to save the LP file. The default is False.
+    use_ten : bool, optional
+        Whether to use the 10% rule. The default is True.
+    load_from_file : str, optional
+        The file to load the parameters from. The default is None.
+    return_model : bool, optional
+        Whether to return the model. The default is True.
+    mode : str, optional
+        The mode. "of" or "10". The default is "of".
+
+    Returns
+    -------
+    model : CrowdshippingModel
+        The model.
+    results : dict
+        The results.
     """
     if not return_model:
         if mode == "of":
@@ -447,9 +678,42 @@ def run_seeds(num_crowdshippers: int,
                use_ten: bool = True,
                load_from_file: str = None,
                return_model: bool = False,
-               mode: str = "of") -> list[CrowdshippingModel] | CrowdshippingModel:
+               mode: str = "of") -> list[CrowdshippingModel] | CrowdshippingModel | dict:
     """
-    Test 10 different seeds of the given parameters and print the results.
+    Runs a specified number of seeds and returns either a list of models or
+    a dictionary of results.
+
+    Parameters
+    ----------
+    num_crowdshippers : int
+        Number of crowdshippers
+    num_parcels : int
+        Number of parcels
+    entrainment_fee : int
+        Fee for entrainment
+    print_level : int, optional
+        Print level, by default 0
+    of : str, optional
+        Objective function, by default "MAX_PARCELS"
+    number_of_seeds : int, optional
+        Number of seeds, by default 5
+    seed : int, optional
+        Seed, by default None
+    used_seeds : list, optional
+        List of used seeds, by default None
+    use_ten : bool, optional
+        Whether to use 10, by default True
+    load_from_file : str, optional
+        File to load parameters from, by default None
+    return_model : bool, optional
+        Whether to return a model, by default False
+    mode : str, optional
+        Mode, either "of" or "10", by default "of"
+
+    Returns
+    -------
+    list[CrowdshippingModel] | CrowdshippingModel
+        Either a list of models or a dictionary of results
     """
     if return_model:
         models = []
@@ -551,7 +815,8 @@ def run_seeds(num_crowdshippers: int,
 
     
 
-def check_minimalinstanz(path: str = "data/minimalinstanz.pkl", print_level: int = 0):
+def check_minimalinstanz(path: str = "data/minimalinstanz.pkl", 
+                         print_level: int = 0) -> None:
     """
     Load parameters from a specified file, update the minimal instance,
     and optimize the crowdshipper model using these parameters.
@@ -584,7 +849,39 @@ def compare_of(num_crowdshippers,
                print_level: int = 0,
                number_of_seeds: int = 1,
                seed: int = None,
-               load_from_file: str = None):
+               load_from_file: str = None) -> tuple:
+    """
+    Compare the performance of the crowdshipping model using different objectives.
+
+    This function runs the crowdshipping model with two different objectives
+    ("MAX_PROFIT" and "MAX_PARCELS") and compares their results. It can handle
+    either a single seed or multiple seeds and prints detailed results for each
+    seed used.
+
+    Parameters
+    ----------
+    num_crowdshippers : int
+        The number of crowdshippers.
+    num_parcels : int
+        The number of parcels.
+    entrainment_fee : int
+        The entrainment fee.
+    print_level : int, optional
+        The level of detail to print. Default is 0.
+    number_of_seeds : int, optional
+        The number of seeds to use. Default is 1.
+    seed : int, optional
+        The specific seed to use. If None, seeds are generated. Default is None.
+    load_from_file : str, optional
+        Path to the file to load the model parameters from. Default is None.
+
+    Returns
+    -------
+    results : dict
+        A dictionary containing the results for each objective and seed.
+    seed or return_seeds : int or list
+        The seed(s) used in the simulation.
+    """
     if number_of_seeds == 1:
         if seed is None:
             seeds, results = run_seeds(num_crowdshippers, 
@@ -686,7 +983,33 @@ def compare_of(num_crowdshippers,
         return results, return_seeds
     
 
-def add_results(results, seed, model, of, use_ten, mode = "10"):
+def add_results(results: dict, seed: int, 
+                model: CrowdshippingModel, 
+                of: str, use_ten: bool,
+                  mode = "10") -> dict:
+    """
+    Adds results of a model run to a dictionary.
+
+    Parameters
+    ----------
+    results : dict
+        The dictionary to add the results to.
+    seed : int
+        The seed used for the model run.
+    model : CrowdshippingModel
+        The model to get the results from.
+    of : str
+        The objective function used. "MAX_PROFIT" or "MAX_PARCELS".
+    use_ten : bool
+        Whether the 10% rule was used.
+    mode : str, optional
+        The mode of the experiment. "10" or "of". The default is "10".
+
+    Returns
+    -------
+    dict
+        The updated dictionary with the results added.
+    """
     if mode == "10":
         model_type = "10" if use_ten else "no_10"
 
@@ -721,8 +1044,36 @@ def compare_10(num_crowdshippers,
                of: str = "MAX_PARCELS",
                number_of_seeds: int = 1,
                seed: int = None,
-               load_from_file: str = None):
-    
+               load_from_file: str = None) -> tuple:
+    """
+    Compares the performance of the crowdshipping model with and without the 10% rule.
+
+    Parameters
+    ----------
+    num_crowdshippers : int
+        The number of crowdshippers.
+    num_parcels : int
+        The number of parcels.
+    entrainment_fee : int
+        The entrainment fee.
+    print_level : int, optional
+        The level of detail to print. Default is 0.
+    of : str, optional
+        The objective function. "MAX_PROFIT" or "MAX_PARCELS". Default is "MAX_PARCELS".
+    number_of_seeds : int, optional
+        The number of seeds to use. Default is 1.
+    seed : int, optional
+        The specific seed to use. If None, seeds are generated. Default is None.
+    load_from_file : str, optional
+        Path to the file to load the model parameters from. Default is None.
+
+    Returns
+    -------
+    results : dict
+        A dictionary containing the results for each seed and mode.
+    seed or return_seeds : int or list
+        The seed(s) used in the simulation.
+    """
     if number_of_seeds == 1:
         if seed is None:
             seeds, results = run_seeds(num_crowdshippers, 
@@ -845,28 +1196,9 @@ if __name__ == "__main__":
     entrainment_fee = 1
     of = "MAX_PROFIT"
     print_level = 1
-    seed = 26432 # 26432 # Seed to none for test_seeds if unproucable behaviour is needed
+    seed = None # Seed to none for test_seeds if unproucable behaviour is needed
     number_of_seeds = 1
-    load_from_file = "problem_instance/params.pkl"
-
-    # check_minimalinstanz(print_level=print_level)
-    
-    # compare_10(num_crowdshippers, 
-    #             num_parcels, 
-    #             entrainment_fee,
-    #             print_level=print_level,
-    #             of=of,
-    #             number_of_seeds=number_of_seeds,
-    #             seed=seed,
-    #             load_from_file=load_from_file)
-
-    # compare_of(num_crowdshippers, 
-    #             num_parcels, 
-    #             entrainment_fee,
-    #             print_level=print_level,
-    #             number_of_seeds=number_of_seeds,
-    #             seed=seed,
-    #             load_from_file=load_from_file)
+    load_from_file = None
 
     run_seeds(num_crowdshippers, 
                 num_parcels, 

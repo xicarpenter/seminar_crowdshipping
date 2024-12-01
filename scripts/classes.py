@@ -9,7 +9,45 @@ import numpy as np
 
 
 class Parameters:
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
+        """
+        Initialize Parameters with provided keyword arguments.
+
+        This constructor initializes various attributes related to crowdshipping,
+        including sets of crowdshippers, parcels, stations, and their associated
+        parameters such as release times, deadlines, and postal charges. It also 
+        sorts stations by visit time and generates subsets based on the provided
+        data.
+
+        Parameters
+        ----------
+        kwargs : dict
+            A dictionary of keyword arguments containing:
+            - seed : int
+                Random seed for reproducibility.
+            - I : list
+                List of crowdshippers.
+            - J : list
+                List of parcels.
+            - S : list
+                List of stations.
+            - alpha : dict
+                Dictionary of starting stations for each parcel.
+            - omega : dict
+                Dictionary of destination stations for each parcel.
+            - r : dict
+                Dictionary of release times for each parcel.
+            - d : dict
+                Dictionary of deadline times for each parcel.
+            - p : dict
+                Dictionary of postal charges for each parcel.
+            - t : dict
+                Dictionary of times when each crowdshipper is at each station.
+            - f : float
+                Fixed entrainment fee.
+            - l : dict, optional
+                Dictionary of locker capacities, default is 20 for each station.
+        """
         # setting a seed
         self.seed = kwargs["seed"]
         random.seed(self.seed)
@@ -52,8 +90,20 @@ class Parameters:
         self.generate_subsets()
 
 
-    def sort_stations(self):
-        """Return the stations based on the time they are visited in sorted order per crowdshipper."""
+    def sort_stations(self) -> dict:
+        """
+        Sort stations for each crowdshipper by the time they are visited.
+
+        This function processes the `t` dictionary, which contains the times at which 
+        each crowdshipper `i` visits each station `s`. It sorts the stations for each 
+        crowdshipper based on the visit time and returns a dictionary where each key 
+        is a crowdshipper and the value is a list of stations in the order they are visited.
+
+        Returns
+        -------
+        dict
+            A dictionary mapping each crowdshipper to a list of stations sorted by visit time.
+        """
         sorted_stations = {}
 
         for (i, s), _ in sorted(self.t.items(), key=lambda item: item[1]):
@@ -65,22 +115,16 @@ class Parameters:
         return sorted_stations
     
 
-    def generate_subsets(self):
-        """
-        Generate subsets based on sets and parameters of the instance.
-
-        This function initializes the following subsets based on the parameters of the instance:
-        - S_i: set of stations crowdshipper i visits
-        - S_i_p: set of stations crowdshipper i visits before his/her last visit
-        - I_s: set of crowdshippers visiting station s
-        - I_s_p: set of crowdshippers visiting station s after their first visit
-        - I_j_1, I_j_2: set of crowdshippers that can pick up or drop off parcel j
-        - I_js_m, I_js_p: set of crowdshippers that can pick up or drop off parcel j
-        - max_times, min_times: maximum and minimum times of visits of crowdshippers
-
-        Note that the subsets are initialized as empty lists/dictionaries and are filled in the loop below.
-        """
+    def generate_subsets(self) -> None:
         # set of stations visited by crowdshipper i
+        """
+        Generate all the subsets of the model, such as the set of stations visited by crowdshipper i, 
+        the set of crowdshippers visiting station s, the set of crowdshippers who can pick up/deliver parcel j 
+        at station s, the set of parcels that can be picked up/delivered by crowdshipper i at station s, 
+        and the set of crowdshippers who can deliver/pick up a non finished entrainment with parcel j from station s.
+
+        These subsets are used to generate the constraints of the model and to generate the decision variables X[i, s, j].
+        """
         self.S_i = {i: list() for i in self.I}
 
         # set of stations visited by crowdshipper i before their last visit
@@ -178,6 +222,27 @@ class Parameters:
     
 
     def check_time(self, i: str, s: str, j: str) -> bool:
+        """
+        Check if the crowdshipper can deliver the parcel within the specified time window.
+
+        This function checks whether the crowdshipper `i` can deliver parcel `j` 
+        at station `s` by verifying if the visit time at station `s` is within the 
+        release time and deadline of parcel `j`.
+
+        Parameters
+        ----------
+        i : str
+            Identifier of the crowdshipper.
+        s : str
+            Station identifier where the crowdshipper is supposed to deliver the parcel.
+        j : str
+            Identifier of the parcel.
+
+        Returns
+        -------
+        bool
+            True if the crowdshipper can deliver the parcel on time, False otherwise.
+        """
         return self.t[i, s] >= self.r[j] and self.t[i, self.s_is_p[i, s]] <= self.d[j]
 
 
@@ -188,14 +253,14 @@ class Parameters:
         Parameters
         ----------
         i : int
-            crowdshipper identifier
+            Identifier of the crowdshipper.
         s : str
-            station identifier
+            Station identifier.
 
         Returns
         -------
         str
-            station identifier
+            Station identifier visited by the crowdshipper before station s.
         """
         stations = self.sorted_stations[i]
         last_index = stations.index(s)-1
@@ -225,7 +290,7 @@ class Parameters:
         return stations[next_index]
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Return a string representation of the Parameters instance.
 
@@ -277,24 +342,49 @@ class Parameters:
             params = pickle.load(f)
 
         return params
-    
-
-    def plot(self):
-        """
-        Plot a visualization of the model parameters.
-
-        This could be a map with nodes for stations and arcs for crowdshippers
-        and parcels. The map could be colored according to the type of node/arc.
-        Alternatively, a Gantt chart could be used to visualize the time
-        windows of the crowdshippers and the parcels.
-
-        :return: None
-        """
-        pass
 
 
 class InstanceGenerator:
-    def __init__(self, num_crowdshippers, num_parcels, entrainment_fee, seed=42):
+    def __init__(self, 
+                 num_crowdshippers: int, 
+                 num_parcels: int, 
+                 entrainment_fee: int, seed: int = 42) -> None:
+        """
+        Initialize an instance of the InstanceGenerator class.
+
+        Parameters
+        ----------
+        num_crowdshippers : int
+            The number of crowdshippers in the instance.
+        num_parcels : int
+            The number of parcels in the instance.
+        entrainment_fee : int
+            The entrainment fee.
+        seed : int, optional
+            The random seed to use for generating the instance. The default is 42.
+
+        Notes
+        -----
+        The instance is generated by creating a graph with the given number of
+        crowdshippers, parcels and stations. The edges of the graph are the
+        possible routes between the stations. The travel times are loaded from
+        a file and the entrainment fee is set to the given value. The parcels
+        are randomly assigned to the crowdshippers and the stations are randomly
+        assigned as start and end stations for the crowdshippers.
+
+        The instance is represented as a dictionary with the following keys:
+        - I: The set of crowdshippers.
+        - J: The set of parcels.
+        - S: The set of stations.
+        - l: A dictionary with the number of parcels each station can hold.
+        - p: A dictionary with the profit of each parcel.
+        - f: The entrainment fee.
+        - travel_times: A dictionary with the travel times between each pair of
+        stations.
+        - start: The start station of each crowdshipper.
+        - end: The end station of each crowdshipper.
+        - parcels: A dictionary with the parcels assigned to each crowdshipper.
+        """
         self.num_crowdshippers = num_crowdshippers
         self.num_parcels = num_parcels
         self.seed = seed
@@ -336,7 +426,7 @@ class InstanceGenerator:
         self.init_crowdshippers()
 
 
-    def read_travel_times(self):
+    def read_travel_times(self) -> dict:
         """
         Generate travel times between stations.
 
@@ -356,7 +446,7 @@ class InstanceGenerator:
         return connections    
 
 
-    def init_crowdshippers(self):
+    def init_crowdshippers(self) -> None:
         """
         Initialize the crowdshippers by randomly selecting a start and end
         station for each of them. The start time, end time, and time of visit
@@ -414,7 +504,7 @@ class InstanceGenerator:
                     last_station = station
 
 
-    def init_parcels(self):
+    def init_parcels(self) -> None:
         """
         Assigns a release and deadline for each parcel at random.
 
@@ -424,14 +514,12 @@ class InstanceGenerator:
         """
         self.alpha = {j: random.choice(self.S) for j in self.J}
         self.omega = {j: random.choice(self.S) for j in self.J if j != self.alpha[j]}
-        # self.r = {j: random.randint(0, self.max_time-self.find_path(self.alpha[j], self.omega[j])[1]) for j in self.J}
-        # self.d = {j: random.randint(self.r[j]+self.find_path(self.alpha[j], self.omega[j])[1], self.max_time-1) for j in self.J}
 
         self.r = {j: random.randint(1, 0.1*self.max_time) for j in self.J}
         self.d = {j: random.randint(0.9*self.max_time, self.max_time) for j in self.J}
 
 
-    def find_path(self, i, j):
+    def find_path(self, i: str, j: str) -> tuple:
         """
         Finds the shortest path and the time taken between two stations in the station network.
 
@@ -454,7 +542,7 @@ class InstanceGenerator:
         return path, time_taken
 
 
-    def generate_graph(self):
+    def generate_graph(self) -> None:
         """
         Generates the graph of the station network.
 
@@ -475,7 +563,7 @@ class InstanceGenerator:
                 self.station_graph_const.add_edge(connection[0], connection[1], weight=1)
 
 
-    def plot_graph(self):
+    def plot_graph(self) -> None:
         """
         Plots the graph of the station network with nodes and edges.
 
@@ -496,15 +584,51 @@ class InstanceGenerator:
 
     def __repr__(self) -> str:
         """
-        Returns a string representation of the instance, including the sets I, J, and S, as well as the alpha, omega, connection times, and L dictionaries.
+        Return a string representation of the instance parameters.
 
-        :return: A string representation of the instance.
-        :rtype: str
+        This is used to provide a better representation of the instance when
+        printing it. The string includes the sets of crowdshippers, parcels and
+        stations, as well as the dictionaries of starting and target stations,
+        travel times and locker capacities.
+
+        Returns
+        -------
+        str
+            A string representation of the instance parameters.
         """
-        return f'''--- Set I ---\n{self.I}\n\n--- Set J ---\n{self.J}\n\n--- Set S ---\n{self.S}\n\n--- Alpha ---\n{self.alpha}\n\n--- Omega ---\n{self.omega}\n\n--- Times ---\n{self.travel_times}\n\n--- L ---\n{self.l}'''
+        return f'''--- Set I ---\n{self.I}\n\n--- Set J ---\
+            \n{self.J}\n\n--- Set S ---\n{self.S}\n\n--- Alpha ---\
+            \n{self.alpha}\n\n--- Omega ---\n{self.omega}\n\n--- Times ---\
+            \n{self.travel_times}\n\n--- L ---\n{self.l}'''
 
     
-    def return_kwargs(self):
+    def return_kwargs(self) -> dict:
+        """
+        Return the keyword arguments representing the instance parameters.
+
+        This method returns a dictionary containing the attributes of the instance,
+        including crowdshippers, parcels, stations, and various parameters related 
+        to their operations such as travel times, starting and ending stations, 
+        release and deadline times, postal charges, locker capacities, 
+        and the random seed used for reproducibility.
+
+        Returns
+        -------
+        dict
+            A dictionary with keys:
+            - "I": list of crowdshippers.
+            - "J": list of parcels.
+            - "S": list of stations.
+            - "alpha": dict of starting stations for each parcel.
+            - "omega": dict of destination stations for each parcel.
+            - "r": dict of release times for each parcel.
+            - "d": dict of deadline times for each parcel.
+            - "p": dict of postal charges for each parcel.
+            - "t": dict of times when each crowdshipper is at each station.
+            - "f": float representing the fixed entrainment fee.
+            - "l": dict of locker capacities for each station.
+            - "seed": int representing the random seed.
+        """
         return {
             "I": self.I,
             "J": self.J,
@@ -521,7 +645,21 @@ class InstanceGenerator:
         }
     
 
-def update_minimalinstanz(path):
+def update_minimalinstanz(path: str) -> None:
+    """
+    Updates the minimal instance parameters with the ones loaded from the given file.
+
+    Parameters
+    ----------
+    path : str
+        The path to the pickle file containing the parameters.
+
+    Notes
+    -----
+    This function updates the minimal instance parameters by loading the parameters 
+    from the file specified by the path and then saving them to the file 
+    "data/minimalinstanz.pkl".
+    """
     with open(path, "rb") as f:
         params = pickle.load(f)
 
@@ -557,5 +695,3 @@ if __name__ == "__main__":
     params = Parameters(**generator.return_kwargs())
 
     print(len(params.S))
-
-
